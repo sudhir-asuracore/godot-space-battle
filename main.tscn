@@ -1,0 +1,48 @@
+[gd_scene load_steps=4 format=3 uid="uid://bmyhxnei4ralb"]
+
+[ext_resource type="Texture2D" uid="uid://b34w1smeur55y" path="res://assets/skies/2k_stars.jpg" id="1_stars"]
+[ext_resource type="Script" path="res://solar_system.gd" id="2_solar_system"]
+[ext_resource type="Script" path="res://camera.gd" id="3_camera"]
+
+[node name="Node2D" type="Node2D"]
+
+[node name="Parallax2D" type="Parallax2D" parent="."]
+scroll_scale = Vector2(0.1, 0.1)
+repeat_size = Vector2(2048, 1024)
+repeat_times = 3
+
+[node name="Sprite2D" type="Sprite2D" parent="Parallax2D"]
+texture = ExtResource("1_stars")
+centered = false
+
+[node name="SolarSystem" type="Node2D" parent="."]
+script = ExtResource("2_solar_system")
+
+[node name="Camera2D" type="Camera2D" parent="."]
+script = ExtResource("3_camera")
+
+[node name="HUD" type="CanvasLayer" parent="."]
+
+[node name="Control" type="Control" parent="HUD"]
+layout_mode = 3
+anchors_preset = 0
+offset_right = 40.0
+offset_bottom = 40.0
+
+[node name="Panel" type="Panel" parent="HUD/Control"]
+layout_mode = 0
+offset_left = 15.0
+offset_top = 15.0
+offset_right = 415.0
+offset_bottom = 105.0
+
+[node name="Label" type="Label" parent="HUD/Control/Panel"]
+layout_mode = 0
+offset_left = 12.0
+offset_top = 10.0
+offset_right = 388.0
+offset_bottom = 80.0
+text = "Solar System Simulation
+• Drag mouse to pan
+• Scroll wheel to zoom in / out
+• WASD / Arrow Keys to move camera"
