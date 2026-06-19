@@ -1,7 +1,10 @@
-[gd_scene load_steps=4 format=3]
+[gd_scene load_steps=7 format=3]
 
 [ext_resource type="Script" path="res://scenes/Ship.gd" id="1_ship_gd"]
-[ext_resource type="Texture2D" uid="uid://dec5gehj1rj16" path="res://assets/ships/assault_light.png" id="2_ship_tex"]
+[ext_resource type="Texture2D" path="res://assets/ships/assault_light.png" id="2_ship_tex"]
+[ext_resource type="Script" path="res://scripts/AbilityController.gd" id="3_ability_ctrl"]
+[ext_resource type="Script" path="res://scripts/TargetingController.gd" id="4_targeting_ctrl"]
+[ext_resource type="Script" path="res://scripts/WeaponController.gd" id="5_weapon_ctrl"]
 
 [sub_resource type="CapsuleShape2D" id="CapsuleShape2D_ship"]
 radius = 15.0
@@ -9,6 +12,23 @@ height = 42.0
 
 [node name="Ship" type="CharacterBody2D"]
 script = ExtResource("1_ship_gd")
+
+[node name="ThrusterParticles" type="CPUParticles2D" parent="."]
+position = Vector2(-20, 0)
+rotation = 3.14159
+amount = 20
+lifetime = 0.5
+randomness = 0.5
+lifetime_randomness = 0.3
+emission_shape = 1
+emission_sphere_radius = 5.0
+spread = 20.0
+gravity = Vector2(0, 0)
+initial_velocity_min = 100.0
+initial_velocity_max = 200.0
+scale_amount_min = 2.0
+scale_amount_max = 4.0
+color = Color(1, 0.5, 0.2, 1)
 
 [node name="Sprite2D" type="Sprite2D" parent="."]
 rotation = 1.5708
@@ -18,3 +38,20 @@ texture = ExtResource("2_ship_tex")
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
 rotation = 1.5708
 shape = SubResource("CapsuleShape2D_ship")
+
+[node name="Muzzle" type="Marker2D" parent="."]
+position = Vector2(25, 0)
+
+[node name="Engine" type="Marker2D" parent="."]
+position = Vector2(-20, 0)
+
+[node name="WeaponController" type="Node2D" parent="."]
+script = ExtResource("5_weapon_ctrl")
+
+[node name="AbilityController" type="Node2D" parent="."]
+script = ExtResource("3_ability_ctrl")
+
+[node name="TargetingController" type="Node2D" parent="."]
+script = ExtResource("4_targeting_ctrl")
+
+[node name="StateMachine" type="Node" parent="."]

@@ -1,0 +1,30 @@
+[gd_resource type="Resource" script_class="ShipData" load_steps=4 format=3]
+[ext_resource type="Resource" path="res://resources/weapons/t1_assault_weapon.tres" id="1_weapon"]
+[ext_resource type="Resource" path="res://resources/abilities/afterburner.tres" id="2_ability"]
+[ext_resource type="Script" path="res://scripts/resources/ShipData.gd" id="3_script"]
+
+[resource]
+script = ExtResource("3_script")
+name = "Scout"
+tier = 1
+ship_class = "Assault"
+faction = "Iron Vanguard"
+max_hull = 100.0
+max_shield = 50.0
+shield_regen = 5.0
+shield_regen_delay = 3.0
+max_speed = 350.0
+acceleration = 450.0
+turn_speed = 4.0
+forward_damping = 0.08
+lateral_damping = 0.18
+arrival_radius = 80.0
+braking_strength = 1.5
+max_capacitor = 100.0
+capacitor_regen = 15.0
+basic_weapon = ExtResource("1_weapon")
+target_lock_range = 600.0
+ability_1 = ExtResource("2_ability")
+purchase_cost = 150.0
+kill_bounty = 75.0
+death_penalty = 37.0

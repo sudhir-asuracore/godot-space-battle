@@ -1,0 +1,12 @@
+[gd_resource type="Resource" script_class="PlanetData" load_steps=2 format=3]
+[ext_resource type="Script" path="res://scripts/resources/PlanetData.gd" id="1_script"]
+
+[resource]
+script = ExtResource("1_script")
+name = "Neutral Colony"
+planet_type = "Default"
+income_per_second = 2.0
+capture_radius = 400.0
+capture_required = 100.0
+capture_resistance = 1.0
+has_defenses = false

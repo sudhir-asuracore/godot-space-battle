@@ -2,11 +2,11 @@
 
 [ext_resource type="Script" path="res://scenes/Sun.gd" id="1_sun_gd"]
 [ext_resource type="Shader" path="res://shaders/Sun.gdshader" id="2_shader"]
-[ext_resource type="Texture2D" uid="uid://b6mm2t7svgf0s" path="res://assets/sun/2k_sun.jpg" id="3_sun_tex"]
-[ext_resource type="Texture2D" uid="uid://cp0uem35kyra" path="res://assets/kenney_planets/Parts/noise00.png" id="4_noise_tex"]
-[ext_resource type="Texture2D" uid="uid://c4dkygersxab1" path="res://assets/kenney_planets/Parts/sphere0.png" id="5_sphere0"]
-[ext_resource type="Texture2D" uid="uid://6ug61e5mjo5e" path="res://assets/kenney_planets/Parts/light0.png" id="6_light0"]
-[ext_resource type="Texture2D" uid="uid://dvbju112d02me" path="res://assets/kenney_planets/Parts/light1.png" id="7_light1"]
+[ext_resource type="Texture2D" path="res://assets/sun/2k_sun.jpg" id="3_sun_tex"]
+[ext_resource type="Texture2D" path="res://assets/kenney_planets/Parts/noise00.png" id="4_noise_tex"]
+[ext_resource type="Texture2D" path="res://assets/kenney_planets/Parts/sphere0.png" id="5_sphere0"]
+[ext_resource type="Texture2D" path="res://assets/kenney_planets/Parts/light0.png" id="6_light0"]
+[ext_resource type="Texture2D" path="res://assets/kenney_planets/Parts/light1.png" id="7_light1"]
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_sun"]
 shader = ExtResource("2_shader")

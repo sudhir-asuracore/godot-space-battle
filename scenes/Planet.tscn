@@ -1,0 +1,39 @@
+[gd_scene load_steps=5 format=3]
+
+[ext_resource type="Script" path="res://scenes/Planet.gd" id="1_script"]
+[ext_resource type="Texture2D" path="res://assets/kenney_planets/Planets/planet00.png" id="2_tex"]
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_planet"]
+radius = 64.0
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_capture"]
+radius = 150.0
+
+[node name="Planet" type="StaticBody2D"]
+collision_layer = 2
+collision_mask = 17
+script = ExtResource("1_script")
+
+[node name="Sprite2D" type="Sprite2D" parent="."]
+texture = ExtResource("2_tex")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+shape = SubResource("CircleShape2D_planet")
+
+[node name="CaptureZone" type="Area2D" parent="."]
+collision_layer = 32
+collision_mask = 1
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="CaptureZone"]
+shape = SubResource("CircleShape2D_capture")
+
+[node name="CaptureRingVisual" type="Line2D" parent="."]
+width = 4.0
+default_color = Color(1, 1, 1, 0.3)
+
+[node name="DefenseSlots" type="Node2D" parent="."]
+
+[node name="PointLight2D" type="PointLight2D" parent="."]
+energy = 0.5
+texture = ExtResource("2_tex")
+texture_scale = 1.5
