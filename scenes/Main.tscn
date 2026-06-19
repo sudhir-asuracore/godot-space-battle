@@ -1,0 +1,92 @@
+[gd_scene format=3 uid="uid://b085j1x30qbrc"]
+
+[ext_resource type="Script" uid="uid://lawkeuo7wk25" path="res://scenes/Main.gd" id="1_main_gd"]
+[ext_resource type="Texture2D" uid="uid://b34w1smeur55y" path="res://assets/skies/2k_stars.jpg" id="2_stars"]
+[ext_resource type="Script" uid="uid://wvd3lsabp2iq" path="res://scenes/SolarSystem.gd" id="3_solar_system"]
+[ext_resource type="Script" uid="uid://cewp3weqgu8el" path="res://scripts/Camera.gd" id="4_camera"]
+[ext_resource type="Script" uid="uid://ds8xwrg10v6f5" path="res://scripts/ParallaxBg.gd" id="5_parallax_bg"]
+[ext_resource type="PackedScene" path="res://scenes/Ship.tscn" id="6_ship_scene"]
+
+[node name="Node2D" type="Node2D" unique_id=360373482]
+script = ExtResource("1_main_gd")
+
+[node name="Background" type="CanvasLayer" parent="." unique_id=1784757428]
+layer = -100
+
+[node name="Parallax2D" type="Parallax2D" parent="Background" unique_id=74807132]
+scroll_scale = Vector2(0.1, 0.1)
+repeat_size = Vector2(2048, 1024)
+repeat_times = 3
+ignore_camera_scroll = true
+script = ExtResource("5_parallax_bg")
+
+[node name="Sprite2D" type="Sprite2D" parent="Background/Parallax2D" unique_id=1013953472]
+texture = ExtResource("2_stars")
+centered = false
+
+[node name="SolarSystem" type="Node2D" parent="." unique_id=1110951262]
+script = ExtResource("3_solar_system")
+
+[node name="Camera2D" type="Camera2D" parent="." unique_id=1358676897]
+script = ExtResource("4_camera")
+
+[node name="Ship" parent="." unique_id=1855272447 instance=ExtResource("6_ship_scene")]
+position = Vector2(0, 500)
+
+[node name="PathLine" type="Line2D" parent="." unique_id=529537849]
+
+[node name="HUD" type="CanvasLayer" parent="." unique_id=642229658]
+
+[node name="Control" type="Control" parent="HUD" unique_id=331490308]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="Panel" type="Panel" parent="HUD/Control" unique_id=1704214234]
+layout_mode = 0
+offset_left = 15.0
+offset_top = 15.0
+offset_right = 430.0
+offset_bottom = 125.0
+
+[node name="Label" type="Label" parent="HUD/Control/Panel" unique_id=1903911429]
+layout_mode = 0
+offset_left = 12.0
+offset_top = 10.0
+offset_right = 410.0
+offset_bottom = 100.0
+text = "Solar System Navigation
+• Left Click in space to steer & navigate ship
+• Spacebar to lock camera onto ship
+• WASD / Arrow Keys or Right-Click Drag to pan
+• Scroll wheel to zoom in / out"
+
+[node name="ZoomPanel" type="Panel" parent="HUD/Control" unique_id=1957000508]
+layout_mode = 1
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -170.0
+offset_top = 15.0
+offset_right = -15.0
+offset_bottom = 55.0
+grow_horizontal = 0
+
+[node name="Label" type="Label" parent="HUD/Control/ZoomPanel" unique_id=1919228042]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 5.0
+offset_top = 5.0
+offset_right = -5.0
+offset_bottom = -5.0
+grow_horizontal = 2
+grow_vertical = 2
+text = "Zoom: 40%"
+horizontal_alignment = 1
+vertical_alignment = 1
