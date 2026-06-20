@@ -1,0 +1,40 @@
+[gd_scene load_steps=5 format=3 uid="uid://bnsuncorona22"]
+
+[ext_resource type="Shader" uid="uid://cnsuncorona11" path="res://shaders/SunCorona.gdshader" id="1_corona_shader"]
+[ext_resource type="Script" uid="uid://dkapeqww471oq" path="res://scenes/Sun.gd" id="2_sun_gd"]
+[ext_resource type="Texture2D" uid="uid://6ug61e5mjo5e" path="res://assets/kenney_planets/Parts/light0.png" id="3_light0"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_corona"]
+shader = ExtResource("1_corona_shader")
+shader_parameter/core_color = Color(1, 0.85, 0.45, 1)
+shader_parameter/hot_color = Color(1, 0.55, 0.12, 1)
+shader_parameter/corona_color = Color(1, 0.42, 0.06, 1)
+shader_parameter/spot_color = Color(0.45, 0.18, 0.02, 1)
+shader_parameter/sun_radius = 0.3
+shader_parameter/corona_size = 0.18
+shader_parameter/bloom_strength = 1.1
+shader_parameter/surface_detail = 5.0
+shader_parameter/granulation = 0.55
+shader_parameter/spot_amount = 0.35
+shader_parameter/rotation_speed = 0.03
+shader_parameter/flare_detail = 4.0
+shader_parameter/flare_intensity = 1.6
+shader_parameter/flare_speed = 0.45
+
+[node name="SunCorona" type="Node2D"]
+script = ExtResource("2_sun_gd")
+
+[node name="SunDisc" type="ColorRect" parent="."]
+material = SubResource("ShaderMaterial_corona")
+offset_left = -960.0
+offset_top = -960.0
+offset_right = 960.0
+offset_bottom = 960.0
+
+[node name="PointLight2D" type="PointLight2D" parent="."]
+color = Color(1, 0.75, 0.3, 1)
+energy = 2.5
+shadow_enabled = true
+shadow_color = Color(0, 0, 0, 0.9)
+texture = ExtResource("3_light0")
+texture_scale = 16.0

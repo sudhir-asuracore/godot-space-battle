@@ -1,10 +1,10 @@
 extends Node2D
-class_name SolarSystem
+class_name SolazrSystem
 
 # Array to hold planet data dictionaries for orbital animation
 var _planets: Array = []
 
-const SUN_SCENE = preload("res://scenes/Sun.tscn")
+const SUN_SCENE = preload("res://scenes/SunCorona.tscn")
 const PLANET_SCENE = preload("res://scenes/Planet.tscn")
 
 func _ready() -> void:
@@ -52,7 +52,7 @@ func _ready() -> void:
 			"radius": current_radius,
 			"angle": randf() * TAU,
 			"speed": (0.005 + randf() * 0.007) * (1500.0 / current_radius),
-			"spin_speed": (randf() - 0.5) * 0.12
+			"spin_speed": (randf() - 0.5) * 0.22
 		}
 		
 		# Initial position

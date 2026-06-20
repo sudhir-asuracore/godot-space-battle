@@ -1,23 +1,23 @@
-[gd_scene load_steps=12 format=3]
+[gd_scene format=3 uid="uid://csp66n73gokt0"]
 
-[ext_resource type="Script" path="res://scenes/Sun.gd" id="1_sun_gd"]
-[ext_resource type="Shader" path="res://shaders/Sun.gdshader" id="2_shader"]
-[ext_resource type="Texture2D" path="res://assets/sun/2k_sun.jpg" id="3_sun_tex"]
-[ext_resource type="Texture2D" path="res://assets/kenney_planets/Parts/noise00.png" id="4_noise_tex"]
-[ext_resource type="Texture2D" path="res://assets/kenney_planets/Parts/sphere0.png" id="5_sphere0"]
-[ext_resource type="Texture2D" path="res://assets/kenney_planets/Parts/light0.png" id="6_light0"]
-[ext_resource type="Texture2D" path="res://assets/kenney_planets/Parts/light1.png" id="7_light1"]
+[ext_resource type="Script" uid="uid://dkapeqww471oq" path="res://scenes/Sun.gd" id="1_sun_gd"]
+[ext_resource type="Shader" uid="uid://dnkojok7ugot3" path="res://shaders/Sun.gdshader" id="2_shader"]
+[ext_resource type="Texture2D" uid="uid://b6mm2t7svgf0s" path="res://assets/sun/2k_sun.jpg" id="3_sun_tex"]
+[ext_resource type="Texture2D" uid="uid://cp0uem35kyra" path="res://assets/kenney_planets/Parts/noise00.png" id="4_noise_tex"]
+[ext_resource type="Texture2D" uid="uid://c4dkygersxab1" path="res://assets/kenney_planets/Parts/sphere0.png" id="5_sphere0"]
+[ext_resource type="Texture2D" uid="uid://6ug61e5mjo5e" path="res://assets/kenney_planets/Parts/light0.png" id="6_light0"]
+[ext_resource type="Texture2D" uid="uid://dvbju112d02me" path="res://assets/kenney_planets/Parts/light1.png" id="7_light1"]
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_sun"]
 shader = ExtResource("2_shader")
+shader_parameter/sun_texture = ExtResource("3_sun_tex")
+shader_parameter/noise_texture = ExtResource("4_noise_tex")
 shader_parameter/rotation_speed = 0.02
 shader_parameter/noise_scale = 2.0
 shader_parameter/noise_strength = 0.025
 shader_parameter/corona_size = 0.12
 shader_parameter/sun_color = Color(1.2, 0.9, 0.5, 1)
 shader_parameter/corona_color = Color(1, 0.45, 0, 1)
-shader_parameter/sun_texture = ExtResource("3_sun_tex")
-shader_parameter/noise_texture = ExtResource("4_noise_tex")
 
 [sub_resource type="Gradient" id="Gradient_sun_particles"]
 offsets = PackedFloat32Array(0, 0.25, 0.6, 1)
@@ -31,24 +31,24 @@ particle_flag_disable_z = true
 emission_shape = 1
 emission_sphere_radius = 350.0
 spread = 180.0
-gravity = Vector3(0, 0, 0)
 initial_velocity_min = 30.0
 initial_velocity_max = 90.0
 angular_velocity_min = -25.0
 angular_velocity_max = 25.0
+gravity = Vector3(0, 0, 0)
 scale_min = 0.02
 scale_max = 0.06
 color_ramp = SubResource("GradientTexture1D_sun_particles")
 
-[node name="Sun" type="Node2D"]
+[node name="Sun" type="Node2D" unique_id=585544370]
 script = ExtResource("1_sun_gd")
 
-[node name="StarBody" type="Sprite2D" parent="."]
+[node name="StarBody" type="Sprite2D" parent="." unique_id=2015241215]
 material = SubResource("ShaderMaterial_sun")
 scale = Vector2(1.8, 1.8)
 texture = ExtResource("5_sphere0")
 
-[node name="PointLight2D" type="PointLight2D" parent="."]
+[node name="PointLight2D" type="PointLight2D" parent="." unique_id=1948289945]
 color = Color(1, 0.75, 0.3, 1)
 energy = 2.5
 shadow_enabled = true
@@ -56,10 +56,11 @@ shadow_color = Color(0, 0, 0, 0.9)
 texture = ExtResource("6_light0")
 texture_scale = 16.0
 
-[node name="GPUParticles2D" type="GPUParticles2D" parent="."]
+[node name="GPUParticles2D" type="GPUParticles2D" parent="." unique_id=1407639627]
+visible = false
 amount = 60
-process_material = SubResource("ParticleProcessMaterial_sun")
 texture = ExtResource("7_light1")
 lifetime = 2.5
 preprocess = 2.5
 randomness = 0.5
+process_material = SubResource("ParticleProcessMaterial_sun")

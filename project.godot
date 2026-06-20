@@ -8,12 +8,21 @@
 
 config_version=5
 
+[animation]
+
+compatibility/default_parent_skeleton_in_mesh_instance_3d=true
+
 [application]
 
 config/name="space-battle"
 run/main_scene="res://scenes/Main.tscn"
-config/features=PackedStringArray("4.3", "Forward Plus")
+config/features=PackedStringArray("4.6", "Forward Plus")
 config/icon="res://icon.svg"
+
+[autoload]
+
+EventBus="*res://scripts/autoload/EventBus.gd"
+GameState="*res://scripts/autoload/GameState.gd"
 
 [display]
 
@@ -22,6 +31,10 @@ window/size/viewport_height=1080
 window/stretch/mode="canvas_items"
 window/stretch/aspect="expand"
 
+[editor]
+
+movie_writer/movie_file="/home/sid/Documents/projects/godot/2d-space/space-battle/temp/sun.avi"
+
 [physics]
 
 3d/physics_engine="Jolt Physics"
@@ -29,8 +42,3 @@ window/stretch/aspect="expand"
 [rendering]
 
 rendering_device/driver.windows="d3d12"
-
-[autoload]
-
-EventBus="*res://scripts/autoload/EventBus.gd"
-GameState="*res://scripts/autoload/GameState.gd"
