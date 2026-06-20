@@ -54,7 +54,7 @@ energy = 2.5
 shadow_enabled = true
 shadow_color = Color(0, 0, 0, 0.9)
 texture = ExtResource("6_light0")
-texture_scale = 16.0
+texture_scale = 200.0
 
 [node name="GPUParticles2D" type="GPUParticles2D" parent="." unique_id=1407639627]
 visible = false
