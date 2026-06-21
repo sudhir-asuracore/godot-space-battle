@@ -6,6 +6,7 @@ class_name FactionData
 @export var description: String = ""
 @export var primary_color: Color
 @export var secondary_color: Color
+@export var shield_color: Color
 
 @export_category("Stat Modifiers")
 @export var hull_multiplier: float = 1.0

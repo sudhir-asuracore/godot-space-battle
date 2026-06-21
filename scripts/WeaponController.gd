@@ -16,7 +16,8 @@ func _process(delta: float) -> void:
 	if not _ship.ship_data or not _ship.ship_data.basic_weapon:
 		return
 		
-	if _targeting.locked_target:
+	var weapon = _ship.ship_data.basic_weapon
+	if weapon.auto_fire and _targeting.locked_target:
 		_attempt_fire()
 
 func _attempt_fire() -> void:
@@ -24,6 +25,9 @@ func _attempt_fire() -> void:
 		return
 		
 	var target = _targeting.locked_target
+	if not target:
+		return
+		
 	var weapon = _ship.ship_data.basic_weapon
 	
 	var dist = _ship.global_position.distance_to(target.global_position)

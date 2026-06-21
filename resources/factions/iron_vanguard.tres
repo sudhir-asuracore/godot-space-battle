@@ -1,20 +1,11 @@
-[gd_resource type="Resource" script_class="FactionData" load_steps=2 format=3]
-[ext_resource type="Script" path="res://scripts/resources/FactionData.gd" id="1_script"]
+[gd_resource type="Resource" script_class="FactionData" format=3 uid="uid://cdeulawvmbjwh"]
+
+[ext_resource type="Script" uid="uid://dhfeooppt1gk4" path="res://scripts/resources/FactionData.gd" id="1_script"]
 
 [resource]
 script = ExtResource("1_script")
-name = "Iron Vanguard"
 description = "Chonky, brutalist metallic hulls with bright orange thrusters"
-primary_color = Color(0.45, 0.45, 0.5, 1.0)
-secondary_color = Color(1.0, 0.5, 0.0, 1.0)
+primary_color = Color(0.45, 0.45, 0.5, 1)
+secondary_color = Color(1, 0.5, 0, 1)
 hull_multiplier = 1.25
-shield_multiplier = 1.0
 speed_multiplier = 0.9
-acceleration_multiplier = 1.0
-capacitor_multiplier = 1.0
-turn_speed_multiplier = 1.0
-lateral_damping_multiplier = 1.0
-braking_multiplier = 1.0
-aggression = 1.0
-defense_bias = 1.0
-expansion_bias = 1.0

@@ -12,7 +12,12 @@ var current_shield: float = 0.0
 var current_capacitor: float = 0.0
 var is_dead: bool = false
 
-@onready var _thruster_particles: CPUParticles2D = $ThrusterParticles
+@onready var _thruster: Node2D = $Thruster
+@onready var _thruster_sprite: Sprite2D = $Thruster/Sprite2D
+@onready var _engine: Marker2D = $Engine
+
+const RIBBON_TRAIL_SCENE = preload("res://scenes/RibbonTrail.tscn")
+var _trail: Line2D = null
 
 # Internal calculated stats (data + faction multipliers)
 var max_hull: float
@@ -25,6 +30,9 @@ var _forward_damping: float
 var _lateral_damping: float
 var _braking_strength: float
 
+var _thrust_intensity: float = 0.0
+var _visual_thrust: float = 0.0
+
 var _shield_regen_delay_timer: float = 0.0
 var _last_attacker: Node2D = null
 
@@ -32,10 +40,36 @@ func _ready() -> void:
 	add_to_group("ships")
 	target_position = global_position
 	update_stats()
+	
+	if _thruster_sprite and _thruster_sprite.material:
+		_thruster_sprite.material = _thruster_sprite.material.duplicate()
+	
+	_setup_trail()
+
+func _setup_trail() -> void:
+	if not ship_data or not is_inside_tree():
+		return
+	
+	# If we already have a trail (e.g. from previous life that didn't clean up), 
+	# stop it so it can fade out and clean itself up
+	if _trail:
+		_trail.stop_emitting()
+		_trail.set_target(null)
+		_trail = null
+		
+	_trail = RIBBON_TRAIL_SCENE.instantiate()
+	# Add as sibling so it's in world space but managed by the same parent
+	get_parent().add_child(_trail)
+	_trail.setup(ship_data)
+	_trail.set_target(_engine if _engine else self)
+	_trail.set_emitting(false)
 
 func update_stats() -> void:
 	if not ship_data:
 		return
+		
+	if not _trail and is_inside_tree():
+		_setup_trail()
 		
 	var speed_mult = faction_data.speed_multiplier if faction_data else 1.0
 	var accel_mult = faction_data.acceleration_multiplier if faction_data else 1.0
@@ -75,10 +109,30 @@ func _physics_process(delta: float) -> void:
 	# 1. Handle Damping (Fake Space Friction)
 	_apply_friction(delta)
 	
+	_thrust_intensity = 0.0
 	if is_moving:
 		_process_movement(delta)
 	
+	_update_thruster_vfx(delta)
+	
 	move_and_slide()
+
+func _update_thruster_vfx(delta: float) -> void:
+	if not _thruster:
+		return
+		
+	_visual_thrust = move_toward(_visual_thrust, _thrust_intensity, delta * 5.0)
+	
+	if _visual_thrust > 0.001:
+#		_thruster.visible = true
+		_thruster.scale.y = lerp(0.008, 0.05, _visual_thrust)
+		if _thruster_sprite and _thruster_sprite.material:
+			_thruster_sprite.material.set_shader_parameter("emission_glow", _visual_thrust)
+	
+	if _trail:
+		_trail.set_emitting(_visual_thrust > 0.01)
+#	else:
+#		_thruster.visible = false
 
 func _process_regen(delta: float) -> void:
 	if not ship_data:
@@ -137,16 +191,12 @@ func _process_movement(delta: float) -> void:
 	# Apply acceleration if below speed limit
 	if velocity.length() < speed_limit:
 		velocity += forward_dir * _acceleration * thrust_factor * delta
-		if _thruster_particles:
-			_thruster_particles.emitting = true
+		_thrust_intensity = thrust_factor
 	elif velocity.length() > speed_limit + 10.0:
 		# Braking logic
 		velocity = velocity.move_toward(forward_dir * speed_limit, _acceleration * _braking_strength * delta)
-		if _thruster_particles:
-			_thruster_particles.emitting = false
 	else:
-		if _thruster_particles:
-			_thruster_particles.emitting = false
+		pass
 
 func set_target(pos: Vector2) -> void:
 	target_position = pos
@@ -189,6 +239,8 @@ func respawn(at: Vector2) -> void:
 	_shield_regen_delay_timer = 0.0
 	current_hull = 0.0 # Forces full reset of vitals in update_stats().
 	update_stats()
+	
+	_setup_trail()
 	visible = true
 
 func _die() -> void:
@@ -199,6 +251,11 @@ func _die() -> void:
 	velocity = Vector2.ZERO
 	# Hide or explode
 	visible = false
+	if _trail:
+		_trail.stop_emitting()
+		_trail.set_target(null)
+		_trail = null
+		
 	print(name, " destroyed!")
 	EventBus.ship_destroyed.emit(self, _last_attacker)
 	

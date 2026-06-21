@@ -1,0 +1,11 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Shader" path="res://shaders/RibbonTrail.gdshader" id="1_shader"]
+[ext_resource type="Script" path="res://scripts/RibbonTrail.gd" id="2_script"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_1"]
+shader = ExtResource("1_shader")
+
+[node name="RibbonTrail" type="Line2D"]
+material = SubResource("ShaderMaterial_1")
+script = ExtResource("2_script")

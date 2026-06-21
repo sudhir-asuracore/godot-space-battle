@@ -65,3 +65,4 @@ func _other_faction() -> FactionData:
 
 func is_enemy() -> bool:
 	return true # For targeting
+	

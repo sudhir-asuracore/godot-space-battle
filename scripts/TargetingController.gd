@@ -3,7 +3,21 @@ class_name TargetingController
 
 @onready var _ship: Ship = get_parent() as Ship
 
-var locked_target: Node2D = null
+var manual_target: Node2D = null
+var auto_target: Node2D = null
+
+# Priority: Manual target > Ship with least health nearby > Ship
+var locked_target: Node2D:
+	get:
+		if is_instance_valid(manual_target):
+			if not manual_target is Ship or not manual_target.is_dead:
+				return manual_target
+		if is_instance_valid(auto_target):
+			if not auto_target is Ship or not auto_target.is_dead:
+				return auto_target
+		return null
+	set(v):
+		manual_target = v
 
 func _unhandled_input(event: InputEvent) -> void:
 	if event.is_action_pressed("target_lock"): # I'll register this in Main.gd
@@ -35,20 +49,42 @@ func _attempt_lock() -> void:
 			break
 			
 	if found_target:
-		locked_target = found_target
-		print("Target locked: ", locked_target.name)
+		manual_target = found_target
+		print("Manual target locked: ", manual_target.name)
 	else:
-		locked_target = null
-		print("Target cleared")
+		manual_target = null
+		print("Manual target cleared")
 
 func _process(_delta: float) -> void:
-	if locked_target:
-		# Check if target is still valid (not destroyed, in range?)
-		if not is_instance_valid(locked_target):
-			locked_target = null
-			return
+	_update_targets()
+
+func _update_targets() -> void:
+	# 1. Validate Manual Target
+	if manual_target:
+		if not is_instance_valid(manual_target) or (manual_target is Ship and manual_target.is_dead):
+			manual_target = null
 			
-		var dist = _ship.global_position.distance_to(locked_target.global_position)
-		if dist > _ship.ship_data.target_lock_range * 1.5: # Loose leash for lock
-			# For MVP, maybe keep lock but stop firing
-			pass
+	# 2. Find Auto Target (if no manual target or just to have it ready)
+	var ships = get_tree().get_nodes_in_group("ships")
+	var best_target = null
+	var min_health = INF
+	
+	# Use weapon range or target lock range for auto-targeting?
+	# ShipData has target_lock_range.
+	var search_range = _ship.ship_data.target_lock_range
+	
+	for s in ships:
+		if s == _ship or not is_instance_valid(s) or (s is Ship and s.is_dead):
+			continue
+		if s.faction_data == _ship.faction_data:
+			continue
+			
+		var dist = _ship.global_position.distance_to(s.global_position)
+		if dist <= search_range:
+			# Priority: Ship with least health nearby
+			var health = s.current_hull + s.current_shield
+			if health < min_health:
+				min_health = health
+				best_target = s
+	
+	auto_target = best_target

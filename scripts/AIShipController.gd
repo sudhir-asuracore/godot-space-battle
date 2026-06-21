@@ -57,17 +57,18 @@ func _state_capturing(_delta: float) -> void:
 	_check_for_combat()
 
 func _state_combat(_delta: float) -> void:
-	if not _targeting.locked_target or not is_instance_valid(_targeting.locked_target):
+	var target = _targeting.locked_target
+	if not target or not is_instance_valid(target):
 		current_state = State.NAVIGATING
 		return
 		
 	# Simple kiting or orbiting
-	var dist = _ship.global_position.distance_to(_targeting.locked_target.global_position)
+	var dist = _ship.global_position.distance_to(target.global_position)
 	if dist > _ship.ship_data.target_lock_range * 0.8:
-		_ship.set_target(_targeting.locked_target.global_position)
+		_ship.set_target(target.global_position)
 	elif dist < _ship.ship_data.target_lock_range * 0.4:
 		# Back away
-		var away = _ship.global_position + (_ship.global_position - _targeting.locked_target.global_position).normalized() * 300.0
+		var away = _ship.global_position + (_ship.global_position - target.global_position).normalized() * 300.0
 		_ship.set_target(away)
 
 func _find_new_objective() -> void:
@@ -86,13 +87,5 @@ func _find_new_objective() -> void:
 	_target_objective = best_p
 
 func _check_for_combat() -> void:
-	# For MVP, just look for player ship or other faction ships
-	# This is a bit expensive to do every frame, but okay for MVP
-	var ships = get_tree().get_nodes_in_group("ships")
-	for s in ships:
-		if s != _ship and s is Ship and not s.is_dead and s.faction_data != _ship.faction_data:
-			var d = _ship.global_position.distance_to(s.global_position)
-			if d < _ship.ship_data.target_lock_range:
-				_targeting.locked_target = s
-				current_state = State.COMBAT_ENGAGED
-				return
+	if _targeting.locked_target:
+		current_state = State.COMBAT_ENGAGED

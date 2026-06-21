@@ -1,24 +1,37 @@
-[gd_scene load_steps=4 format=3]
+[gd_scene format=3 uid="uid://10qym0deqbvw"]
 
-[ext_resource type="Script" path="res://scenes/Homebase.gd" id="1_script"]
-[ext_resource type="Texture2D" path="res://assets/kenney_planets/Planets/planet08.png" id="2_tex"]
+[ext_resource type="Script" uid="uid://budrxpnnkro2j" path="res://scenes/Homebase.gd" id="1_script"]
+[ext_resource type="Texture2D" uid="uid://dc6xsn1y2v1mb" path="res://assets/kenney_planets/Planets/planet08.png" id="2_tex"]
+[ext_resource type="Shader" uid="uid://detcaj8nybdbe" path="res://scenes/HomebaseShield.gdshader" id="3_lscak"]
+[ext_resource type="Script" uid="uid://b3l3resvp81sd" path="res://scenes/Homebase_shield.gd" id="4_2r8xy"]
 
 [sub_resource type="CircleShape2D" id="CircleShape2D_hb"]
-radius = 200.0
+radius = 409.9573
 
-[node name="Homebase" type="StaticBody2D"]
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_lscak"]
+shader = ExtResource("3_lscak")
+shader_parameter/shield_color = Color(0.6120922, 0.6020588, 0.27354357, 0.4)
+shader_parameter/grid_scale = 29.142001336745
+shader_parameter/line_thickness = 0.22000000975148
+shader_parameter/edge_glow_power = 10.0
+shader_parameter/impact_pos = Vector2(0.5, 0.5)
+shader_parameter/impact_radius = 0.0
+
+[node name="Homebase" type="StaticBody2D" unique_id=1685546274]
 collision_layer = 64
 collision_mask = 17
 script = ExtResource("1_script")
 
-[node name="Sprite2D" type="Sprite2D" parent="."]
+[node name="Sprite2D" type="Sprite2D" parent="." unique_id=1323177038]
 scale = Vector2(0.8, 0.8)
 texture = ExtResource("2_tex")
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=1098195104]
 shape = SubResource("CircleShape2D_hb")
 
-[node name="ShieldSprite" type="Sprite2D" parent="."]
+[node name="ShieldSprite" type="Sprite2D" parent="." unique_id=1801694914]
 modulate = Color(0, 0.5, 1, 0.3)
-scale = Vector2(1.2, 1.2)
+material = SubResource("ShaderMaterial_lscak")
+scale = Vector2(0.805, 0.805)
 texture = ExtResource("2_tex")
+script = ExtResource("4_2r8xy")

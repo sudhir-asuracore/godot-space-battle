@@ -1,5 +1,30 @@
 [gd_scene format=3 uid="uid://cyfh6mhr1uyqg"]
 
+[ext_resource type="Shader" uid="uid://cupfrsdsn26e2" path="res://scenes/Thruster.gdshader" id="1_028xx"]
+[ext_resource type="Texture2D" uid="uid://cxf6l0g16n2vb" path="res://assets/thruster/nozzle_wide.png" id="2_0hye8"]
+
+[sub_resource type="FastNoiseLite" id="FastNoiseLite_13p1b"]
+
+[sub_resource type="NoiseTexture2D" id="NoiseTexture2D_6hjk2"]
+noise = SubResource("FastNoiseLite_13p1b")
+seamless = true
+as_normal_map = true
+bump_strength = 8.4
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_6hjk2"]
+shader = ExtResource("1_028xx")
+shader_parameter/core_color = Color(1, 1, 1, 1)
+shader_parameter/body_color = Color(0, 0.4, 0.9, 1)
+shader_parameter/edge_color = Color(0.4, 0, 0.8, 1)
+shader_parameter/emission_glow = 3.5
+shader_parameter/noise_texture = SubResource("NoiseTexture2D_6hjk2")
+shader_parameter/scroll_speed = Vector2(0, -2.5)
+shader_parameter/dissolve_tightness = 0.4
+
 [node name="Thruster" type="Node2D" unique_id=2012412625]
 
-[node name="Sprite2D" type="Sprite2D" parent="." unique_id=705654813]
+[node name="Sprite2D" type="Sprite2D" parent="." unique_id=1533948507]
+material = SubResource("ShaderMaterial_6hjk2")
+texture = ExtResource("2_0hye8")
+centered = false
+offset = Vector2(-206, 1)
