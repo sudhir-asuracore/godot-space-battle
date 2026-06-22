@@ -18,6 +18,8 @@ var is_dead: bool = false
 @onready var _thruster_right: Node2D = $Thruster_Right
 @onready var _thruster_right_sprite: Sprite2D = $Thruster_Right/Sprite2D
 @onready var _engine: Marker2D = $Engine
+@onready var shield_sprite: ColorRect = $Shield
+
 
 const RIBBON_TRAIL_SCENE = preload("res://scenes/RibbonTrail.tscn")
 const DAMAGE_MARKER_EFFECT_SCENE = preload("res://scenes/ShipDamageFlames.tscn")
@@ -43,6 +45,7 @@ var _visual_thrust: float = 0.0
 
 var _shield_regen_delay_timer: float = 0.0
 var _last_attacker: Node2D = null
+var _shield_active: bool = true
 
 func _ready() -> void:
 	add_to_group("ships")
@@ -53,6 +56,8 @@ func _ready() -> void:
 		_thruster_left_sprite.material = _thruster_left_sprite.material.duplicate()
 	if _thruster_right_sprite and _thruster_right_sprite.material:
 		_thruster_right_sprite.material = _thruster_right_sprite.material.duplicate()
+	if shield_sprite and shield_sprite.material:
+		shield_sprite.material = shield_sprite.material.duplicate()
 	
 	_setup_trail()
 	_cache_damage_markers()
@@ -130,11 +135,21 @@ func _update_damage_marker_effects() -> void:
 		_set_damage_marker_effect_active(marker_effect, should_be_active)
 
 func _get_active_damage_marker_count() -> int:
-	if _damage_marker_effects.is_empty():
+	if _damage_marker_effects.is_empty() or max_hull <= 0.0:
 		return 0
 
-	# Debug mode: keep all damage marker effects visible regardless of health.
-	return _damage_marker_effects.size()
+	var health_percent := current_hull / max_hull
+	
+	# Only show flames if health is below 80%
+	if health_percent > 0.8:
+		return 0
+	
+	# Map health from 80% down to 0% to 1 to N flames
+	# (0.8 - health_percent) / 0.8 gives 0.0 at 80% health and 1.0 at 0% health
+	var damage_factor := (0.8 - health_percent) / 0.8
+	var count := int(ceil(damage_factor * _damage_marker_effects.size()))
+	
+	return clampi(count, 1, _damage_marker_effects.size())
 
 func _set_damage_marker_effect_active(effect: Node2D, active: bool) -> void:
 	if not effect:
@@ -185,6 +200,10 @@ func update_stats() -> void:
 		current_hull = max_hull
 		current_shield = max_shield
 		current_capacitor = max_capacitor
+		
+		# Initialize shield visual state
+		_shield_active = current_shield > 0
+		set_shield_angle(ship_data.shield_angle if _shield_active else 0.0)
 
 	_update_damage_marker_effects()
 
@@ -251,7 +270,12 @@ func _process_regen(delta: float) -> void:
 	if _shield_regen_delay_timer > 0.0:
 		_shield_regen_delay_timer -= delta
 	elif current_shield < max_shield:
+		var old_shield = current_shield
 		current_shield = min(max_shield, current_shield + ship_data.shield_regen * delta)
+		if old_shield <= 0.0 and current_shield > 0.0:
+			if not _shield_active:
+				activate_shield()
+				_shield_active = true
 
 func _apply_friction(delta: float) -> void:
 	if velocity.length() < 1.0:
@@ -319,10 +343,13 @@ func take_damage(hull_dmg: float, shield_dmg: float, attacker: Node2D = null) ->
 	
 	if current_shield > 0:
 		current_shield -= shield_dmg
-		if current_shield < 0:
+		if current_shield <= 0:
 			# Shield broke this hit: spill the basic weapon's hull damage through.
 			current_hull -= hull_dmg
 			current_shield = 0.0
+			if _shield_active:
+				deactivate_shield()
+				_shield_active = false
 	else:
 		current_hull -= hull_dmg
 
@@ -374,3 +401,32 @@ func _die() -> void:
 	
 func is_enemy() -> bool:
 	return faction_data != null # Simple check for MVP
+
+func activate_shield(duration: float = 2) -> void:
+	var mat = shield_sprite.material as ShaderMaterial
+	if not mat: return
+	
+	# Create a smooth opening animation from 0 to target shield angle
+	var target_angle = ship_data.shield_angle if ship_data else 360.0
+	var tween = create_tween()
+	tween.tween_method(set_shield_angle, 0.0, target_angle, duration)\
+		.set_trans(Tween.TRANS_CUBIC)\
+		.set_ease(Tween.EASE_OUT)
+
+func deactivate_shield(duration: float = 0.4) -> void:
+	var mat = shield_sprite.material as ShaderMaterial
+	if not mat: return
+	
+	# Shrink it back down to the tip when collapsing
+	var start_angle = ship_data.shield_angle if ship_data else 360.0
+	var tween = create_tween()
+	tween.tween_method(set_shield_angle, start_angle, 0.0, duration)\
+		.set_trans(Tween.TRANS_CUBIC)\
+		.set_ease(Tween.EASE_IN)
+
+# Helper function because we are animating a shader parameter
+func set_shield_angle(value: float) -> void:
+	var mat := shield_sprite.material as ShaderMaterial
+	if not mat:
+		return
+	mat.set_shader_parameter("shield_angle", value)

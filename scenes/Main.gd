@@ -10,9 +10,9 @@ class_name GameMain
 
 const AIS_SHIP_SCENE = preload("res://scenes/AIShip.tscn")
 const HOMEBASE_SCENE = preload("res://scenes/Homebase.tscn")
-const SHIP_DATA_PATH := "res://resources/ships/t1_assault_ship.tres"
-const PLAYER_FACTION_PATH := "res://resources/factions/iron_vanguard.tres"
-const ENEMY_FACTION_PATH := "res://resources/factions/solarion_collective.tres"
+const SHIP_DATA_PATH := "res://resources/factions/iron_vanguard/ships/t1_assault_ship.tres"
+const PLAYER_FACTION_PATH := "res://resources/factions/iron_vanguard/iron_vanguard.tres"
+const ENEMY_FACTION_PATH := "res://resources/factions/solarion_collective/solarion_collective.tres"
 
 const PLAYER_HOMEBASE_POS := Vector2(0, 3000)
 const ENEMY_HOMEBASE_POS := Vector2(0, -3000)

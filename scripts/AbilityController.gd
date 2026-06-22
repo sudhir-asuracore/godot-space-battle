@@ -11,6 +11,8 @@ func _process(delta: float) -> void:
 		_ability_1_cooldown -= delta
 
 func _physics_process(delta: float) -> void:
+	if _ship.is_dead:
+		return
 	if _ability_1_active_time > 0:
 		_ability_1_active_time -= delta
 		_process_active_abilities(delta)
@@ -31,6 +33,8 @@ func _process_active_abilities(_delta: float) -> void:
 		_ship.apply_acceleration(accel)
 
 func use_ability_1() -> void:
+	if _ship.is_dead:
+		return
 	if _ability_1_cooldown > 0:
 		return
 	if not _ship.ship_data:

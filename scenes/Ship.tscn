@@ -1,13 +1,23 @@
 [gd_scene format=3 uid="uid://ckhohugwnwl7i"]
 
 [ext_resource type="Script" uid="uid://che0sdu0iw80e" path="res://scenes/Ship.gd" id="1_ship_gd"]
-[ext_resource type="Texture2D" uid="uid://dec5gehj1rj16" path="res://assets/ships/assault_light.png" id="2_ship_tex"]
-[ext_resource type="Texture2D" uid="uid://pdqjgyxbb10j" path="res://assets/ships/white-assault-01.png" id="3_7ty2q"]
+[ext_resource type="Shader" uid="uid://ygy6nmx7ntkx" path="res://shaders/ship_shield.gdshader" id="3_7ty2q"]
 [ext_resource type="Script" uid="uid://2uyc2o7ii6i8" path="res://scripts/AbilityController.gd" id="3_ability_ctrl"]
 [ext_resource type="Script" uid="uid://csclx8xvdnu4u" path="res://scripts/TargetingController.gd" id="4_targeting_ctrl"]
 [ext_resource type="Texture2D" uid="uid://cvgeulgpu7s1v" path="res://assets/ships/white-assault-01-super-low.png" id="4_tgbo8"]
 [ext_resource type="Script" uid="uid://ce7dxwfhmrobl" path="res://scripts/WeaponController.gd" id="5_weapon_ctrl"]
 [ext_resource type="PackedScene" uid="uid://cyfh6mhr1uyqg" path="res://scenes/Thruster.tscn" id="6_slbyd"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_swkrw"]
+shader = ExtResource("3_7ty2q")
+shader_parameter/shield_fill_color = Color(0.15, 0.2, 0.45, 0.35)
+shader_parameter/shield_rim_color = Color(0.6, 0.8, 1, 1)
+shader_parameter/radius = 0.4610000218975
+shader_parameter/rim_thickness = 0.0030000001425
+shader_parameter/glow_intensity = 2.0550000501125
+shader_parameter/shield_angle = 237.282011270895
+shader_parameter/edge_smoothness = 0.43500001996397997
+shader_parameter/grow_from_right = true
 
 [sub_resource type="CapsuleShape2D" id="CapsuleShape2D_ship"]
 radius = 24.999989
@@ -16,24 +26,19 @@ height = 75.999985
 [node name="Ship" type="CharacterBody2D" unique_id=635758140]
 script = ExtResource("1_ship_gd")
 
-[node name="Sprite2D" type="Sprite2D" parent="." unique_id=538605522]
-visible = false
-rotation = 1.5708
-scale = Vector2(0.08, 0.08)
-texture = ExtResource("2_ship_tex")
-
-[node name="Sprite2D White" type="Sprite2D" parent="." unique_id=28090953]
-visible = false
-position = Vector2(-7.6293945e-06, -3.8146973e-06)
-rotation = 1.5707964
-scale = Vector2(0.036762472, 0.036762472)
-texture = ExtResource("3_7ty2q")
-
 [node name="Sprite2D-superlow" type="Sprite2D" parent="." unique_id=1610781674]
 position = Vector2(-1.2185352, 0.6787586)
 rotation = 1.5707964
 scale = Vector2(0.0360504, 0.03390996)
 texture = ExtResource("4_tgbo8")
+
+[node name="Shield" type="ColorRect" parent="." unique_id=1421233290]
+material = SubResource("ShaderMaterial_swkrw")
+offset_left = -58.0
+offset_top = -43.0
+offset_right = 51.0
+offset_bottom = 40.0
+pivot_offset = Vector2(42, 25)
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=2116050992]
 rotation = 1.5708

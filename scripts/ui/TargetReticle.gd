@@ -13,13 +13,22 @@ func _process(_delta: float) -> void:
 		
 	visible = true
 	# Follow target in screen space
-	var canvas = get_canvas_transform()
-	var top_left = canvas * target.global_position
-	set_position(top_left)
+	global_position = target.get_global_transform_with_canvas().origin
 	
 	if target is Ship:
-		_shield_bar.max_value = target.ship_data.max_shield * (target.faction_data.shield_multiplier if target.faction_data else 1.0)
+		_shield_bar.max_value = target.max_shield
 		_shield_bar.value = target.current_shield
-		
-		_hull_bar.max_value = target.ship_data.max_hull * (target.faction_data.hull_multiplier if target.faction_data else 1.0)
+		_hull_bar.max_value = target.max_hull
 		_hull_bar.value = target.current_hull
+		_shield_bar.visible = true
+		_hull_bar.visible = true
+	elif target is Homebase:
+		_shield_bar.max_value = 1.0
+		_shield_bar.value = 1.0 if target.is_shield_active else 0.0
+		_hull_bar.max_value = target.max_hull
+		_hull_bar.value = target.current_hull
+		_shield_bar.visible = true 
+		_hull_bar.visible = true
+	else:
+		_shield_bar.visible = false
+		_hull_bar.visible = false

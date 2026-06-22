@@ -48,26 +48,3 @@ split. Follow them for every milestone.
 | `SceneRouter`     | Scene switching with fade/warp transitions.               |
 
 Load order matters: `EventBus` is registered first so the others may emit on it.
-
-## Input Actions (Project Settings → Input Map)
-| Action            | Binding         | Purpose                          |
-| ----------------- | --------------- | -------------------------------- |
-| `navigate`        | LMB             | Click-to-move waypoint.          |
-| `aim_fire`        | RMB / Space     | Aim & fire primary weapon.       |
-| `manual_thrust`   | W               | Manual forward thrust.           |
-| `cam_rotate_left` | Q               | Orbit camera left.               |
-| `cam_rotate_right`| E               | Orbit camera right.              |
-| `zoom_in`          | Wheel Up        | Zoom in camera.                  |
-| `zoom_out`         | Wheel Down      | Zoom out camera.                 |
-| `tactical_map`    | M               | Toggle tactical map.             |
-| `ability_1`       | 1               | Archetype ability 1.             |
-| `ability_2`       | 2               | Archetype ability 2.             |
-| `scan_ping`       | F               | Active long-range sensor ping.   |
-
-## Physics Layers (Project Settings → Layer Names → 3D Physics)
-1. `Ship` · 2. `Planet` · 3. `ResourceNode` · 4. `Hazard` · 5. `Projectile` · 6. `CaptureZone` · 7. `Homebase`
-
-## Testing
-- Add a lightweight sandbox scene under `tests/` for each milestone.
-- Cover the highest-risk areas explicitly: determinism (seeds) and
-  economy/penalty math.

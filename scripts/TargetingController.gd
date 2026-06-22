@@ -20,6 +20,8 @@ var locked_target: Node2D:
 		manual_target = v
 
 func _unhandled_input(event: InputEvent) -> void:
+	if _ship.is_dead:
+		return
 	if event.is_action_pressed("target_lock"): # I'll register this in Main.gd
 		_attempt_lock()
 
@@ -56,6 +58,8 @@ func _attempt_lock() -> void:
 		print("Manual target cleared")
 
 func _process(_delta: float) -> void:
+	if _ship.is_dead:
+		return
 	_update_targets()
 
 func _update_targets() -> void:

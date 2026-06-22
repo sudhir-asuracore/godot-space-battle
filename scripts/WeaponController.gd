@@ -10,6 +10,9 @@ var _cooldown_timer: float = 0.0
 const PROJECTILE_SCENE = preload("res://scenes/Projectile.tscn")
 
 func _process(delta: float) -> void:
+	if _ship.is_dead:
+		return
+		
 	if _cooldown_timer > 0:
 		_cooldown_timer -= delta
 		

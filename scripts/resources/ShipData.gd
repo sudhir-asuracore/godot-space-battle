@@ -12,6 +12,7 @@ class_name ShipData
 @export var max_shield: float = 50.0
 @export var shield_regen: float = 5.0
 @export var shield_regen_delay: float = 3.0
+@export var shield_angle: float = 360.0
 
 @export_category("Movement")
 @export var max_speed: float = 35.0
