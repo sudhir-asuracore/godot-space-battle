@@ -57,29 +57,29 @@ func _state_capturing(_delta: float) -> void:
 	_check_for_combat()
 
 func _state_combat(_delta: float) -> void:
-	var target = _targeting.locked_target
+	var target: Node2D = _targeting.locked_target
 	if not target or not is_instance_valid(target):
 		current_state = State.NAVIGATING
 		return
 		
 	# Simple kiting or orbiting
-	var dist = _ship.global_position.distance_to(target.global_position)
+	var dist: float = _ship.global_position.distance_to(target.global_position)
 	if dist > _ship.ship_data.target_lock_range * 0.8:
 		_ship.set_target(target.global_position)
 	elif dist < _ship.ship_data.target_lock_range * 0.4:
 		# Back away
-		var away = _ship.global_position + (_ship.global_position - target.global_position).normalized() * 300.0
+		var away: Vector2 = _ship.global_position + (_ship.global_position - target.global_position).normalized() * 300.0
 		_ship.set_target(away)
 
 func _find_new_objective() -> void:
 	# Find nearest neutral or enemy planet
-	var planets = get_tree().get_nodes_in_group("planets")
-	var best_p = null
-	var min_dist = INF
+	var planets: Array[Node] = get_tree().get_nodes_in_group("planets")
+	var best_p: Planet = null
+	var min_dist: float = INF
 	
-	for p in planets:
+	for p: Node in planets:
 		if p is Planet and p.owning_faction != _ship.faction_data:
-			var d = _ship.global_position.distance_to(p.global_position)
+			var d: float = _ship.global_position.distance_to(p.global_position)
 			if d < min_dist:
 				min_dist = d
 				best_p = p

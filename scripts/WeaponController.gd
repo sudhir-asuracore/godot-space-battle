@@ -19,7 +19,7 @@ func _process(delta: float) -> void:
 	if not _ship.ship_data or not _ship.ship_data.basic_weapon:
 		return
 		
-	var weapon = _ship.ship_data.basic_weapon
+	var weapon: WeaponData = _ship.ship_data.basic_weapon
 	if weapon.auto_fire and _targeting.locked_target:
 		_attempt_fire()
 
@@ -27,13 +27,13 @@ func _attempt_fire() -> void:
 	if _cooldown_timer > 0:
 		return
 		
-	var target = _targeting.locked_target
+	var target: Node2D = _targeting.locked_target
 	if not target:
 		return
 		
-	var weapon = _ship.ship_data.basic_weapon
+	var weapon: WeaponData = _ship.ship_data.basic_weapon
 	
-	var dist = _ship.global_position.distance_to(target.global_position)
+	var dist: float = _ship.global_position.distance_to(target.global_position)
 	if dist <= weapon.weapon_range:
 		_fire(target, weapon)
 		_cooldown_timer = weapon.cooldown
@@ -46,7 +46,7 @@ func _fire(target: Node2D, weapon: WeaponData) -> void:
 	_play_fire_audio(weapon)
 		
 	# Instantiate projectile
-	var projectile = PROJECTILE_SCENE.instantiate()
+	var projectile: Projectile = PROJECTILE_SCENE.instantiate() as Projectile
 	
 	# Set projectile properties
 	projectile.global_position = _muzzle.global_position
@@ -70,7 +70,7 @@ func _play_fire_audio(weapon: WeaponData) -> void:
 		return
 
 	var game_state := get_node_or_null(^"/root/GameState")
-	var player_faction = game_state.get(&"player_faction") if game_state else null
+	var player_faction: FactionData = game_state.get(&"player_faction") if game_state else null
 
 	var is_player_shot: bool = false
 	if _ship.faction_data != null and player_faction != null:

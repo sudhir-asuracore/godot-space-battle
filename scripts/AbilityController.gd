@@ -21,15 +21,15 @@ func _process_active_abilities(_delta: float) -> void:
 	if not _ship or not _ship.ship_data:
 		return
 		
-	var ability = _ship.ship_data.ability_1
+	var ability: AbilityData = _ship.ship_data.ability_1
 	if not ability:
 		return
 		
 	if ability.name == "Afterburner":
 		# Strong forward thrust burst. 
 		# We use 4x base acceleration for a significant boost.
-		var forward = Vector2.from_angle(_ship.global_rotation)
-		var accel = forward * _ship._acceleration * 4.0
+		var forward: Vector2 = Vector2.from_angle(_ship.global_rotation)
+		var accel: Vector2 = forward * _ship._acceleration * 4.0
 		_ship.apply_acceleration(accel)
 
 func use_ability_1() -> void:
@@ -40,7 +40,7 @@ func use_ability_1() -> void:
 	if not _ship.ship_data:
 		return
 		
-	var ability = _ship.ship_data.ability_1
+	var ability: AbilityData = _ship.ship_data.ability_1
 	if not ability:
 		return
 	

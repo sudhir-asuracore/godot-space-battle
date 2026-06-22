@@ -1,6 +1,6 @@
 [gd_scene format=3 uid="uid://c35l1bv6nbhp2"]
 
-[ext_resource type="Shader" uid="uid://c0bh5mf62dqld" path="res://scenes/ShipDamageFlames.gdshader" id="1_n8col"]
+[ext_resource type="Shader" uid="uid://c0bh5mf62dqld" path="res://shaders/ShipDamageFlames.gdshader" id="1_n8col"]
 [ext_resource type="Texture2D" uid="uid://dqyudmqwnef1j" path="res://assets/textures/flames/T_VFX_CloudNoise_Tiled.png" id="2_e2ol4"]
 [ext_resource type="Texture2D" uid="uid://ceu6jk0cv01l6" path="res://assets/textures/flames/T_1_pixel.jpg" id="2_ivcvd"]
 [ext_resource type="Texture2D" uid="uid://5wdcjfa3sl7m" path="res://assets/textures/flames/T_Gradient_circle22.jpg" id="3_2d0vu"]

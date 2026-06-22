@@ -26,21 +26,23 @@ func _unhandled_input(event: InputEvent) -> void:
 		_attempt_lock()
 
 func _attempt_lock() -> void:
-	var mouse_pos = get_global_mouse_position()
-	var space_state = get_world_2d().direct_space_state
+	var mouse_pos: Vector2 = get_global_mouse_position()
+	var space_state: PhysicsDirectSpaceState2D = get_world_2d().direct_space_state
 	
 	# Use point sampling to see if we clicked an enemy
-	var query = PhysicsPointQueryParameters2D.new()
+	var query: PhysicsPointQueryParameters2D = PhysicsPointQueryParameters2D.new()
 	query.position = mouse_pos
 	# Layer 1 = Ship, Layer 64 (bit 7) = Homebase. Allow locking both (siege targeting).
 	query.collision_mask = 1 | 64
 	query.collide_with_areas = true
 	
-	var results = space_state.intersect_point(query)
+	var results: Array[Dictionary] = space_state.intersect_point(query)
 	
-	var found_target = null
-	for result in results:
-		var collider = result.collider
+	var found_target: Node2D = null
+	for result: Dictionary in results:
+		var collider: Node2D = result.get("collider") as Node2D
+		if not collider:
+			continue
 		if collider == _ship:
 			continue
 		# Skip friendly units / structures.
@@ -69,24 +71,24 @@ func _update_targets() -> void:
 			manual_target = null
 			
 	# 2. Find Auto Target (if no manual target or just to have it ready)
-	var ships = get_tree().get_nodes_in_group("ships")
-	var best_target = null
-	var min_health = INF
+	var ships: Array[Node] = get_tree().get_nodes_in_group("ships")
+	var best_target: Node2D = null
+	var min_health: float = INF
 	
 	# Use weapon range or target lock range for auto-targeting?
 	# ShipData has target_lock_range.
-	var search_range = _ship.ship_data.target_lock_range
+	var search_range: float = _ship.ship_data.target_lock_range
 	
-	for s in ships:
+	for s: Node in ships:
 		if s == _ship or not is_instance_valid(s) or (s is Ship and s.is_dead):
 			continue
 		if s.faction_data == _ship.faction_data:
 			continue
 			
-		var dist = _ship.global_position.distance_to(s.global_position)
+		var dist: float = _ship.global_position.distance_to(s.global_position)
 		if dist <= search_range:
 			# Priority: Ship with least health nearby
-			var health = s.current_hull + s.current_shield
+			var health: float = s.current_hull + s.current_shield
 			if health < min_health:
 				min_health = health
 				best_target = s

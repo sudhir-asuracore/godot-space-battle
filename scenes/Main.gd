@@ -26,7 +26,7 @@ var _enemy_faction: FactionData
 var _targeting: TargetingController
 var _ability: AbilityController
 
-var _enemy_ships: Array = []
+var _enemy_ships: Array[Ship] = []
 var _enemy_spawn_timer: float = 0.0
 var _match_over: bool = false
 
@@ -38,13 +38,13 @@ func _ready() -> void:
 	_register_input_action("zoom_out", MOUSE_BUTTON_WHEEL_DOWN)
 	_register_key_action("ability_1", KEY_1)
 	
-	_player_faction = load(PLAYER_FACTION_PATH)
-	_enemy_faction = load(ENEMY_FACTION_PATH)
+	_player_faction = load(PLAYER_FACTION_PATH) as FactionData
+	_enemy_faction = load(ENEMY_FACTION_PATH) as FactionData
 	GameState.player_faction = _player_faction
 	
 	# Load MVP data for the player ship.
 	if _ship:
-		_ship.ship_data = load(SHIP_DATA_PATH)
+		_ship.ship_data = load(SHIP_DATA_PATH) as ShipData
 		_ship.faction_data = _player_faction
 		_ship.update_stats()
 		_targeting = _ship.get_node("TargetingController") as TargetingController
@@ -66,7 +66,7 @@ func _setup_camera_and_path() -> void:
 	if _camera and _ship:
 		_camera.target_node = _ship
 		_camera.follow_target = true
-		var audio_manager := get_node_or_null(^"/root/AudioManager")
+		var audio_manager: Node = get_node_or_null(^"/root/AudioManager")
 		if audio_manager:
 			audio_manager.call("set_listener_camera", _camera)
 		
@@ -78,22 +78,22 @@ func _setup_camera_and_path() -> void:
 		_path_line.visible = false
 
 func _spawn_homebases() -> void:
-	var player_hb = HOMEBASE_SCENE.instantiate()
+	var player_hb: Homebase = HOMEBASE_SCENE.instantiate() as Homebase
 	player_hb.name = "PlayerHomebase"
 	player_hb.position = PLAYER_HOMEBASE_POS
 	player_hb.faction_data = _player_faction
 	add_child(player_hb)
 	
-	var enemy_hb = HOMEBASE_SCENE.instantiate()
+	var enemy_hb: Homebase = HOMEBASE_SCENE.instantiate() as Homebase
 	enemy_hb.name = "EnemyHomebase"
 	enemy_hb.position = ENEMY_HOMEBASE_POS
 	enemy_hb.faction_data = _enemy_faction
 	add_child(enemy_hb)
 
 func _spawn_enemy() -> void:
-	var enemy = AIS_SHIP_SCENE.instantiate()
+	var enemy: Ship = AIS_SHIP_SCENE.instantiate() as Ship
 	enemy.position = ENEMY_HOMEBASE_POS + Vector2(randf_range(-300, 300), randf_range(200, 500))
-	enemy.ship_data = load(SHIP_DATA_PATH)
+	enemy.ship_data = load(SHIP_DATA_PATH) as ShipData
 	enemy.faction_data = _enemy_faction
 	add_child(enemy)
 	enemy.update_stats()
@@ -161,7 +161,11 @@ func _process(delta: float) -> void:
 		_enemy_spawn_timer += delta
 		if _enemy_spawn_timer >= ENEMY_SPAWN_INTERVAL:
 			_enemy_spawn_timer = 0.0
-			_enemy_ships = _enemy_ships.filter(func(s): return is_instance_valid(s))
+			var alive_enemy_ships: Array[Ship] = []
+			for enemy_ship: Ship in _enemy_ships:
+				if is_instance_valid(enemy_ship):
+					alive_enemy_ships.append(enemy_ship)
+			_enemy_ships = alive_enemy_ships
 			if _enemy_ships.size() < MAX_ENEMY_SHIPS:
 				_spawn_enemy()
 

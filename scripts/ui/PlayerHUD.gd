@@ -104,11 +104,11 @@ func _process(_delta: float) -> void:
 	
 	_prestige_label.text = "Prestige: %d" % int(GameState.get_prestige(_player_faction))
 	
-	var owned := GameState.get_planet_count(_player_faction)
-	var total := GameState.get_total_planets()
+	var owned: int = GameState.get_planet_count(_player_faction)
+	var total: int = GameState.get_total_planets()
 	_planets_label.text = "Planets: %d / %d" % [owned, total]
 	
-	var majority := GameState.get_majority_faction()
+	var majority: FactionData = GameState.get_majority_faction()
 	if majority == _player_faction:
 		_majority_label.text = "Majority: YOU control the system"
 	elif majority == _enemy_faction:
@@ -116,17 +116,17 @@ func _process(_delta: float) -> void:
 	else:
 		_majority_label.text = "Majority: contested"
 	
-	var enemy_shield_up := GameState.is_homebase_shield_active(_enemy_faction)
+	var enemy_shield_up: bool = GameState.is_homebase_shield_active(_enemy_faction)
 	_shield_label.text = "Enemy Shield: %s" % ("UP (capture majority)" if enemy_shield_up else "DOWN - SIEGE!")
 	
 	if _ability:
-		var cd := _ability.get_ability_1_cooldown()
+		var cd: float = _ability.get_ability_1_cooldown()
 		if cd <= 0.0:
 			_ability_label.text = "[1] Afterburner: READY"
 		else:
 			_ability_label.text = "[1] Afterburner: %.1fs" % cd
 	
-	var tgt = null
+	var tgt: Node2D = null
 	if _ship.has_node("TargetingController"):
 		tgt = (_ship.get_node("TargetingController") as TargetingController).locked_target
 	if tgt and is_instance_valid(tgt):

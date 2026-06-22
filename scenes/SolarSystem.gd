@@ -1,8 +1,16 @@
 extends Node2D
-class_name SolazrSystem
+class_name SolarSystem
+
+class OrbitData:
+	var node: Planet
+	var sprite: Sprite2D
+	var radius: float
+	var angle: float
+	var speed: float
+	var spin_speed: float
 
 # Array to hold planet data dictionaries for orbital animation
-var _planets: Array = []
+var _planets: Array[OrbitData] = []
 
 const SUN_SCENE = preload("res://scenes/SunCorona.tscn")
 const PLANET_SCENE = preload("res://scenes/Planet.tscn")
@@ -46,27 +54,26 @@ func _ready() -> void:
 		planet_instance.get_node("CollisionShape2D").shape.radius = 250.0 * base_scale
 		
 		# Orbital stats
-		var orbit_data: Dictionary = {
-			"node": planet_instance,
-			"sprite": sprite,
-			"radius": current_radius,
-			"angle": randf() * TAU,
-			"speed": (0.005 + randf() * 0.007) * (1500.0 / current_radius),
-			"spin_speed": (randf() - 0.5) * 0.22
-		}
+		var orbit_data: OrbitData = OrbitData.new()
+		orbit_data.node = planet_instance
+		orbit_data.sprite = sprite
+		orbit_data.radius = current_radius
+		orbit_data.angle = randf() * TAU
+		orbit_data.speed = (0.005 + randf() * 0.007) * (1500.0 / current_radius)
+		orbit_data.spin_speed = (randf() - 0.5) * 0.22
 		
 		# Initial position
-		planet_instance.position = Vector2(cos(orbit_data.angle), sin(orbit_data.angle)) * current_radius
+		planet_instance.position = Vector2(cos(orbit_data.angle), sin(orbit_data.angle)) * orbit_data.radius
 		_planets.append(orbit_data)
 	
 	queue_redraw()
 
 func _process(delta: float) -> void:
-	for planet in _planets:
-		planet.angle += planet.speed * delta
-		planet.node.position = Vector2(cos(planet.angle), sin(planet.angle)) * planet.radius
-		planet.sprite.rotation += planet.spin_speed * delta
+	for orbit_data: OrbitData in _planets:
+		orbit_data.angle += orbit_data.speed * delta
+		orbit_data.node.position = Vector2(cos(orbit_data.angle), sin(orbit_data.angle)) * orbit_data.radius
+		orbit_data.sprite.rotation += orbit_data.spin_speed * delta
 
 func _draw() -> void:
-	for planet in _planets:
-		draw_arc(Vector2.ZERO, planet.radius, 0, TAU, 360, Color(1, 1, 1, 0.12), 2.5, true)
+	for orbit_data: OrbitData in _planets:
+		draw_arc(Vector2.ZERO, orbit_data.radius, 0, TAU, 360, Color(1, 1, 1, 0.12), 2.5, true)

@@ -18,7 +18,7 @@ var is_dead: bool = false
 @onready var _thruster_right: Node2D = $Thruster_Right
 @onready var _thruster_right_sprite: Sprite2D = $Thruster_Right/Sprite2D
 @onready var _engine: Marker2D = $Engine
-@onready var shield_sprite: ColorRect = $Shield
+@onready var _shield_sprite: ColorRect = $Shield
 
 
 const RIBBON_TRAIL_SCENE = preload("res://scenes/RibbonTrail.tscn")
@@ -56,8 +56,8 @@ func _ready() -> void:
 		_thruster_left_sprite.material = _thruster_left_sprite.material.duplicate()
 	if _thruster_right_sprite and _thruster_right_sprite.material:
 		_thruster_right_sprite.material = _thruster_right_sprite.material.duplicate()
-	if shield_sprite and shield_sprite.material:
-		shield_sprite.material = shield_sprite.material.duplicate()
+	if _shield_sprite and _shield_sprite.material:
+		_shield_sprite.material = _shield_sprite.material.duplicate()
 	
 	_setup_trail()
 	_cache_damage_markers()
@@ -79,7 +79,10 @@ func _setup_trail() -> void:
 	# Add as sibling so it's in world space but managed by the same parent
 	get_parent().add_child(_trail)
 	_trail.call("setup", ship_data)
-	_trail.call("set_target", _engine if _engine else self)
+	var trail_target: Node2D = self
+	if _engine != null:
+		trail_target = _engine
+	_trail.call("set_target", trail_target)
 	_trail.call("set_emitting", false)
 
 func _cache_damage_markers() -> void:
@@ -173,14 +176,14 @@ func update_stats() -> void:
 	if not _trail and is_inside_tree():
 		_setup_trail()
 		
-	var speed_mult = faction_data.speed_multiplier if faction_data else 1.0
-	var accel_mult = faction_data.acceleration_multiplier if faction_data else 1.0
-	var turn_mult = faction_data.turn_speed_multiplier if faction_data else 1.0
-	var lateral_mult = faction_data.lateral_damping_multiplier if faction_data else 1.0
-	var braking_mult = faction_data.braking_multiplier if faction_data else 1.0
-	var hull_mult = faction_data.hull_multiplier if faction_data else 1.0
-	var shield_mult = faction_data.shield_multiplier if faction_data else 1.0
-	var cap_mult = faction_data.capacitor_multiplier if faction_data else 1.0
+	var speed_mult: float = faction_data.speed_multiplier if faction_data else 1.0
+	var accel_mult: float = faction_data.acceleration_multiplier if faction_data else 1.0
+	var turn_mult: float = faction_data.turn_speed_multiplier if faction_data else 1.0
+	var lateral_mult: float = faction_data.lateral_damping_multiplier if faction_data else 1.0
+	var braking_mult: float = faction_data.braking_multiplier if faction_data else 1.0
+	var hull_mult: float = faction_data.hull_multiplier if faction_data else 1.0
+	var shield_mult: float = faction_data.shield_multiplier if faction_data else 1.0
+	var cap_mult: float = faction_data.capacitor_multiplier if faction_data else 1.0
 	
 	_max_speed = ship_data.max_speed * speed_mult
 	_acceleration = ship_data.acceleration * accel_mult
@@ -230,8 +233,8 @@ func apply_acceleration(accel: Vector2) -> void:
 	
 	# Update thrust intensity based on forward component of acceleration
 	# This allows visuals (thrusters, trails) to react to any acceleration source.
-	var forward_dir = Vector2.from_angle(global_rotation)
-	var thrust_component = accel.dot(forward_dir)
+	var forward_dir: Vector2 = Vector2.from_angle(global_rotation)
+	var thrust_component: float = accel.dot(forward_dir)
 	if thrust_component > 0 and _acceleration > 0:
 		# We normalize intensity against the ship's base acceleration.
 		# Afterburners or multiple thrust sources can push this above 1.0.
@@ -241,7 +244,7 @@ func _update_thruster_vfx(delta: float) -> void:
 	_visual_thrust = move_toward(_visual_thrust, _thrust_intensity, delta * 5.0)
 	
 	if _visual_thrust > 0.001:
-		var thrust_scale = lerp(0.008, 0.05, _visual_thrust)
+		var thrust_scale: float = lerp(0.008, 0.05, _visual_thrust)
 		
 		if _thruster_left:
 			_thruster_left.scale.y = thrust_scale
@@ -270,7 +273,7 @@ func _process_regen(delta: float) -> void:
 	if _shield_regen_delay_timer > 0.0:
 		_shield_regen_delay_timer -= delta
 	elif current_shield < max_shield:
-		var old_shield = current_shield
+		var old_shield: float = current_shield
 		current_shield = min(max_shield, current_shield + ship_data.shield_regen * delta)
 		if old_shield <= 0.0 and current_shield > 0.0:
 			if not _shield_active:
@@ -282,11 +285,11 @@ func _apply_friction(delta: float) -> void:
 		velocity = Vector2.ZERO
 		return
 		
-	var forward_dir = Vector2.from_angle(global_rotation)
-	var lateral_dir = forward_dir.rotated(PI/2.0)
+	var forward_dir: Vector2 = Vector2.from_angle(global_rotation)
+	var lateral_dir: Vector2 = forward_dir.rotated(PI / 2.0)
 	
-	var forward_vel = velocity.dot(forward_dir)
-	var lateral_vel = velocity.dot(lateral_dir)
+	var forward_vel: float = velocity.dot(forward_dir)
+	var lateral_vel: float = velocity.dot(lateral_dir)
 	
 	# Apply damping
 	# Using (1.0 - damping * delta) approach for simple linear-ish friction
@@ -296,26 +299,26 @@ func _apply_friction(delta: float) -> void:
 	velocity = forward_dir * forward_vel + lateral_dir * lateral_vel
 
 func _process_movement(delta: float) -> void:
-	var to_target = target_position - global_position
-	var distance = to_target.length()
+	var to_target: Vector2 = target_position - global_position
+	var distance: float = to_target.length()
 	
 	if distance < 10.0:
 		is_moving = false
 		return
 		
 	# 1. Rotation
-	var target_angle = to_target.angle()
+	var target_angle: float = to_target.angle()
 	global_rotation = rotate_toward(global_rotation, target_angle, _turn_speed * delta)
 	
 	# 2. Acceleration
-	var forward_dir = Vector2.from_angle(global_rotation)
-	var angle_diff = abs(angle_difference(global_rotation, target_angle))
+	var forward_dir: Vector2 = Vector2.from_angle(global_rotation)
+	var angle_diff: float = abs(angle_difference(global_rotation, target_angle))
 	
 	# Scale acceleration based on alignment (thrust factor)
-	var thrust_factor = clamp(1.0 - (angle_diff / PI), 0.0, 1.0)
+	var thrust_factor: float = clamp(1.0 - (angle_diff / PI), 0.0, 1.0)
 	
 	# 3. Assisted Braking
-	var speed_limit = _max_speed
+	var speed_limit: float = _max_speed
 	if distance < ship_data.arrival_radius:
 		speed_limit = _max_speed * (distance / ship_data.arrival_radius)
 	
@@ -403,30 +406,30 @@ func is_enemy() -> bool:
 	return faction_data != null # Simple check for MVP
 
 func activate_shield(duration: float = 2) -> void:
-	var mat = shield_sprite.material as ShaderMaterial
+	var mat: ShaderMaterial = _shield_sprite.material as ShaderMaterial
 	if not mat: return
 	
 	# Create a smooth opening animation from 0 to target shield angle
-	var target_angle = ship_data.shield_angle if ship_data else 360.0
-	var tween = create_tween()
+	var target_angle: float = ship_data.shield_angle if ship_data else 360.0
+	var tween: Tween = create_tween()
 	tween.tween_method(set_shield_angle, 0.0, target_angle, duration)\
 		.set_trans(Tween.TRANS_CUBIC)\
 		.set_ease(Tween.EASE_OUT)
 
 func deactivate_shield(duration: float = 0.4) -> void:
-	var mat = shield_sprite.material as ShaderMaterial
+	var mat: ShaderMaterial = _shield_sprite.material as ShaderMaterial
 	if not mat: return
 	
 	# Shrink it back down to the tip when collapsing
-	var start_angle = ship_data.shield_angle if ship_data else 360.0
-	var tween = create_tween()
+	var start_angle: float = ship_data.shield_angle if ship_data else 360.0
+	var tween: Tween = create_tween()
 	tween.tween_method(set_shield_angle, start_angle, 0.0, duration)\
 		.set_trans(Tween.TRANS_CUBIC)\
 		.set_ease(Tween.EASE_IN)
 
 # Helper function because we are animating a shader parameter
 func set_shield_angle(value: float) -> void:
-	var mat := shield_sprite.material as ShaderMaterial
+	var mat: ShaderMaterial = _shield_sprite.material as ShaderMaterial
 	if not mat:
 		return
 	mat.set_shader_parameter("shield_angle", value)

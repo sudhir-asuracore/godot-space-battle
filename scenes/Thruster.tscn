@@ -1,6 +1,6 @@
 [gd_scene format=3 uid="uid://cyfh6mhr1uyqg"]
 
-[ext_resource type="Shader" uid="uid://cupfrsdsn26e2" path="res://scenes/Thruster.gdshader" id="1_028xx"]
+[ext_resource type="Shader" uid="uid://cupfrsdsn26e2" path="res://shaders/Thruster.gdshader" id="1_028xx"]
 [ext_resource type="Texture2D" uid="uid://cxf6l0g16n2vb" path="res://assets/thruster/nozzle_wide.png" id="2_0hye8"]
 
 [sub_resource type="FastNoiseLite" id="FastNoiseLite_13p1b"]
