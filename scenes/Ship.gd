@@ -12,8 +12,10 @@ var current_shield: float = 0.0
 var current_capacitor: float = 0.0
 var is_dead: bool = false
 
-@onready var _thruster: Node2D = $Thruster
-@onready var _thruster_sprite: Sprite2D = $Thruster/Sprite2D
+@onready var _thruster_left: Node2D = $Thruster_Left
+@onready var _thruster_left_sprite: Sprite2D = $Thruster_Left/Sprite2D
+@onready var _thruster_right: Node2D = $Thruster_Right
+@onready var _thruster_right_sprite: Sprite2D = $Thruster_Right/Sprite2D
 @onready var _engine: Marker2D = $Engine
 
 const RIBBON_TRAIL_SCENE = preload("res://scenes/RibbonTrail.tscn")
@@ -41,8 +43,10 @@ func _ready() -> void:
 	target_position = global_position
 	update_stats()
 	
-	if _thruster_sprite and _thruster_sprite.material:
-		_thruster_sprite.material = _thruster_sprite.material.duplicate()
+	if _thruster_left_sprite and _thruster_left_sprite.material:
+		_thruster_left_sprite.material = _thruster_left_sprite.material.duplicate()
+	if _thruster_right_sprite and _thruster_right_sprite.material:
+		_thruster_right_sprite.material = _thruster_right_sprite.material.duplicate()
 	
 	_setup_trail()
 
@@ -109,30 +113,44 @@ func _physics_process(delta: float) -> void:
 	# 1. Handle Damping (Fake Space Friction)
 	_apply_friction(delta)
 	
-	_thrust_intensity = 0.0
 	if is_moving:
 		_process_movement(delta)
 	
 	_update_thruster_vfx(delta)
+	_thrust_intensity = 0.0
 	
 	move_and_slide()
 
+func apply_acceleration(accel: Vector2) -> void:
+	velocity += accel * get_physics_process_delta_time()
+	
+	# Update thrust intensity based on forward component of acceleration
+	# This allows visuals (thrusters, trails) to react to any acceleration source.
+	var forward_dir = Vector2.from_angle(global_rotation)
+	var thrust_component = accel.dot(forward_dir)
+	if thrust_component > 0 and _acceleration > 0:
+		# We normalize intensity against the ship's base acceleration.
+		# Afterburners or multiple thrust sources can push this above 1.0.
+		_thrust_intensity = max(_thrust_intensity, thrust_component / _acceleration)
+
 func _update_thruster_vfx(delta: float) -> void:
-	if not _thruster:
-		return
-		
 	_visual_thrust = move_toward(_visual_thrust, _thrust_intensity, delta * 5.0)
 	
 	if _visual_thrust > 0.001:
-#		_thruster.visible = true
-		_thruster.scale.y = lerp(0.008, 0.05, _visual_thrust)
-		if _thruster_sprite and _thruster_sprite.material:
-			_thruster_sprite.material.set_shader_parameter("emission_glow", _visual_thrust)
+		var thrust_scale = lerp(0.008, 0.05, _visual_thrust)
+		
+		if _thruster_left:
+			_thruster_left.scale.y = thrust_scale
+			if _thruster_left_sprite and _thruster_left_sprite.material:
+				_thruster_left_sprite.material.set_shader_parameter("emission_glow", _visual_thrust)
+		
+		if _thruster_right:
+			_thruster_right.scale.y = thrust_scale
+			if _thruster_right_sprite and _thruster_right_sprite.material:
+				_thruster_right_sprite.material.set_shader_parameter("emission_glow", _visual_thrust)
 	
 	if _trail:
 		_trail.set_emitting(_visual_thrust > 0.01)
-#	else:
-#		_thruster.visible = false
 
 func _process_regen(delta: float) -> void:
 	if not ship_data:
@@ -190,8 +208,7 @@ func _process_movement(delta: float) -> void:
 	
 	# Apply acceleration if below speed limit
 	if velocity.length() < speed_limit:
-		velocity += forward_dir * _acceleration * thrust_factor * delta
-		_thrust_intensity = thrust_factor
+		apply_acceleration(forward_dir * _acceleration * thrust_factor)
 	elif velocity.length() > speed_limit + 10.0:
 		# Braking logic
 		velocity = velocity.move_toward(forward_dir * speed_limit, _acceleration * _braking_strength * delta)

@@ -2,32 +2,58 @@
 
 [ext_resource type="Script" uid="uid://che0sdu0iw80e" path="res://scenes/Ship.gd" id="1_ship_gd"]
 [ext_resource type="Texture2D" uid="uid://dec5gehj1rj16" path="res://assets/ships/assault_light.png" id="2_ship_tex"]
+[ext_resource type="Texture2D" uid="uid://pdqjgyxbb10j" path="res://assets/ships/white-assault-01.png" id="3_7ty2q"]
 [ext_resource type="Script" uid="uid://2uyc2o7ii6i8" path="res://scripts/AbilityController.gd" id="3_ability_ctrl"]
 [ext_resource type="Script" uid="uid://csclx8xvdnu4u" path="res://scripts/TargetingController.gd" id="4_targeting_ctrl"]
+[ext_resource type="Texture2D" uid="uid://cvgeulgpu7s1v" path="res://assets/ships/white-assault-01-super-low.png" id="4_tgbo8"]
 [ext_resource type="Script" uid="uid://ce7dxwfhmrobl" path="res://scripts/WeaponController.gd" id="5_weapon_ctrl"]
 [ext_resource type="PackedScene" uid="uid://cyfh6mhr1uyqg" path="res://scenes/Thruster.tscn" id="6_slbyd"]
 
 [sub_resource type="CapsuleShape2D" id="CapsuleShape2D_ship"]
-radius = 15.0
-height = 42.0
+radius = 24.999989
+height = 75.999985
 
 [node name="Ship" type="CharacterBody2D" unique_id=635758140]
 script = ExtResource("1_ship_gd")
 
 [node name="Sprite2D" type="Sprite2D" parent="." unique_id=538605522]
+visible = false
 rotation = 1.5708
 scale = Vector2(0.08, 0.08)
 texture = ExtResource("2_ship_tex")
+
+[node name="Sprite2D White" type="Sprite2D" parent="." unique_id=28090953]
+visible = false
+position = Vector2(-7.6293945e-06, -3.8146973e-06)
+rotation = 1.5707964
+scale = Vector2(0.036762472, 0.036762472)
+texture = ExtResource("3_7ty2q")
+
+[node name="Sprite2D-superlow" type="Sprite2D" parent="." unique_id=1610781674]
+position = Vector2(-1.2185352, 0.6787586)
+rotation = 1.5707964
+scale = Vector2(0.0360504, 0.03390996)
+texture = ExtResource("4_tgbo8")
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=2116050992]
 rotation = 1.5708
 shape = SubResource("CapsuleShape2D_ship")
 
 [node name="Muzzle" type="Marker2D" parent="." unique_id=1999937415]
-position = Vector2(25, 0)
+position = Vector2(42, 0)
 
 [node name="Engine" type="Marker2D" parent="." unique_id=1554534484]
-position = Vector2(-16, 0)
+position = Vector2(-31, -1)
+
+[node name="Thruster_Left" parent="." unique_id=2012412625 instance=ExtResource("6_slbyd")]
+position = Vector2(-21.335, -10.625)
+rotation = 1.5707964
+scale = Vector2(0.007285808, 0.022202449)
+
+[node name="Thruster_Right" parent="." unique_id=1918693532 instance=ExtResource("6_slbyd")]
+position = Vector2(-21.405, 10.18)
+rotation = 1.5707964
+scale = Vector2(0.007285808, 0.022202449)
 
 [node name="WeaponController" type="Node2D" parent="." unique_id=1318442607]
 script = ExtResource("5_weapon_ctrl")
@@ -39,8 +65,3 @@ script = ExtResource("3_ability_ctrl")
 script = ExtResource("4_targeting_ctrl")
 
 [node name="StateMachine" type="Node" parent="." unique_id=1184889770]
-
-[node name="Thruster" parent="." unique_id=2012412625 instance=ExtResource("6_slbyd")]
-position = Vector2(-16, -1.1920929e-07)
-rotation = 1.5707964
-scale = Vector2(0.007285808, 0.022202449)

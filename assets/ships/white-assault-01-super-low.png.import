@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://pdqjgyxbb10j"
-path="res://.godot/imported/white-assault-01.png-20073deeeb069c3beccd7bc2c007ad5c.ctex"
+uid="uid://cvgeulgpu7s1v"
+path="res://.godot/imported/white-assault-01-super-low.png-7b902cf6bc51abc210a002d1373eadfa.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/ships/white-assault-01.png"
-dest_files=["res://.godot/imported/white-assault-01.png-20073deeeb069c3beccd7bc2c007ad5c.ctex"]
+source_file="res://assets/ships/white-assault-01-super-low.png"
+dest_files=["res://.godot/imported/white-assault-01-super-low.png-7b902cf6bc51abc210a002d1373eadfa.ctex"]
 
 [params]
 
