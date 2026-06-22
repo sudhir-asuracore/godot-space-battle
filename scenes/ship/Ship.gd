@@ -22,8 +22,11 @@ var is_dead: bool = false
 
 
 const RIBBON_TRAIL_SCENE = preload("res://scenes/RibbonTrail.tscn")
-const DAMAGE_MARKER_EFFECT_SCENE = preload("res://scenes/ShipDamageFlames.tscn")
+const DAMAGE_MARKER_EFFECT_SCENE = preload("res://scenes/ship/ShipDamageFlames.tscn")
 const DAMAGE_MARKER_PREFIX := "damage_"
+const IDLE_STRAFE_SPEED_FACTOR := 0.15
+const IDLE_TURN_SPEED_FACTOR := 0.08
+const IDLE_LATERAL_RESPONSE_FACTOR := 0.35
 
 var _trail: Node = null
 var _damage_markers: Array[Marker2D] = []
@@ -36,6 +39,8 @@ var max_capacitor: float
 var _max_speed: float
 var _acceleration: float
 var _turn_speed: float
+var _strafe_speed: float
+var _reverse_speed: float
 var _forward_damping: float
 var _lateral_damping: float
 var _braking_strength: float
@@ -188,6 +193,8 @@ func update_stats() -> void:
 	_max_speed = ship_data.max_speed * speed_mult
 	_acceleration = ship_data.acceleration * accel_mult
 	_turn_speed = ship_data.turn_speed * turn_mult
+	_strafe_speed = ship_data.strafe_speed
+	_reverse_speed = ship_data.reverse_speed
 	_forward_damping = ship_data.forward_damping
 	_lateral_damping = ship_data.lateral_damping * lateral_mult
 	_braking_strength = ship_data.braking_strength * braking_mult
@@ -220,13 +227,61 @@ func _physics_process(delta: float) -> void:
 	# 1. Handle Damping (Fake Space Friction)
 	_apply_friction(delta)
 	
+	var has_manual_instruction: bool = _process_manual_movement_input(delta)
+	
 	if is_moving:
 		_process_movement(delta)
+	elif not has_manual_instruction:
+		_process_idle_stabilization(delta)
 	
 	_update_thruster_vfx(delta)
 	_thrust_intensity = 0.0
 	
 	move_and_slide()
+
+func _process_manual_movement_input(delta: float) -> bool:
+	var strafe_input: float = 0.0
+	if InputMap.has_action("strafe_left") and Input.is_action_pressed("strafe_left"):
+		strafe_input -= 1.0
+	if InputMap.has_action("strafe_right") and Input.is_action_pressed("strafe_right"):
+		strafe_input += 1.0
+
+	var reverse_input: bool = InputMap.has_action("reverse_thrust") and Input.is_action_pressed("reverse_thrust")
+	if is_zero_approx(strafe_input) and not reverse_input:
+		return false
+
+	var forward_dir: Vector2 = Vector2.from_angle(global_rotation)
+	var lateral_dir: Vector2 = forward_dir.rotated(PI / 2.0)
+	var forward_vel: float = velocity.dot(forward_dir)
+	var lateral_vel: float = velocity.dot(lateral_dir)
+
+	if not is_zero_approx(strafe_input):
+		lateral_vel = move_toward(lateral_vel, strafe_input * _strafe_speed, _acceleration * delta)
+
+	if reverse_input:
+		forward_vel = move_toward(forward_vel, -_reverse_speed, _acceleration * delta)
+		_thrust_intensity = max(_thrust_intensity, 0.25)
+
+	velocity = forward_dir * forward_vel + lateral_dir * lateral_vel
+	return true
+
+func _process_idle_stabilization(delta: float) -> void:
+	var idle_strafe_speed: float = _strafe_speed * IDLE_STRAFE_SPEED_FACTOR
+	if idle_strafe_speed <= 0.0 and _turn_speed <= 0.0:
+		return
+
+	var t: float = Time.get_ticks_msec() * 0.001
+	var phase: float = float(get_instance_id() % 97)
+	var strafe_target: float = sin(t * 1.2 + phase) * idle_strafe_speed
+	var turn_delta: float = sin(t * 0.9 + phase * 0.5) * _turn_speed * IDLE_TURN_SPEED_FACTOR
+	global_rotation += turn_delta * delta
+
+	var forward_dir: Vector2 = Vector2.from_angle(global_rotation)
+	var lateral_dir: Vector2 = forward_dir.rotated(PI / 2.0)
+	var forward_vel: float = velocity.dot(forward_dir)
+	var lateral_vel: float = velocity.dot(lateral_dir)
+	lateral_vel = move_toward(lateral_vel, strafe_target, _acceleration * IDLE_LATERAL_RESPONSE_FACTOR * delta)
+	velocity = forward_dir * forward_vel + lateral_dir * lateral_vel
 
 func apply_acceleration(accel: Vector2) -> void:
 	velocity += accel * get_physics_process_delta_time()

@@ -1,0 +1,18 @@
+[gd_resource type="Resource" script_class="WeaponData" format=3 uid="uid://bib8dja4sl371"]
+
+[ext_resource type="Script" uid="uid://cegt3oesh5v7k" path="res://scripts/resources/WeaponData.gd" id="1_script"]
+[ext_resource type="AudioStream" uid="uid://jmddotqkxeqr" path="res://assets/audio/a10_brrt.wav" id="2_fire_audio"]
+[ext_resource type="PackedScene" uid="uid://cxt5gla5r5l8x" path="res://scenes/ship/MuzzleFlash_GunPowder.tscn" id="3_muzzle_flash"]
+
+[resource]
+script = ExtResource("1_script")
+name = "Kinetic Autocannon"
+fire_rate = 64.0
+ammo = 64
+cooldown = 2.0
+shield_damage = 0.3
+hull_damage = 3.0
+muzzle_flash = ExtResource("3_muzzle_flash")
+muzzle_flash_scale = 0.1
+fire_audio = ExtResource("2_fire_audio")
+fire_audio_once_per_ammo = 64

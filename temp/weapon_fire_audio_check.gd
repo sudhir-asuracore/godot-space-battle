@@ -12,15 +12,17 @@ func _initialize() -> void:
 func _verify_default_audio_is_empty() -> void:
 	var weapon: WeaponData = WEAPON_DATA_SCRIPT.new()
 	assert(weapon.fire_audio == null, "New weapons should default to no fire audio")
+	assert(weapon.fire_audio_once_per_ammo == 1, "Audio cadence should default to once per shot")
 
 func _verify_gattling_weapon_has_configured_audio() -> void:
 	var gattling_weapon := load(GATTLING_WEAPON_PATH) as WeaponData
 	assert(gattling_weapon != null, "Gattling weapon resource should load as WeaponData")
 	assert(gattling_weapon.fire_audio != null, "Gattling weapon should define a fire audio stream")
 	assert(
-		gattling_weapon.fire_audio.resource_path == "res://assets/audio/laser-short-pulse.mp3",
-		"Gattling weapon should point at laser-short-pulse.mp3"
+		gattling_weapon.fire_audio.resource_path == "res://assets/audio/a10_brrt.wav",
+		"Gattling weapon should point at a10_brrt.wav"
 	)
+	assert(gattling_weapon.fire_audio_once_per_ammo == 64, "Gattling weapon should play audio once per 64 rounds")
 
 func _verify_audio_field_accepts_clearing() -> void:
 	var gattling_weapon := load(GATTLING_WEAPON_PATH) as WeaponData

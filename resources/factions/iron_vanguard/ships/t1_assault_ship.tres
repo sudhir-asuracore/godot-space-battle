@@ -1,6 +1,6 @@
 [gd_resource type="Resource" script_class="ShipData" format=3 uid="uid://bjxs3gbqgfgqk"]
 
-[ext_resource type="Resource" uid="uid://bib8dja4sl371" path="res://resources/weapons/t1_weapon_gattling.tres" id="1_weapon"]
+[ext_resource type="Resource" uid="uid://bib8dja4sl371" path="res://resources/weapons/gattling.tres" id="1_weapon"]
 [ext_resource type="Resource" path="res://resources/abilities/afterburner.tres" id="2_ability"]
 [ext_resource type="Script" uid="uid://deo8044sl5k4r" path="res://scripts/resources/ShipData.gd" id="3_script"]
 
@@ -9,7 +9,10 @@ script = ExtResource("3_script")
 faction = "Iron Vanguard"
 max_speed = 250.0
 acceleration = 350.0
+strafe_speed = 80.0
+reverse_speed = 55.0
 max_shield = 50.0
+max_hull = 200
 shield_angle = 240.0
 basic_weapon = ExtResource("1_weapon")
 trail_length = 70

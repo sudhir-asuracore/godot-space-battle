@@ -4,10 +4,35 @@
 [ext_resource type="Texture2D" uid="uid://b34w1smeur55y" path="res://assets/skies/2k_stars.jpg" id="2_stars"]
 [ext_resource type="Script" uid="uid://wvd3lsabp2iq" path="res://scenes/SolarSystem.gd" id="3_solar_system"]
 [ext_resource type="Script" uid="uid://cewp3weqgu8el" path="res://scripts/Camera.gd" id="4_camera"]
+[ext_resource type="Shader" uid="uid://bgph1lhol2huv" path="res://shaders/skies-nebula.gdshader" id="4_q8u5g"]
 [ext_resource type="Script" uid="uid://ds8xwrg10v6f5" path="res://scripts/ParallaxBg.gd" id="5_parallax_bg"]
-[ext_resource type="PackedScene" uid="uid://ckhohugwnwl7i" path="res://scenes/Ship.tscn" id="6_ship_scene"]
+[ext_resource type="PackedScene" uid="uid://ckhohugwnwl7i" path="res://scenes/ship/Ship.tscn" id="6_ship_scene"]
 [ext_resource type="PackedScene" path="res://ui/TargetReticle.tscn" id="7_reticle"]
 [ext_resource type="Script" uid="uid://cakvfis248a46" path="res://scripts/ui/PlayerHUD.gd" id="8_player_hud"]
+
+[sub_resource type="FastNoiseLite" id="FastNoiseLite_3ek63"]
+noise_type = 2
+frequency = 0.005
+
+[sub_resource type="NoiseTexture2D" id="NoiseTexture2D_ass0e"]
+width = 1920
+height = 1080
+noise = SubResource("FastNoiseLite_3ek63")
+seamless = true
+seamless_blend_skirt = 0.222
+bump_strength = 15.8
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_swkrw"]
+shader = ExtResource("4_q8u5g")
+shader_parameter/noise_texture = SubResource("NoiseTexture2D_ass0e")
+shader_parameter/nebula_color = Color(0.5019608, 0.2, 0.8, 0.85490197)
+shader_parameter/scroll_direction = Vector2(1, 0.5)
+shader_parameter/scroll_speed = 0.01
+shader_parameter/cloud_density = 0.64400003059
+shader_parameter/cloud_softness = 0.44700002053398
+shader_parameter/star_color = Color(1, 0.9, 0.7, 1)
+shader_parameter/star_density = 0.06400000234148
+shader_parameter/star_amount = 0.4930000234175
 
 [node name="Node2D" type="Node2D" unique_id=427294956]
 script = ExtResource("1_main_gd")
@@ -25,6 +50,20 @@ script = ExtResource("5_parallax_bg")
 [node name="Sprite2D" type="Sprite2D" parent="Background/Parallax2D" unique_id=1206215750]
 texture = ExtResource("2_stars")
 centered = false
+
+[node name="Parallax2D_Nebula" type="Parallax2D" parent="Background" unique_id=585829479]
+scroll_scale = Vector2(0.2, 0.2)
+repeat_size = Vector2(1920, 1080)
+autoscroll = Vector2(0.1, 0.1)
+repeat_times = 3
+ignore_camera_scroll = true
+script = ExtResource("5_parallax_bg")
+
+[node name="ColorRect" type="ColorRect" parent="Background/Parallax2D_Nebula" unique_id=34955705]
+material = SubResource("ShaderMaterial_swkrw")
+offset_right = 1920.0
+offset_bottom = 1080.0
+mouse_filter = 2
 
 [node name="SolarSystem" type="Node2D" parent="." unique_id=699232570]
 script = ExtResource("3_solar_system")

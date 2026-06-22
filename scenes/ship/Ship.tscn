@@ -1,12 +1,12 @@
 [gd_scene format=3 uid="uid://ckhohugwnwl7i"]
 
-[ext_resource type="Script" uid="uid://che0sdu0iw80e" path="res://scenes/Ship.gd" id="1_ship_gd"]
+[ext_resource type="Script" uid="uid://che0sdu0iw80e" path="res://scenes/ship/Ship.gd" id="1_ship_gd"]
 [ext_resource type="Shader" uid="uid://ygy6nmx7ntkx" path="res://shaders/ship_shield.gdshader" id="3_7ty2q"]
 [ext_resource type="Script" uid="uid://2uyc2o7ii6i8" path="res://scripts/AbilityController.gd" id="3_ability_ctrl"]
 [ext_resource type="Script" uid="uid://csclx8xvdnu4u" path="res://scripts/TargetingController.gd" id="4_targeting_ctrl"]
 [ext_resource type="Texture2D" uid="uid://cvgeulgpu7s1v" path="res://assets/ships/white-assault-01-super-low.png" id="4_tgbo8"]
 [ext_resource type="Script" uid="uid://ce7dxwfhmrobl" path="res://scripts/WeaponController.gd" id="5_weapon_ctrl"]
-[ext_resource type="PackedScene" uid="uid://cyfh6mhr1uyqg" path="res://scenes/Thruster.tscn" id="6_slbyd"]
+[ext_resource type="PackedScene" uid="uid://cyfh6mhr1uyqg" path="res://scenes/ship/Thruster.tscn" id="6_slbyd"]
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_swkrw"]
 shader = ExtResource("3_7ty2q")
@@ -16,7 +16,7 @@ shader_parameter/radius = 0.4610000218975
 shader_parameter/rim_thickness = 0.0030000001425
 shader_parameter/glow_intensity = 2.0550000501125
 shader_parameter/shield_angle = 237.282011270895
-shader_parameter/edge_smoothness = 0.43500001996397997
+shader_parameter/edge_smoothness = 0.43500001996398
 shader_parameter/grow_from_right = true
 
 [sub_resource type="CapsuleShape2D" id="CapsuleShape2D_ship"]

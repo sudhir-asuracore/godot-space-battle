@@ -8,7 +8,7 @@ class_name GameMain
 @onready var _reticle: TargetReticle = $HUD/TargetReticle as TargetReticle
 @onready var _player_hud: PlayerHUD = $HUD/PlayerHUD as PlayerHUD
 
-const AIS_SHIP_SCENE = preload("res://scenes/AIShip.tscn")
+const AIS_SHIP_SCENE = preload("res://scenes/ship/AIShip.tscn")
 const HOMEBASE_SCENE = preload("res://scenes/Homebase.tscn")
 const SHIP_DATA_PATH := "res://resources/factions/iron_vanguard/ships/t1_assault_ship.tres"
 const PLAYER_FACTION_PATH := "res://resources/factions/iron_vanguard/iron_vanguard.tres"
@@ -37,6 +37,9 @@ func _ready() -> void:
 	_register_input_action("zoom_in", MOUSE_BUTTON_WHEEL_UP)
 	_register_input_action("zoom_out", MOUSE_BUTTON_WHEEL_DOWN)
 	_register_key_action("ability_1", KEY_1)
+	_register_key_action("strafe_left", KEY_Q)
+	_register_key_action("strafe_right", KEY_E)
+	_register_key_action("reverse_thrust", KEY_R)
 	
 	_player_faction = load(PLAYER_FACTION_PATH) as FactionData
 	_enemy_faction = load(ENEMY_FACTION_PATH) as FactionData

@@ -1,0 +1,9 @@
+[gd_scene format=3]
+
+[ext_resource type="PackedScene" uid="uid://ckhohugwnwl7i" path="res://scenes/ship/Ship.tscn" id="1_ship_scene"]
+[ext_resource type="Script" uid="uid://b82qkl5umsj1b" path="res://scripts/AIShipController.gd" id="2_ai_script"]
+
+[node name="AIShip" instance=ExtResource("1_ship_scene")]
+
+[node name="StateMachine" parent="." index="8"]
+script = ExtResource("2_ai_script")
