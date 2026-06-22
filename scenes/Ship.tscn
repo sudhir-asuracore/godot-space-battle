@@ -45,6 +45,8 @@ position = Vector2(42, 0)
 [node name="Engine" type="Marker2D" parent="." unique_id=1554534484]
 position = Vector2(-31, -1)
 
+[node name="damage_0" type="Marker2D" parent="." unique_id=1828425718]
+
 [node name="Thruster_Left" parent="." unique_id=2012412625 instance=ExtResource("6_slbyd")]
 position = Vector2(-21.335, -10.625)
 rotation = 1.5707964

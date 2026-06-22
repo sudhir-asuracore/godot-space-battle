@@ -3,6 +3,7 @@ class_name Ship
 
 @export var ship_data: ShipData
 @export var faction_data: FactionData
+@export_range(5.0, 100.0, 5) var damage_flame_scale_factor: float = 50.0
 
 # Current state
 var target_position: Vector2 = Vector2.ZERO
@@ -19,7 +20,12 @@ var is_dead: bool = false
 @onready var _engine: Marker2D = $Engine
 
 const RIBBON_TRAIL_SCENE = preload("res://scenes/RibbonTrail.tscn")
-var _trail: Line2D = null
+const DAMAGE_MARKER_EFFECT_SCENE = preload("res://scenes/ShipDamageFlames.tscn")
+const DAMAGE_MARKER_PREFIX := "damage_"
+
+var _trail: Node = null
+var _damage_markers: Array[Marker2D] = []
+var _damage_marker_effects: Array[Node2D] = []
 
 # Internal calculated stats (data + faction multipliers)
 var max_hull: float
@@ -49,6 +55,9 @@ func _ready() -> void:
 		_thruster_right_sprite.material = _thruster_right_sprite.material.duplicate()
 	
 	_setup_trail()
+	_cache_damage_markers()
+	_setup_damage_marker_effects()
+	_update_damage_marker_effects()
 
 func _setup_trail() -> void:
 	if not ship_data or not is_inside_tree():
@@ -57,16 +66,90 @@ func _setup_trail() -> void:
 	# If we already have a trail (e.g. from previous life that didn't clean up), 
 	# stop it so it can fade out and clean itself up
 	if _trail:
-		_trail.stop_emitting()
-		_trail.set_target(null)
+		_trail.call("stop_emitting")
+		_trail.call("set_target", null)
 		_trail = null
 		
 	_trail = RIBBON_TRAIL_SCENE.instantiate()
 	# Add as sibling so it's in world space but managed by the same parent
 	get_parent().add_child(_trail)
-	_trail.setup(ship_data)
-	_trail.set_target(_engine if _engine else self)
-	_trail.set_emitting(false)
+	_trail.call("setup", ship_data)
+	_trail.call("set_target", _engine if _engine else self)
+	_trail.call("set_emitting", false)
+
+func _cache_damage_markers() -> void:
+	_damage_markers.clear()
+
+	for child in get_children():
+		var marker := child as Marker2D
+		if not marker:
+			continue
+		if str(marker.name).begins_with(DAMAGE_MARKER_PREFIX):
+			_damage_markers.append(marker)
+
+	_damage_markers.sort_custom(_is_damage_marker_before)
+
+func _setup_damage_marker_effects() -> void:
+	for effect in _damage_marker_effects:
+		if is_instance_valid(effect):
+			effect.queue_free()
+	_damage_marker_effects.clear()
+
+	for marker in _damage_markers:
+		var effect := DAMAGE_MARKER_EFFECT_SCENE.instantiate() as Node2D
+		if not effect:
+			continue
+		effect.name = &"DamageMarkerEffect"
+		effect.scale *= damage_flame_scale_factor
+		marker.add_child(effect)
+		_damage_marker_effects.append(effect)
+
+func _is_damage_marker_before(a: Marker2D, b: Marker2D) -> bool:
+	return _damage_marker_index(a.name) < _damage_marker_index(b.name)
+
+func _damage_marker_index(marker_name: StringName) -> int:
+	var marker_name_text := str(marker_name)
+	if not marker_name_text.begins_with(DAMAGE_MARKER_PREFIX):
+		return 1_000_000
+
+	var index_text := marker_name_text.substr(DAMAGE_MARKER_PREFIX.length())
+	if index_text.is_valid_int():
+		return index_text.to_int()
+
+	return 1_000_000
+
+func _update_damage_marker_effects() -> void:
+	if _damage_marker_effects.is_empty():
+		return
+
+	var active_marker_count := _get_active_damage_marker_count()
+
+	for marker_index in range(_damage_marker_effects.size()):
+		var marker_effect := _damage_marker_effects[marker_index]
+		var should_be_active := not is_dead and marker_index < active_marker_count
+		_set_damage_marker_effect_active(marker_effect, should_be_active)
+
+func _get_active_damage_marker_count() -> int:
+	if _damage_marker_effects.is_empty():
+		return 0
+
+	# Debug mode: keep all damage marker effects visible regardless of health.
+	return _damage_marker_effects.size()
+
+func _set_damage_marker_effect_active(effect: Node2D, active: bool) -> void:
+	if not effect:
+		return
+
+	effect.visible = active
+
+	for child in effect.get_children():
+		var gpu_particles := child as GPUParticles2D
+		if not gpu_particles:
+			continue
+
+		if active and not gpu_particles.emitting:
+			gpu_particles.restart()
+		gpu_particles.emitting = active
 
 func update_stats() -> void:
 	if not ship_data:
@@ -95,13 +178,15 @@ func update_stats() -> void:
 	max_shield = ship_data.max_shield * shield_mult
 	max_capacitor = ship_data.max_capacitor * cap_mult
 	
-	if faction_data and has_node("Sprite2D"):
+	if faction_data and has_node(^"Sprite2D"):
 		$Sprite2D.modulate = faction_data.primary_color
 	
 	if current_hull <= 0: # Only init if not already set (or if we want to reset)
 		current_hull = max_hull
 		current_shield = max_shield
 		current_capacitor = max_capacitor
+
+	_update_damage_marker_effects()
 
 func _physics_process(delta: float) -> void:
 	if is_dead:
@@ -142,15 +227,19 @@ func _update_thruster_vfx(delta: float) -> void:
 		if _thruster_left:
 			_thruster_left.scale.y = thrust_scale
 			if _thruster_left_sprite and _thruster_left_sprite.material:
-				_thruster_left_sprite.material.set_shader_parameter("emission_glow", _visual_thrust)
+				var left_shader_material := _thruster_left_sprite.material as ShaderMaterial
+				if left_shader_material:
+					left_shader_material.set_shader_parameter(&"emission_glow", _visual_thrust)
 		
 		if _thruster_right:
 			_thruster_right.scale.y = thrust_scale
 			if _thruster_right_sprite and _thruster_right_sprite.material:
-				_thruster_right_sprite.material.set_shader_parameter("emission_glow", _visual_thrust)
+				var right_shader_material := _thruster_right_sprite.material as ShaderMaterial
+				if right_shader_material:
+					right_shader_material.set_shader_parameter(&"emission_glow", _visual_thrust)
 	
 	if _trail:
-		_trail.set_emitting(_visual_thrust > 0.01)
+		_trail.call("set_emitting", _visual_thrust > 0.01)
 
 func _process_regen(delta: float) -> void:
 	if not ship_data:
@@ -233,9 +322,11 @@ func take_damage(hull_dmg: float, shield_dmg: float, attacker: Node2D = null) ->
 		if current_shield < 0:
 			# Shield broke this hit: spill the basic weapon's hull damage through.
 			current_hull -= hull_dmg
-			current_shield = 0
+			current_shield = 0.0
 	else:
 		current_hull -= hull_dmg
+
+	_update_damage_marker_effects()
 		
 	if current_hull <= 0:
 		_die()
@@ -259,6 +350,7 @@ func respawn(at: Vector2) -> void:
 	
 	_setup_trail()
 	visible = true
+	_update_damage_marker_effects()
 
 func _die() -> void:
 	if is_dead:
@@ -269,12 +361,16 @@ func _die() -> void:
 	# Hide or explode
 	visible = false
 	if _trail:
-		_trail.stop_emitting()
-		_trail.set_target(null)
+		_trail.call("stop_emitting")
+		_trail.call("set_target", null)
 		_trail = null
+
+	_update_damage_marker_effects()
 		
 	print(name, " destroyed!")
-	EventBus.ship_destroyed.emit(self, _last_attacker)
+	var event_bus := get_node_or_null(^"/root/EventBus")
+	if event_bus:
+		event_bus.call("emit_signal", &"ship_destroyed", self, _last_attacker)
 	
 func is_enemy() -> bool:
 	return faction_data != null # Simple check for MVP

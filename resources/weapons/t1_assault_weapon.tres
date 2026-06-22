@@ -1,8 +1,10 @@
 [gd_resource type="Resource" script_class="WeaponData" format=3 uid="uid://bib8dja4sl371"]
 
 [ext_resource type="Script" uid="uid://cegt3oesh5v7k" path="res://scripts/resources/WeaponData.gd" id="1_script"]
+[ext_resource type="AudioStream" uid="uid://b71frg6h2gegu" path="res://assets/audio/laser-short-pulse.mp3" id="2_fire_audio"]
 
 [resource]
 script = ExtResource("1_script")
 name = "Kinetic Autocannon"
 fire_rate = 8.0
+fire_audio = ExtResource("2_fire_audio")

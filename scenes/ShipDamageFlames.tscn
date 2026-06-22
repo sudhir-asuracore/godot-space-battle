@@ -1,0 +1,44 @@
+[gd_scene format=3 uid="uid://c35l1bv6nbhp2"]
+
+[ext_resource type="Shader" uid="uid://c0bh5mf62dqld" path="res://scenes/ShipDamageFlames.gdshader" id="1_n8col"]
+[ext_resource type="Texture2D" uid="uid://dqyudmqwnef1j" path="res://assets/textures/flames/T_VFX_CloudNoise_Tiled.png" id="2_e2ol4"]
+[ext_resource type="Texture2D" uid="uid://ceu6jk0cv01l6" path="res://assets/textures/flames/T_1_pixel.jpg" id="2_ivcvd"]
+[ext_resource type="Texture2D" uid="uid://5wdcjfa3sl7m" path="res://assets/textures/flames/T_Gradient_circle22.jpg" id="3_2d0vu"]
+
+[sub_resource type="Gradient" id="Gradient_im5fp"]
+offsets = PackedFloat32Array(0.4477612, 1)
+
+[sub_resource type="GradientTexture2D" id="GradientTexture2D_n8col"]
+gradient = SubResource("Gradient_im5fp")
+fill_to = Vector2(0.035353534, 1)
+
+[sub_resource type="Gradient" id="Gradient_qjfd3"]
+offsets = PackedFloat32Array(0, 0.539823, 0.57743365, 0.7632743, 1)
+colors = PackedColorArray(0, 0, 0, 0, 0.77397525, 0.18009412, 0.13958469, 1, 0.87971205, 0.4375857, 0.012501289, 1, 0.77764165, 0.57142437, 0.08518384, 1, 1, 1, 1, 1)
+
+[sub_resource type="GradientTexture1D" id="GradientTexture1D_e2ol4"]
+gradient = SubResource("Gradient_qjfd3")
+
+[sub_resource type="Gradient" id="Gradient_o0766"]
+
+[sub_resource type="GradientTexture2D" id="GradientTexture2D_ivcvd"]
+gradient = SubResource("Gradient_o0766")
+fill_from = Vector2(1, 1)
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_ghxl5"]
+shader = ExtResource("1_n8col")
+shader_parameter/texture_main = ExtResource("2_e2ol4")
+shader_parameter/texture_add = SubResource("GradientTexture2D_n8col")
+shader_parameter/texture_multiply = ExtResource("3_2d0vu")
+shader_parameter/texture_subtract = SubResource("GradientTexture2D_ivcvd")
+shader_parameter/texture_color_1d = SubResource("GradientTexture1D_e2ol4")
+shader_parameter/speed = Vector2(0, 1)
+shader_parameter/scale = Vector2(1, 1)
+
+[node name="ShipDamageFlames" type="Node2D" unique_id=337948339]
+
+[node name="Sprite2D" type="Sprite2D" parent="." unique_id=322663896]
+material = SubResource("ShaderMaterial_ghxl5")
+rotation = -1.5707964
+texture = ExtResource("2_ivcvd")
+offset = Vector2(-0.0078124786, -0.4921875)

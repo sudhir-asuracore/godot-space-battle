@@ -19,5 +19,6 @@ class_name WeaponData
 @export var hull_damage: float = 10.0
 @export var projectile_speed: float = 900.0
 @export var spread_degrees: float = 2.0
+@export var fire_audio: AudioStream
 @export var is_beam: bool = false
 @export var auto_fire: bool = true

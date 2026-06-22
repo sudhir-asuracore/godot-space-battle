@@ -66,6 +66,9 @@ func _setup_camera_and_path() -> void:
 	if _camera and _ship:
 		_camera.target_node = _ship
 		_camera.follow_target = true
+		var audio_manager := get_node_or_null(^"/root/AudioManager")
+		if audio_manager:
+			audio_manager.call("set_listener_camera", _camera)
 		
 	# Visual trajectory path line look.
 	if _path_line:

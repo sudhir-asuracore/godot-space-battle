@@ -16,13 +16,18 @@ compatibility/default_parent_skeleton_in_mesh_instance_3d=true
 
 config/name="space-battle"
 run/main_scene="res://scenes/Main.tscn"
-config/features=PackedStringArray("4.6", "Forward Plus")
+config/features=PackedStringArray("4.7", "Forward Plus")
 config/icon="res://icon.svg"
 
 [autoload]
 
 EventBus="*res://scripts/autoload/EventBus.gd"
 GameState="*res://scripts/autoload/GameState.gd"
+AudioManager="*res://scripts/autoload/AudioManager.gd"
+
+[audio]
+
+buses/default_bus_layout="res://default_bus_layout.tres"
 
 [display]
 
