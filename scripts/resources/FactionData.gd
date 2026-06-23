@@ -2,7 +2,7 @@ extends Resource
 class_name FactionData
 
 @export_category("Profile")
-@export var name: String = "Iron Vanguard"
+@export var name: String = "Zarak Confedaracy"
 @export var description: String = ""
 @export var primary_color: Color
 @export var secondary_color: Color

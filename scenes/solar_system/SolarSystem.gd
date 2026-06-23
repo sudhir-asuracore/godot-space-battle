@@ -12,8 +12,8 @@ class OrbitData:
 # Array to hold planet data dictionaries for orbital animation
 var _planets: Array[OrbitData] = []
 
-const SUN_SCENE = preload("res://scenes/SunCorona.tscn")
-const PLANET_SCENE = preload("res://scenes/Planet.tscn")
+const SUN_SCENE = preload("res://scenes/solar_system/SunCorona.tscn")
+const PLANET_SCENE = preload("res://scenes/solar_system/Planet.tscn")
 
 func _ready() -> void:
 	# 1. Instance the Sun

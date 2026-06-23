@@ -1,6 +1,6 @@
 [gd_scene format=3 uid="uid://csp66n73gokt0"]
 
-[ext_resource type="Script" uid="uid://dkapeqww471oq" path="res://scenes/Sun.gd" id="1_sun_gd"]
+[ext_resource type="Script" uid="uid://dkapeqww471oq" path="res://scenes/solar_system/Sun.gd" id="1_sun_gd"]
 [ext_resource type="Shader" uid="uid://dnkojok7ugot3" path="res://shaders/Sun.gdshader" id="2_shader"]
 [ext_resource type="Texture2D" uid="uid://b6mm2t7svgf0s" path="res://assets/sun/2k_sun.jpg" id="3_sun_tex"]
 [ext_resource type="Texture2D" uid="uid://cp0uem35kyra" path="res://assets/kenney_planets/Parts/noise00.png" id="4_noise_tex"]

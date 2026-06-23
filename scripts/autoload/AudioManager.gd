@@ -22,22 +22,71 @@ const ENEMY_CUTOFF_FAR_HZ := 1500.0
 const DEFAULT_MAX_DISTANCE := 2200.0
 const DEFAULT_ATTENUATION := 2.0
 
+const MENU_CLICK_STREAM := preload("res://assets/audio/btn-click.mp3")
+const MENU_AMBIENT_STREAM := preload("res://assets/audio/spaceship-ambient.mp3")
+const PLAYER_THRUSTER_STREAM := preload("res://assets/audio/thrustmax.mp3")
+const MENU_CLICK_VOLUME_DB := -5.0
+const MENU_AMBIENT_VOLUME_DB := -12.0
+const PLAYER_THRUSTER_VOLUME_DB_IDLE := -42.0
+const PLAYER_THRUSTER_VOLUME_DB_MAX := -10.0
+const PLAYER_THRUSTER_PITCH_MIN := 0.92
+const PLAYER_THRUSTER_PITCH_MAX := 1.08
+const PLAYER_THRUSTER_FADE_IN_SPEED := 4.0
+const PLAYER_THRUSTER_FADE_OUT_SPEED := 3.0
+const PLAYER_THRUSTER_PLAY_THRESHOLD := 0.01
+const PLAYER_THRUSTER_STOP_THRESHOLD := 0.001
+
 var _camera: GameCamera = null
 var _enemy_bus_index: int = -1
 var _enemy_lowpass_effect_index: int = -1
 
 var _active_enemy_laser_count: int = 0
 var _enemy_laser_count_by_ship: Dictionary = {}
+var _menu_click_player: AudioStreamPlayer = null
+var _menu_ambient_player: AudioStreamPlayer = null
+var _player_thruster_player: AudioStreamPlayer = null
+var _player_thruster_target_intensity: float = 0.0
+var _player_thruster_smoothed_intensity: float = 0.0
 
 func _ready() -> void:
 	randomize()
 	_cache_enemy_lowpass_effect_index()
+	_ensure_menu_audio_players()
+	_ensure_player_thruster_audio_player()
 
-func _process(_delta: float) -> void:
+func _process(delta: float) -> void:
 	_update_enemy_lowpass_from_zoom()
+	_update_player_thruster_audio(delta)
 
 func set_listener_camera(camera: GameCamera) -> void:
 	_camera = camera
+
+func start_menu_ambient() -> void:
+	_ensure_menu_audio_players()
+	if _menu_ambient_player.playing:
+		return
+	_menu_ambient_player.play()
+
+func stop_menu_ambient() -> void:
+	if not _menu_ambient_player:
+		return
+	_menu_ambient_player.stop()
+
+func play_menu_click() -> void:
+	_ensure_menu_audio_players()
+	_menu_click_player.stop()
+	_menu_click_player.play()
+
+func set_player_thruster_intensity(intensity: float) -> void:
+	_ensure_player_thruster_audio_player()
+	_player_thruster_target_intensity = clampf(intensity, 0.0, 1.0)
+
+func stop_player_thruster_audio(immediate: bool = false) -> void:
+	_player_thruster_target_intensity = 0.0
+	if immediate:
+		_player_thruster_smoothed_intensity = 0.0
+		if _player_thruster_player:
+			_player_thruster_player.stop()
 
 func play_weapon_fire(
 	audio_stream: AudioStream,
@@ -105,6 +154,7 @@ func get_enemy_ship_voice_count(ship: Node) -> int:
 func clear_debug_state() -> void:
 	_active_enemy_laser_count = 0
 	_enemy_laser_count_by_ship.clear()
+	stop_player_thruster_audio(true)
 	for child in get_children():
 		if child is AudioStreamPlayer2D:
 			child.queue_free()
@@ -120,6 +170,74 @@ func _on_one_shot_finished(audio_player: AudioStreamPlayer2D, emitter_id: int, w
 				_enemy_laser_count_by_ship[emitter_id] = updated_ship_count
 
 	audio_player.queue_free()
+
+func _ensure_menu_audio_players() -> void:
+	if not _menu_click_player:
+		_menu_click_player = AudioStreamPlayer.new()
+		_menu_click_player.stream = MENU_CLICK_STREAM
+		_menu_click_player.volume_db = MENU_CLICK_VOLUME_DB
+		_menu_click_player.bus = _resolve_bus_name(MASTER_BUS)
+		add_child(_menu_click_player)
+
+	if not _menu_ambient_player:
+		_menu_ambient_player = AudioStreamPlayer.new()
+		_menu_ambient_player.stream = MENU_AMBIENT_STREAM
+		_menu_ambient_player.volume_db = MENU_AMBIENT_VOLUME_DB
+		_menu_ambient_player.bus = _resolve_bus_name(MASTER_BUS)
+		_menu_ambient_player.finished.connect(_on_menu_ambient_finished)
+		add_child(_menu_ambient_player)
+
+func _ensure_player_thruster_audio_player() -> void:
+	if _player_thruster_player:
+		return
+
+	_player_thruster_player = AudioStreamPlayer.new()
+	_player_thruster_player.stream = PLAYER_THRUSTER_STREAM
+	_player_thruster_player.volume_db = PLAYER_THRUSTER_VOLUME_DB_IDLE
+	_player_thruster_player.pitch_scale = PLAYER_THRUSTER_PITCH_MIN
+	_player_thruster_player.bus = _resolve_bus_name(PLAYER_BUS)
+	_player_thruster_player.finished.connect(_on_player_thruster_finished)
+	add_child(_player_thruster_player)
+
+func _on_menu_ambient_finished() -> void:
+	if _menu_ambient_player and _menu_ambient_player.stream:
+		_menu_ambient_player.play()
+
+func _on_player_thruster_finished() -> void:
+	if _player_thruster_player and _player_thruster_target_intensity > PLAYER_THRUSTER_PLAY_THRESHOLD:
+		_player_thruster_player.play()
+
+func _update_player_thruster_audio(delta: float) -> void:
+	if not _player_thruster_player:
+		return
+
+	var fade_speed: float = PLAYER_THRUSTER_FADE_IN_SPEED
+	if _player_thruster_smoothed_intensity > _player_thruster_target_intensity:
+		fade_speed = PLAYER_THRUSTER_FADE_OUT_SPEED
+
+	_player_thruster_smoothed_intensity = move_toward(
+		_player_thruster_smoothed_intensity,
+		_player_thruster_target_intensity,
+		delta * fade_speed
+	)
+
+	if _player_thruster_smoothed_intensity > PLAYER_THRUSTER_PLAY_THRESHOLD and not _player_thruster_player.playing:
+		_player_thruster_player.play()
+
+	_player_thruster_player.volume_db = lerpf(
+		PLAYER_THRUSTER_VOLUME_DB_IDLE,
+		PLAYER_THRUSTER_VOLUME_DB_MAX,
+		_player_thruster_smoothed_intensity
+	)
+	_player_thruster_player.pitch_scale = lerpf(
+		PLAYER_THRUSTER_PITCH_MIN,
+		PLAYER_THRUSTER_PITCH_MAX,
+		_player_thruster_smoothed_intensity
+	)
+
+	if _player_thruster_target_intensity <= PLAYER_THRUSTER_STOP_THRESHOLD and _player_thruster_smoothed_intensity <= PLAYER_THRUSTER_STOP_THRESHOLD:
+		if _player_thruster_player.playing:
+			_player_thruster_player.stop()
 
 func _resolve_bus_name(preferred_bus: StringName) -> StringName:
 	if AudioServer.get_bus_index(preferred_bus) != -1:

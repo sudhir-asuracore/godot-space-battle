@@ -9,6 +9,12 @@ const SHIELD_WARNING_DELAY: float = 12.0
 
 var player_faction: FactionData = null
 
+var selected_faction_id: String = ""
+var selected_faction_path: String = ""
+var selected_ship_data_path: String = ""
+var selected_enemy_faction_path: String = ""
+var selected_enemy_ship_data_path: String = ""
+
 var planet_ownership: Dictionary = {}      # Planet -> FactionData (null = neutral)
 var faction_prestige: Dictionary = {}      # FactionData -> float
 
@@ -136,3 +142,10 @@ func _tick_income() -> void:
 		var owner: FactionData = planet_ownership[planet]
 		if owner and planet.planet_data:
 			add_prestige(owner, planet.planet_data.income_per_second)
+
+func clear_menu_selection() -> void:
+	selected_faction_id = ""
+	selected_faction_path = ""
+	selected_ship_data_path = ""
+	selected_enemy_faction_path = ""
+	selected_enemy_ship_data_path = ""

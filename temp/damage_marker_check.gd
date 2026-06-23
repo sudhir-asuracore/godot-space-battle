@@ -1,7 +1,7 @@
 extends SceneTree
 
 const SHIP_SCENE := preload("res://scenes/Ship.tscn")
-const SHIP_DATA_PATH := "res://resources/factions/iron_vanguard/ships/t1_assault_ship.tres"
+const SHIP_DATA_PATH := "res://resources/factions/zarak/ships/t1_assault_ship.tres"
 
 func _initialize() -> void:
 	call_deferred("_run_checks")

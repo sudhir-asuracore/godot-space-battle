@@ -229,7 +229,7 @@ Examples:
 
 | Faction/Class | Key `1` Ability Example |
 |---|---|
-| Iron Vanguard | Super-shield / armor lockdown |
+| Zarak Confedaracy | Super-shield / armor lockdown |
 | Solarion Collective | Capacitor shield burst |
 | Nebula Wraiths | Cloak and speed surge |
 | Assault | Afterburner |
@@ -324,7 +324,7 @@ Turning speed communicates weight and class identity.
 | Medium ships | Controlled and balanced |
 | Heavy ships | Slow, committed, powerful |
 | Wraith ships | Sharp but slippery |
-| Vanguard ships | Heavy and deliberate |
+| Zarak Confedaracy ships | Heavy and deliberate |
 | Solarion ships | Smooth and precise |
 
 ## 6.7 Movement Skill Expression
@@ -369,7 +369,7 @@ Faction modifiers affect base ship data, movement feel, visual style, and abilit
 
 | Faction Name | Theme Profile | Global Stat Modifiers | Movement Identity |
 |---|---|---|---|
-| **The Iron Vanguard** | Chonky, brutalist metallic hulls with bright orange thrusters | Hull Health `x1.25`, Base Speed `x0.90` | Heavy, stable, powerful, slower to turn |
+| **The Zarak Confedaracy** | Chonky, brutalist metallic hulls with bright orange thrusters | Hull Health `x1.25`, Base Speed `x0.90` | Heavy, stable, powerful, slower to turn |
 | **The Solarion Collective** | Sleek white/gold profiles with neon blue accents | Shield Capacity `x1.30`, Capacitor Max `x1.15` | Smooth, precise, controlled, elegant |
 | **The Nebula Wraiths** | Asymmetrical scavenger hulls with exposed frames and purple emitters | Max Speed `x1.15`, Thrust Power `x1.20`, Shields `x0.80` | Fast, slippery, fragile, aggressive |
 
@@ -379,7 +379,7 @@ Faction ships must be readable at small top-down sizes.
 
 | Faction | Silhouette Language |
 |---|---|
-| Iron Vanguard | Wide, blocky, armored, industrial |
+| Zarak Confedaracy | Wide, blocky, armored, industrial |
 | Solarion Collective | Symmetrical, sleek, clean, advanced |
 | Nebula Wraiths | Jagged, asymmetric, predatory, scavenged |
 
@@ -387,7 +387,7 @@ Faction ships must be readable at small top-down sizes.
 
 | Faction | Survival Flavor |
 |---|---|
-| Iron Vanguard | Super-shield, armor lock, damage resistance |
+| Zarak Confedaracy | Super-shield, armor lock, damage resistance |
 | Solarion Collective | Shield recharge, capacitor burst, clean energy dash |
 | Nebula Wraiths | Invisibility cloak, phase slip, speed surge |
 
@@ -819,7 +819,7 @@ extends Resource
 class_name FactionData
 
 @export_category("Profile")
-@export var name: String = "Iron Vanguard"
+@export var name: String = "Zarak Confedaracy"
 @export var description: String = ""
 @export var primary_color: Color
 @export var secondary_color: Color
@@ -1031,7 +1031,7 @@ Important effects:
 
 | Faction | Suggested Colors |
 |---|---|
-| Iron Vanguard | Dark steel, gunmetal, orange thrusters |
+| Zarak Confedaracy | Dark steel, gunmetal, orange thrusters |
 | Solarion Collective | White, gold, neon blue |
 | Nebula Wraiths | Dark purple, black metal, violet emitters |
 
@@ -1061,7 +1061,7 @@ Audio should reinforce faction and ship feel.
 
 | Faction | Audio Feel |
 |---|---|
-| Iron Vanguard | Heavy, metallic, industrial |
+| Zarak Confedaracy | Heavy, metallic, industrial |
 | Solarion Collective | Clean, harmonic, energy-based |
 | Nebula Wraiths | Distorted, unstable, stealthy |
 

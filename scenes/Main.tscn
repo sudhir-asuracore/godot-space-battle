@@ -2,7 +2,7 @@
 
 [ext_resource type="Script" uid="uid://lawkeuo7wk25" path="res://scenes/Main.gd" id="1_main_gd"]
 [ext_resource type="Texture2D" uid="uid://b34w1smeur55y" path="res://assets/skies/2k_stars.jpg" id="2_stars"]
-[ext_resource type="Script" uid="uid://wvd3lsabp2iq" path="res://scenes/SolarSystem.gd" id="3_solar_system"]
+[ext_resource type="Script" uid="uid://wvd3lsabp2iq" path="res://scenes/solar_system/SolarSystem.gd" id="3_solar_system"]
 [ext_resource type="Script" uid="uid://cewp3weqgu8el" path="res://scripts/Camera.gd" id="4_camera"]
 [ext_resource type="Shader" uid="uid://bgph1lhol2huv" path="res://shaders/skies-nebula.gdshader" id="4_q8u5g"]
 [ext_resource type="Script" uid="uid://ds8xwrg10v6f5" path="res://scripts/ParallaxBg.gd" id="5_parallax_bg"]

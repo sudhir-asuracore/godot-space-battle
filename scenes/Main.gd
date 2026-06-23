@@ -9,13 +9,14 @@ class_name GameMain
 @onready var _player_hud: PlayerHUD = $HUD/PlayerHUD as PlayerHUD
 
 const AIS_SHIP_SCENE = preload("res://scenes/ship/AIShip.tscn")
-const HOMEBASE_SCENE = preload("res://scenes/Homebase.tscn")
-const SHIP_DATA_PATH := "res://resources/factions/iron_vanguard/ships/t1_assault_ship.tres"
-const PLAYER_FACTION_PATH := "res://resources/factions/iron_vanguard/iron_vanguard.tres"
-const ENEMY_FACTION_PATH := "res://resources/factions/solarion_collective/solarion_collective.tres"
+const HOMEBASE_SCENE = preload("res://scenes/homebase/Homebase.tscn")
+const DEFAULT_PLAYER_SHIP_DATA_PATH := "res://resources/factions/zarak/ships/t1_assault_ship.tres"
+const DEFAULT_PLAYER_FACTION_PATH := "res://resources/factions/zarak/zarak_confedaracy.tres"
+const DEFAULT_ENEMY_SHIP_DATA_PATH := "res://resources/factions/solarion_collective/ships/striker_lance.tres"
+const DEFAULT_ENEMY_FACTION_PATH := "res://resources/factions/solarion_collective/solarion_collective.tres"
 
-const PLAYER_HOMEBASE_POS := Vector2(0, 3000)
-const ENEMY_HOMEBASE_POS := Vector2(0, -3000)
+const PLAYER_HOMEBASE_POS := Vector2.DOWN * 3000.0
+const ENEMY_HOMEBASE_POS := Vector2.UP * 3000.0
 
 const PLAYER_RESPAWN_DELAY := 5.0
 const ENEMY_SPAWN_INTERVAL := 10.0
@@ -26,32 +27,44 @@ var _enemy_faction: FactionData
 var _targeting: TargetingController
 var _ability: AbilityController
 
+var _player_ship_data_path: String = DEFAULT_PLAYER_SHIP_DATA_PATH
+var _enemy_ship_data_path: String = DEFAULT_ENEMY_SHIP_DATA_PATH
+
 var _enemy_ships: Array[Ship] = []
 var _enemy_spawn_timer: float = 0.0
 var _match_over: bool = false
 
 func _ready() -> void:
+	AudioManager.stop_menu_ambient()
 	# Programmatically register required Input Map actions.
-	_register_input_action("navigate", MOUSE_BUTTON_LEFT)
-	_register_input_action("target_lock", MOUSE_BUTTON_RIGHT)
-	_register_input_action("zoom_in", MOUSE_BUTTON_WHEEL_UP)
-	_register_input_action("zoom_out", MOUSE_BUTTON_WHEEL_DOWN)
-	_register_key_action("ability_1", KEY_1)
-	_register_key_action("strafe_left", KEY_Q)
-	_register_key_action("strafe_right", KEY_E)
-	_register_key_action("reverse_thrust", KEY_R)
+	_register_input_action(&"navigate", MOUSE_BUTTON_LEFT)
+	_register_input_action(&"target_lock", MOUSE_BUTTON_RIGHT)
+	_register_input_action(&"zoom_in", MOUSE_BUTTON_WHEEL_UP)
+	_register_input_action(&"zoom_out", MOUSE_BUTTON_WHEEL_DOWN)
+	_register_key_action(&"ability_1", KEY_1)
+	_register_key_action(&"strafe_left", KEY_Q)
+	_register_key_action(&"strafe_right", KEY_E)
+	_register_key_action(&"reverse_thrust", KEY_R)
 	
-	_player_faction = load(PLAYER_FACTION_PATH) as FactionData
-	_enemy_faction = load(ENEMY_FACTION_PATH) as FactionData
+	_resolve_match_setup()
+	_player_faction = load(GameState.selected_faction_path if not GameState.selected_faction_path.is_empty() else DEFAULT_PLAYER_FACTION_PATH) as FactionData
+	_enemy_faction = load(GameState.selected_enemy_faction_path if not GameState.selected_enemy_faction_path.is_empty() else DEFAULT_ENEMY_FACTION_PATH) as FactionData
+	if not _player_faction:
+		_player_faction = load(DEFAULT_PLAYER_FACTION_PATH) as FactionData
+	if not _enemy_faction:
+		_enemy_faction = load(DEFAULT_ENEMY_FACTION_PATH) as FactionData
 	GameState.player_faction = _player_faction
 	
 	# Load MVP data for the player ship.
 	if _ship:
-		_ship.ship_data = load(SHIP_DATA_PATH) as ShipData
+		_ship.is_player_ship = true
+		_ship.ship_data = load(_player_ship_data_path) as ShipData
+		if not _ship.ship_data:
+			_ship.ship_data = load(DEFAULT_PLAYER_SHIP_DATA_PATH) as ShipData
 		_ship.faction_data = _player_faction
 		_ship.update_stats()
-		_targeting = _ship.get_node("TargetingController") as TargetingController
-		_ability = _ship.get_node("AbilityController") as AbilityController
+		_targeting = _ship.get_node(^"TargetingController") as TargetingController
+		_ability = _ship.get_node(^"AbilityController") as AbilityController
 	
 	_spawn_homebases()
 	_setup_camera_and_path()
@@ -76,35 +89,45 @@ func _setup_camera_and_path() -> void:
 	# Visual trajectory path line look.
 	if _path_line:
 		_path_line.width = 3.0
-		_path_line.default_color = Color(0.0, 0.8, 1.0, 0.45) # Glowing semi-transparent cyan
+		var path_color: Color = Color.DEEP_SKY_BLUE
+		path_color.a = 0.45
+		_path_line.default_color = path_color # Glowing semi-transparent cyan
 		_path_line.clear_points()
 		_path_line.visible = false
 
 func _spawn_homebases() -> void:
 	var player_hb: Homebase = HOMEBASE_SCENE.instantiate() as Homebase
-	player_hb.name = "PlayerHomebase"
+	player_hb.name = &"PlayerHomebase"
 	player_hb.position = PLAYER_HOMEBASE_POS
 	player_hb.faction_data = _player_faction
 	add_child(player_hb)
 	
 	var enemy_hb: Homebase = HOMEBASE_SCENE.instantiate() as Homebase
-	enemy_hb.name = "EnemyHomebase"
+	enemy_hb.name = &"EnemyHomebase"
 	enemy_hb.position = ENEMY_HOMEBASE_POS
 	enemy_hb.faction_data = _enemy_faction
 	add_child(enemy_hb)
 
 func _spawn_enemy() -> void:
 	var enemy: Ship = AIS_SHIP_SCENE.instantiate() as Ship
-	enemy.position = ENEMY_HOMEBASE_POS + Vector2(randf_range(-300, 300), randf_range(200, 500))
-	enemy.ship_data = load(SHIP_DATA_PATH) as ShipData
+	enemy.is_player_ship = false
+	var spawn_offset: Vector2 = Vector2.RIGHT * randf_range(-300.0, 300.0) + Vector2.DOWN * randf_range(200.0, 500.0)
+	enemy.position = ENEMY_HOMEBASE_POS + spawn_offset
+	enemy.ship_data = load(_enemy_ship_data_path) as ShipData
+	if not enemy.ship_data:
+		enemy.ship_data = load(DEFAULT_ENEMY_SHIP_DATA_PATH) as ShipData
 	enemy.faction_data = _enemy_faction
 	add_child(enemy)
 	enemy.update_stats()
 	_enemy_ships.append(enemy)
 
+func _resolve_match_setup() -> void:
+	_player_ship_data_path = GameState.selected_ship_data_path if not GameState.selected_ship_data_path.is_empty() else DEFAULT_PLAYER_SHIP_DATA_PATH
+	_enemy_ship_data_path = GameState.selected_enemy_ship_data_path if not GameState.selected_enemy_ship_data_path.is_empty() else DEFAULT_ENEMY_SHIP_DATA_PATH
+
 func _on_ship_destroyed(ship: Ship, _killer: Node2D) -> void:
 	if ship == _ship:
-		print("Player destroyed! Respawning in %d seconds..." % int(PLAYER_RESPAWN_DELAY))
+		print("Player destroyed! Respawning in %.0f seconds..." % PLAYER_RESPAWN_DELAY)
 		await get_tree().create_timer(PLAYER_RESPAWN_DELAY).timeout
 		_respawn_player()
 	elif ship in _enemy_ships:
@@ -176,26 +199,26 @@ func _unhandled_input(event: InputEvent) -> void:
 	if _match_over:
 		return
 	# Set destination target on Left Click using the "navigate" action.
-	if event.is_action_pressed("navigate"):
+	if event.is_action_pressed(&"navigate"):
 		var click_pos: Vector2 = get_global_mouse_position()
 		if _ship and not _ship.is_dead:
 			_ship.set_target(click_pos)
 		if _camera:
 			_camera.follow_target = true
 			
-	if event.is_action_pressed("ability_1"):
+	if event.is_action_pressed(&"ability_1"):
 		if _ability and _ship and not _ship.is_dead:
 			_ability.use_ability_1()
 
 # Helper to programmatically register MouseButton inputs into Godot's InputMap.
-func _register_input_action(action_name: String, button_index: MouseButton) -> void:
+func _register_input_action(action_name: StringName, button_index: MouseButton) -> void:
 	if not InputMap.has_action(action_name):
 		InputMap.add_action(action_name)
 		var ev: InputEventMouseButton = InputEventMouseButton.new()
 		ev.button_index = button_index
 		InputMap.action_add_event(action_name, ev)
 
-func _register_key_action(action_name: String, key_index: Key) -> void:
+func _register_key_action(action_name: StringName, key_index: Key) -> void:
 	if not InputMap.has_action(action_name):
 		InputMap.add_action(action_name)
 		var ev: InputEventKey = InputEventKey.new()

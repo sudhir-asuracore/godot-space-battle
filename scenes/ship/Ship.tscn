@@ -52,12 +52,12 @@ position = Vector2(-31, -1)
 
 [node name="damage_0" type="Marker2D" parent="." unique_id=1828425718]
 
-[node name="Thruster_Left" parent="." unique_id=2012412625 instance=ExtResource("6_slbyd")]
+[node name="thruster_rear_0" parent="." unique_id=2012412625 instance=ExtResource("6_slbyd")]
 position = Vector2(-21.335, -10.625)
 rotation = 1.5707964
 scale = Vector2(0.007285808, 0.022202449)
 
-[node name="Thruster_Right" parent="." unique_id=1918693532 instance=ExtResource("6_slbyd")]
+[node name="thruster_rear_1" parent="." unique_id=1918693532 instance=ExtResource("6_slbyd")]
 position = Vector2(-21.405, 10.18)
 rotation = 1.5707964
 scale = Vector2(0.007285808, 0.022202449)

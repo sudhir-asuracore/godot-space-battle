@@ -6,7 +6,7 @@
 
 [resource]
 script = ExtResource("3_script")
-faction = "Iron Vanguard"
+faction = "Zarak Confedaracy"
 max_speed = 250.0
 acceleration = 350.0
 strafe_speed = 80.0

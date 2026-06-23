@@ -12,11 +12,8 @@ var current_hull: float = 0.0
 var current_shield: float = 0.0
 var current_capacitor: float = 0.0
 var is_dead: bool = false
+var is_player_ship: bool = false
 
-@onready var _thruster_left: Node2D = $Thruster_Left
-@onready var _thruster_left_sprite: Sprite2D = $Thruster_Left/Sprite2D
-@onready var _thruster_right: Node2D = $Thruster_Right
-@onready var _thruster_right_sprite: Sprite2D = $Thruster_Right/Sprite2D
 @onready var _engine: Marker2D = $Engine
 @onready var _shield_sprite: ColorRect = $Shield
 
@@ -24,6 +21,7 @@ var is_dead: bool = false
 const RIBBON_TRAIL_SCENE = preload("res://scenes/RibbonTrail.tscn")
 const DAMAGE_MARKER_EFFECT_SCENE = preload("res://scenes/ship/ShipDamageFlames.tscn")
 const DAMAGE_MARKER_PREFIX := "damage_"
+const THRUSTER_NODE_PREFIX := "thruster_"
 const IDLE_STRAFE_SPEED_FACTOR := 0.15
 const IDLE_TURN_SPEED_FACTOR := 0.08
 const IDLE_LATERAL_RESPONSE_FACTOR := 0.35
@@ -31,6 +29,8 @@ const IDLE_LATERAL_RESPONSE_FACTOR := 0.35
 var _trail: Node = null
 var _damage_markers: Array[Marker2D] = []
 var _damage_marker_effects: Array[Node2D] = []
+var _thruster_entries: Array[Dictionary] = []
+var _thrusters_by_category: Dictionary = {}
 
 # Internal calculated stats (data + faction multipliers)
 var max_hull: float
@@ -56,10 +56,15 @@ func _ready() -> void:
 	_before_ship_ready()
 	add_to_group("ships")
 	target_position = global_position
+	_cache_thrusters()
 	update_stats()
 	_duplicate_runtime_materials()
 	_initialize_ship_visuals()
 	_after_ship_ready()
+
+func _exit_tree() -> void:
+	if is_player_ship:
+		AudioManager.stop_player_thruster_audio(true)
 
 func _before_ship_ready() -> void:
 	pass
@@ -68,12 +73,74 @@ func _after_ship_ready() -> void:
 	pass
 
 func _duplicate_runtime_materials() -> void:
-	if _thruster_left_sprite and _thruster_left_sprite.material:
-		_thruster_left_sprite.material = _thruster_left_sprite.material.duplicate()
-	if _thruster_right_sprite and _thruster_right_sprite.material:
-		_thruster_right_sprite.material = _thruster_right_sprite.material.duplicate()
+	for thruster_entry in _thruster_entries:
+		var thruster_sprite := thruster_entry.get("sprite") as Sprite2D
+		if thruster_sprite and thruster_sprite.material:
+			thruster_sprite.material = thruster_sprite.material.duplicate()
 	if _shield_sprite and _shield_sprite.material:
 		_shield_sprite.material = _shield_sprite.material.duplicate()
+
+func _cache_thrusters() -> void:
+	_thruster_entries.clear()
+	_thrusters_by_category.clear()
+
+	for child in get_children():
+		var thruster_node := child as Node2D
+		if not thruster_node:
+			continue
+
+		var thruster_metadata: Dictionary = _parse_thruster_node_name(thruster_node.name)
+		if thruster_metadata.is_empty():
+			continue
+
+		var thruster_category: StringName = thruster_metadata.get("category", &"")
+		var thruster_index: int = int(thruster_metadata.get("index", 0))
+		var thruster_sprite := thruster_node.get_node_or_null(^"Sprite2D") as Sprite2D
+
+		_thruster_entries.append({
+			"node": thruster_node,
+			"sprite": thruster_sprite,
+			"category": thruster_category,
+			"index": thruster_index,
+		})
+
+	_thruster_entries.sort_custom(func(a: Dictionary, b: Dictionary) -> bool:
+		var a_category: String = str(a.get("category", &""))
+		var b_category: String = str(b.get("category", &""))
+		if a_category == b_category:
+			return int(a.get("index", 0)) < int(b.get("index", 0))
+		return a_category < b_category
+	)
+
+	for thruster_entry in _thruster_entries:
+		var category: StringName = thruster_entry.get("category", &"")
+		var category_thrusters: Array = _thrusters_by_category.get(category, [])
+		category_thrusters.append(thruster_entry.get("node"))
+		_thrusters_by_category[category] = category_thrusters
+
+func _parse_thruster_node_name(node_name: StringName) -> Dictionary:
+	var raw_name: String = str(node_name)
+	if not raw_name.begins_with(THRUSTER_NODE_PREFIX):
+		return {}
+
+	var parts: PackedStringArray = raw_name.split("_")
+	if parts.size() != 3:
+		return {}
+	if parts[0] != "thruster":
+		return {}
+
+	var category: String = parts[1]
+	if category.is_empty():
+		return {}
+
+	var index_text: String = parts[2]
+	if not index_text.is_valid_int():
+		return {}
+
+	return {
+		"category": StringName(category),
+		"index": int(index_text),
+	}
 
 func _initialize_ship_visuals() -> void:
 	_setup_trail()
@@ -239,6 +306,8 @@ func _on_stats_updated() -> void:
 
 func _physics_process(delta: float) -> void:
 	if is_dead:
+		if is_player_ship:
+			AudioManager.set_player_thruster_intensity(0.0)
 		return
 	
 	# 0. Regenerate capacitor and (delayed) shields.
@@ -255,6 +324,7 @@ func _physics_process(delta: float) -> void:
 		_process_idle_stabilization(delta)
 	
 	_update_thruster_vfx(delta)
+	_update_player_thruster_audio()
 	_thrust_intensity = 0.0
 	
 	move_and_slide()
@@ -320,23 +390,25 @@ func _update_thruster_vfx(delta: float) -> void:
 	
 	if _visual_thrust > 0.001:
 		var thrust_scale: float = lerp(0.008, 0.05, _visual_thrust)
-		
-		if _thruster_left:
-			_thruster_left.scale.y = thrust_scale
-			if _thruster_left_sprite and _thruster_left_sprite.material:
-				var left_shader_material := _thruster_left_sprite.material as ShaderMaterial
-				if left_shader_material:
-					left_shader_material.set_shader_parameter(&"emission_glow", _visual_thrust)
-		
-		if _thruster_right:
-			_thruster_right.scale.y = thrust_scale
-			if _thruster_right_sprite and _thruster_right_sprite.material:
-				var right_shader_material := _thruster_right_sprite.material as ShaderMaterial
-				if right_shader_material:
-					right_shader_material.set_shader_parameter(&"emission_glow", _visual_thrust)
+
+		for thruster_entry in _thruster_entries:
+			var thruster_node := thruster_entry.get("node") as Node2D
+			if thruster_node:
+				thruster_node.scale.y = thrust_scale
+
+			var thruster_sprite := thruster_entry.get("sprite") as Sprite2D
+			if thruster_sprite and thruster_sprite.material:
+				var shader_material := thruster_sprite.material as ShaderMaterial
+				if shader_material:
+					shader_material.set_shader_parameter(&"emission_glow", _visual_thrust)
 	
 	if _trail:
 		_trail.call("set_emitting", _visual_thrust > 0.01)
+
+func _update_player_thruster_audio() -> void:
+	if not is_player_ship:
+		return
+	AudioManager.set_player_thruster_intensity(_visual_thrust)
 
 func _process_regen(delta: float) -> void:
 	if not ship_data:
@@ -471,6 +543,8 @@ func _die() -> void:
 	is_dead = true
 	is_moving = false
 	velocity = Vector2.ZERO
+	if is_player_ship:
+		AudioManager.set_player_thruster_intensity(0.0)
 	# Hide or explode
 	visible = false
 	if _trail:

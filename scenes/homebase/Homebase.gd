@@ -16,7 +16,8 @@ func _ready() -> void:
 	EventBus.homebase_shield_warning.connect(_on_shield_warning)
 	is_shield_active = GameState.is_homebase_shield_active(faction_data)
 	if faction_data:
-		$Sprite2D.modulate = faction_data.primary_color
+		_shield_sprite.modulate = faction_data.primary_color
+#		$Sprite2D.modulate = faction_data.primary_color
 	_update_shield_visual()
 
 func _on_shield_toggled(faction: FactionData, active: bool) -> void:

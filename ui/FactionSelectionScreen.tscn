@@ -1,0 +1,137 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/ui/FactionSelectionScreen.gd" id="1_script"]
+[ext_resource type="Texture2D" path="res://assets/skies/2k_stars.jpg" id="2_stars"]
+
+[node name="FactionSelectionScreen" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_script")
+
+[node name="Background" type="TextureRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("2_stars")
+expand_mode = 1
+stretch_mode = 6
+
+[node name="Overlay" type="ColorRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.01, 0.06, 0.1, 0.56)
+mouse_filter = 2
+
+[node name="LeftPanel" type="PanelContainer" parent="."]
+layout_mode = 1
+anchors_preset = 9
+anchor_left = 0.0
+anchor_top = 0.0
+anchor_right = 0.0
+anchor_bottom = 1.0
+offset_left = 70.0
+offset_top = 80.0
+offset_right = 560.0
+offset_bottom = -120.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="VBox" type="VBoxContainer" parent="LeftPanel"]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="Header" type="Label" parent="LeftPanel/VBox"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 38
+text = "Choose Faction"
+
+[node name="SolarisButton" type="Button" parent="LeftPanel/VBox"]
+custom_minimum_size = Vector2(0, 58)
+layout_mode = 2
+toggle_mode = true
+text = "Solaris"
+
+[node name="ZerekButton" type="Button" parent="LeftPanel/VBox"]
+custom_minimum_size = Vector2(0, 58)
+layout_mode = 2
+toggle_mode = true
+text = "Zerek"
+
+[node name="AegisButton" type="Button" parent="LeftPanel/VBox"]
+custom_minimum_size = Vector2(0, 58)
+layout_mode = 2
+toggle_mode = true
+text = "Aegis"
+
+[node name="RightPanel" type="PanelContainer" parent="."]
+layout_mode = 1
+anchors_preset = 9
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = 120.0
+offset_top = -360.0
+offset_right = 860.0
+offset_bottom = 260.0
+
+[node name="VBox" type="VBoxContainer" parent="RightPanel"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="Title" type="Label" parent="RightPanel/VBox"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 30
+text = "Faction Briefing"
+
+[node name="DescriptionLabel" type="RichTextLabel" parent="RightPanel/VBox"]
+custom_minimum_size = Vector2(0, 470)
+layout_mode = 2
+bbcode_enabled = true
+fit_content = true
+scroll_active = false
+text = "Select a faction."
+
+[node name="PlayButton" type="Button" parent="."]
+custom_minimum_size = Vector2(0, 56)
+layout_mode = 1
+anchors_preset = 10
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -350.0
+offset_top = -110.0
+offset_right = -70.0
+offset_bottom = -40.0
+grow_horizontal = 0
+grow_vertical = 0
+disabled = true
+text = "Play"
+
+[node name="BackButton" type="Button" parent="."]
+custom_minimum_size = Vector2(0, 56)
+layout_mode = 1
+anchors_preset = 7
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -640.0
+offset_top = -110.0
+offset_right = -360.0
+offset_bottom = -40.0
+grow_horizontal = 0
+grow_vertical = 0
+text = "Back"
