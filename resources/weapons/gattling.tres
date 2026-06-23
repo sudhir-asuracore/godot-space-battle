@@ -12,7 +12,5 @@ ammo = 64
 cooldown = 2.0
 shield_damage = 0.3
 hull_damage = 3.0
-muzzle_flash = ExtResource("3_muzzle_flash")
-muzzle_flash_scale = 0.1
 fire_audio = ExtResource("2_fire_audio")
 fire_audio_once_per_ammo = 64

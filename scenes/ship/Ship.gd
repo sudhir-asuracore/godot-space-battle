@@ -53,17 +53,29 @@ var _last_attacker: Node2D = null
 var _shield_active: bool = true
 
 func _ready() -> void:
+	_before_ship_ready()
 	add_to_group("ships")
 	target_position = global_position
 	update_stats()
-	
+	_duplicate_runtime_materials()
+	_initialize_ship_visuals()
+	_after_ship_ready()
+
+func _before_ship_ready() -> void:
+	pass
+
+func _after_ship_ready() -> void:
+	pass
+
+func _duplicate_runtime_materials() -> void:
 	if _thruster_left_sprite and _thruster_left_sprite.material:
 		_thruster_left_sprite.material = _thruster_left_sprite.material.duplicate()
 	if _thruster_right_sprite and _thruster_right_sprite.material:
 		_thruster_right_sprite.material = _thruster_right_sprite.material.duplicate()
 	if _shield_sprite and _shield_sprite.material:
 		_shield_sprite.material = _shield_sprite.material.duplicate()
-	
+
+func _initialize_ship_visuals() -> void:
 	_setup_trail()
 	_cache_damage_markers()
 	_setup_damage_marker_effects()
@@ -202,6 +214,7 @@ func update_stats() -> void:
 	max_hull = ship_data.max_hull * hull_mult
 	max_shield = ship_data.max_shield * shield_mult
 	max_capacitor = ship_data.max_capacitor * cap_mult
+	_apply_stat_overrides()
 	
 	if faction_data and has_node(^"Sprite2D"):
 		$Sprite2D.modulate = faction_data.primary_color
@@ -216,6 +229,13 @@ func update_stats() -> void:
 		set_shield_angle(ship_data.shield_angle if _shield_active else 0.0)
 
 	_update_damage_marker_effects()
+	_on_stats_updated()
+
+func _apply_stat_overrides() -> void:
+	pass
+
+func _on_stats_updated() -> void:
+	pass
 
 func _physics_process(delta: float) -> void:
 	if is_dead:
@@ -412,9 +432,13 @@ func take_damage(hull_dmg: float, shield_dmg: float, attacker: Node2D = null) ->
 		current_hull -= hull_dmg
 
 	_update_damage_marker_effects()
+	_on_damage_taken(hull_dmg, shield_dmg, attacker)
 		
 	if current_hull <= 0:
 		_die()
+
+func _on_damage_taken(_hull_dmg: float, _shield_dmg: float, _attacker: Node2D) -> void:
+	pass
 
 func can_afford(cost: float) -> bool:
 	return current_capacitor >= cost
@@ -436,6 +460,10 @@ func respawn(at: Vector2) -> void:
 	_setup_trail()
 	visible = true
 	_update_damage_marker_effects()
+	_on_ship_respawned()
+
+func _on_ship_respawned() -> void:
+	pass
 
 func _die() -> void:
 	if is_dead:
@@ -451,11 +479,15 @@ func _die() -> void:
 		_trail = null
 
 	_update_damage_marker_effects()
+	_on_ship_destroyed(_last_attacker)
 		
 	print(name, " destroyed!")
 	var event_bus := get_node_or_null(^"/root/EventBus")
 	if event_bus:
 		event_bus.call("emit_signal", &"ship_destroyed", self, _last_attacker)
+
+func _on_ship_destroyed(_killer: Node2D) -> void:
+	pass
 	
 func is_enemy() -> bool:
 	return faction_data != null # Simple check for MVP

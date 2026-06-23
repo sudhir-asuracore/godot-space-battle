@@ -15,39 +15,84 @@ var _fire_audio_weapon: WeaponData
 const PROJECTILE_SCENE = preload("res://scenes/Projectile.tscn")
 
 func _process(delta: float) -> void:
-	if _ship.is_dead:
+	if not _can_process_weapon_logic():
 		return
 
-	if not _ship.ship_data or not _ship.ship_data.basic_weapon:
+	var weapon: WeaponData = _get_active_weapon_data()
+	if not weapon:
 		return
 
-	var weapon: WeaponData = _ship.ship_data.basic_weapon
 	_sync_weapon_state(weapon)
 	_tick_timers(delta, weapon)
+	_after_weapon_tick(delta, weapon)
 
-	if weapon.auto_fire and _targeting.locked_target:
+	if _should_auto_fire(weapon):
 		_attempt_fire(weapon)
 
+func _can_process_weapon_logic() -> bool:
+	return _ship != null and not _ship.is_dead
+
+func _get_active_weapon_data() -> WeaponData:
+	if not _ship or not _ship.ship_data:
+		return null
+	return _ship.ship_data.basic_weapon
+
+func _after_weapon_tick(_delta: float, _weapon: WeaponData) -> void:
+	pass
+
+func _should_auto_fire(weapon: WeaponData) -> bool:
+	return weapon.auto_fire and _get_locked_target() != null
+
+func _get_locked_target() -> Node2D:
+	if not _targeting:
+		return null
+	return _targeting.locked_target
+
 func _attempt_fire(weapon: WeaponData) -> void:
-	if _reload_timer > 0.0 or _shot_timer > 0.0:
+	if not _can_fire_weapon(weapon):
 		return
 
-	if weapon.fire_rate <= 0.0:
-		return
-
-	if _is_out_of_ammo(weapon):
-		_start_reload(weapon)
-		return
-
-	var target: Node2D = _targeting.locked_target
+	var target: Node2D = _get_fire_target(weapon)
 	if not target:
 		return
 
+	if not _is_target_in_range(target, weapon):
+		return
+
+	if not _fire(target, weapon):
+		return
+
+	_start_shot_cooldown(weapon)
+	_consume_ammo(weapon)
+	_on_weapon_fired(target, weapon)
+
+func _can_fire_weapon(weapon: WeaponData) -> bool:
+	if _reload_timer > 0.0 or _shot_timer > 0.0:
+		return false
+
+	if weapon.fire_rate <= 0.0:
+		return false
+
+	if _is_out_of_ammo(weapon):
+		_start_reload(weapon)
+		return false
+
+	return true
+
+func _get_fire_target(_weapon: WeaponData) -> Node2D:
+	return _get_locked_target()
+
+func _is_target_in_range(target: Node2D, weapon: WeaponData) -> bool:
+	if not _ship:
+		return false
 	var dist: float = _ship.global_position.distance_to(target.global_position)
-	if dist <= weapon.weapon_range:
-		_fire(target, weapon)
-		_shot_timer = 1.0 / maxf(weapon.fire_rate, 0.001)
-		_consume_ammo(weapon)
+	return dist <= weapon.weapon_range
+
+func _start_shot_cooldown(weapon: WeaponData) -> void:
+	_shot_timer = 1.0 / maxf(weapon.fire_rate, 0.001)
+
+func _on_weapon_fired(_target: Node2D, _weapon: WeaponData) -> void:
+	pass
 
 func _sync_weapon_state(weapon: WeaponData) -> void:
 	if _active_weapon == weapon:
@@ -73,6 +118,7 @@ func _tick_timers(delta: float, weapon: WeaponData) -> void:
 	_reload_timer = maxf(0.0, _reload_timer - delta)
 	if _reload_timer <= 0.0 and _uses_ammo(weapon):
 		_ammo_in_mag = weapon.ammo
+		_on_reload_finished(weapon)
 
 func _uses_ammo(weapon: WeaponData) -> bool:
 	return weapon != null and weapon.ammo > 0
@@ -92,36 +138,57 @@ func _start_reload(weapon: WeaponData) -> void:
 	if not _uses_ammo(weapon):
 		return
 
-	var reload_time: float = maxf(0.0, weapon.cooldown)
+	var reload_time: float = _get_reload_time(weapon)
 	if reload_time <= 0.0:
 		_ammo_in_mag = weapon.ammo
+		_on_reload_finished(weapon)
 		return
 
 	_reload_timer = reload_time
+	_on_reload_started(weapon, reload_time)
 
-func _fire(target: Node2D, weapon: WeaponData) -> void:
+func _get_reload_time(weapon: WeaponData) -> float:
+	return maxf(0.0, weapon.cooldown)
+
+func _on_reload_started(_weapon: WeaponData, _reload_time: float) -> void:
+	pass
+
+func _on_reload_finished(_weapon: WeaponData) -> void:
+	pass
+
+func _fire(target: Node2D, weapon: WeaponData) -> bool:
 	if not PROJECTILE_SCENE:
 		print("Error: Projectile scene not preloaded!")
-		return
+		return false
 
 	_play_fire_audio(weapon)
 	_spawn_muzzle_flash(weapon)
-		
-	# Instantiate projectile
-	var projectile: Projectile = PROJECTILE_SCENE.instantiate() as Projectile
-	
-	# Set projectile properties
+
+	var projectile: Projectile = _create_projectile()
+	if not projectile:
+		return false
+
+	_configure_projectile(projectile, target, weapon)
+	_add_projectile_to_world(projectile)
+	_after_projectile_spawned(projectile, target, weapon)
+	return true
+
+func _create_projectile() -> Projectile:
+	return PROJECTILE_SCENE.instantiate() as Projectile
+
+func _configure_projectile(projectile: Projectile, target: Node2D, weapon: WeaponData) -> void:
 	projectile.global_position = _muzzle.global_position
 	projectile.direction = (_muzzle.global_position.direction_to(target.global_position)).normalized()
 	projectile.speed = weapon.projectile_speed
 	projectile.damage_hull = weapon.hull_damage
 	projectile.damage_shield = weapon.shield_damage
 	projectile.source_ship = _ship
-	
-	# Add to main scene to avoid movement inheritance
+
+func _add_projectile_to_world(projectile: Projectile) -> void:
 	get_tree().root.add_child(projectile)
-	
-	# print("Firing at ", target.name)
+
+func _after_projectile_spawned(_projectile: Projectile, _target: Node2D, _weapon: WeaponData) -> void:
+	pass
 
 func _play_fire_audio(weapon: WeaponData) -> void:
 	if not weapon.fire_audio:
@@ -170,6 +237,7 @@ func _spawn_muzzle_flash(weapon: WeaponData) -> void:
 		var animation_name: StringName = flash_sprite.animation
 		var frame_count := flash_sprite.sprite_frames.get_frame_count(animation_name)
 		var animation_speed := maxf(0.01, flash_sprite.sprite_frames.get_animation_speed(animation_name) * flash_sprite.speed_scale)
-		flash_lifetime = maxf(0.05, float(frame_count) / animation_speed)
+		var computed_lifetime := frame_count / animation_speed
+		flash_lifetime = computed_lifetime if computed_lifetime > 0.05 else 0.05
 
 	get_tree().create_timer(flash_lifetime).timeout.connect(muzzle_flash_instance.queue_free)

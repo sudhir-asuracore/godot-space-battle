@@ -1,0 +1,13 @@
+[gd_scene load_steps=5 format=3]
+
+[ext_resource type="PackedScene" path="res://scenes/ship/Ship.tscn" id="1_base_ship"]
+[ext_resource type="Script" path="res://scenes/ship/StrikerLance.gd" id="2_ship_script"]
+[ext_resource type="Texture2D" uid="uid://brglcic5bnbgw" path="res://assets/factions/solaris/ships/striker_lance/lower.png" id="3_ship_texture"]
+[ext_resource type="Resource" path="res://resources/factions/solarion_collective/ships/striker_lance.tres" id="4_ship_data"]
+
+[node name="StrikerLance" instance=ExtResource("1_base_ship")]
+script = ExtResource("2_ship_script")
+ship_data = ExtResource("4_ship_data")
+
+[node name="Sprite2D-superlow" parent="." index="0"]
+texture = ExtResource("3_ship_texture")
