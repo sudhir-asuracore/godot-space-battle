@@ -1,5 +1,7 @@
-[gd_resource type="Resource" script_class="FactionData" load_steps=2 format=3]
+[gd_resource type="Resource" script_class="FactionData" load_steps=4 format=3]
 [ext_resource type="Script" path="res://scripts/resources/FactionData.gd" id="1_script"]
+[ext_resource type="PackedScene" path="res://scenes/homebase/SolarionDefenseRing.tscn" id="2_ring"]
+[ext_resource type="Resource" path="res://resources/factions/solarion_collective/ships/striker_lance.tres" id="3_ship"]
 
 [resource]
 script = ExtResource("1_script")
@@ -19,3 +21,15 @@ braking_multiplier = 1.0
 aggression = 1.0
 defense_bias = 1.0
 expansion_bias = 1.2
+defense_ring_scene = ExtResource("2_ring")
+defense_ring_scale = 2.0
+shield_scale = 1.7
+turret_attack_range = 900.0
+turret_min_attack_range = 110.0
+turret_turn_speed = 3.2
+turret_attack_cone_degrees = 24.0
+turret_fire_rate = 2.4
+turret_hull_damage = 16.0
+turret_shield_damage = 22.0
+turret_projectile_speed = 980.0
+hangar_ship_options = Array[Resource("res://scripts/resources/ShipData.gd")]([ExtResource("3_ship")])

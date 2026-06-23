@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://d2wtih32ahmny"
-path="res://.godot/imported/defense_ring_low.png-90d37454e5acb8919dc83187bfc70d3b.ctex"
+uid="uid://3it8ekr0g6x5"
+path="res://.godot/imported/scout.png-bea8892f868d95a17206b636fc2ab54e.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/factions/solaris/homebase/defense_ring_low.png"
-dest_files=["res://.godot/imported/defense_ring_low.png-90d37454e5acb8919dc83187bfc70d3b.ctex"]
+source_file="res://assets/factions/zarak/ships/scout/scout.png"
+dest_files=["res://.godot/imported/scout.png-bea8892f868d95a17206b636fc2ab54e.ctex"]
 
 [params]
 

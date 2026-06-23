@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://7w4j7q6kahwt"
-path="res://.godot/imported/high.png-6e353dfa755a555bf8be7f14efb51063.ctex"
+uid="uid://d2wtih32ahmny"
+path="res://.godot/imported/defense_ring_low.png-d62cb802046363c47ea9507c5d9719f6.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/factions/solaris/ships/striker_lance/high.png"
-dest_files=["res://.godot/imported/high.png-6e353dfa755a555bf8be7f14efb51063.ctex"]
+source_file="res://assets/factions/solarion/homebase/defense_ring_low.png"
+dest_files=["res://.godot/imported/defense_ring_low.png-d62cb802046363c47ea9507c5d9719f6.ctex"]
 
 [params]
 

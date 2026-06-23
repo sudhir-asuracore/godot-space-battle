@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://bdsa26gnk11bo"
-path="res://.godot/imported/turret.png-0c9bf7bb00c393af9513ed8bc41dd713.ctex"
+path="res://.godot/imported/turret.png-3bd1265825da4dbb2aeb0f280e4b52c2.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/factions/solaris/homebase/turret.png"
-dest_files=["res://.godot/imported/turret.png-0c9bf7bb00c393af9513ed8bc41dd713.ctex"]
+source_file="res://assets/factions/solarion/homebase/turret.png"
+dest_files=["res://.godot/imported/turret.png-3bd1265825da4dbb2aeb0f280e4b52c2.ctex"]
 
 [params]
 

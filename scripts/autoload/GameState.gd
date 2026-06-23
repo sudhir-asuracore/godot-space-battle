@@ -12,8 +12,10 @@ var player_faction: FactionData = null
 var selected_faction_id: String = ""
 var selected_faction_path: String = ""
 var selected_ship_data_path: String = ""
+var selected_ship_scene_path: String = ""
 var selected_enemy_faction_path: String = ""
 var selected_enemy_ship_data_path: String = ""
+var selected_enemy_ship_scene_path: String = ""
 
 var planet_ownership: Dictionary = {}      # Planet -> FactionData (null = neutral)
 var faction_prestige: Dictionary = {}      # FactionData -> float
@@ -147,5 +149,7 @@ func clear_menu_selection() -> void:
 	selected_faction_id = ""
 	selected_faction_path = ""
 	selected_ship_data_path = ""
+	selected_ship_scene_path = ""
 	selected_enemy_faction_path = ""
 	selected_enemy_ship_data_path = ""
+	selected_enemy_ship_scene_path = ""

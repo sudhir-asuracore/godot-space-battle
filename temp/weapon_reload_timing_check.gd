@@ -1,7 +1,7 @@
 extends SceneTree
 
 const SHIP_SCENE := preload("res://scenes/ship/Ship.tscn")
-const SHIP_DATA_PATH := "res://resources/factions/zarak/ships/t1_assault_ship.tres"
+const SHIP_DATA_PATH := "res://resources/factions/zarak/ships/scout.tres"
 
 const EXPECTED_FIRE_RATE := 64.0
 const EXPECTED_AMMO := 128

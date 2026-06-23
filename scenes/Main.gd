@@ -8,12 +8,14 @@ class_name GameMain
 @onready var _reticle: TargetReticle = $HUD/TargetReticle as TargetReticle
 @onready var _player_hud: PlayerHUD = $HUD/PlayerHUD as PlayerHUD
 
-const AIS_SHIP_SCENE = preload("res://scenes/ship/AIShip.tscn")
+const AI_SHIP_CONTROLLER_SCRIPT = preload("res://scripts/AIShipController.gd")
 const HOMEBASE_SCENE = preload("res://scenes/homebase/Homebase.tscn")
-const DEFAULT_PLAYER_SHIP_DATA_PATH := "res://resources/factions/zarak/ships/t1_assault_ship.tres"
+const DEFAULT_PLAYER_SHIP_DATA_PATH := "res://resources/factions/zarak/ships/scout.tres"
 const DEFAULT_PLAYER_FACTION_PATH := "res://resources/factions/zarak/zarak_confedaracy.tres"
+const DEFAULT_PLAYER_SHIP_SCENE_PATH := "res://scenes/ship/zarak/Scout.tscn"
 const DEFAULT_ENEMY_SHIP_DATA_PATH := "res://resources/factions/solarion_collective/ships/striker_lance.tres"
 const DEFAULT_ENEMY_FACTION_PATH := "res://resources/factions/solarion_collective/solarion_collective.tres"
+const DEFAULT_ENEMY_SHIP_SCENE_PATH := "res://scenes/ship/solarion_collective/StrikerLance.tscn"
 
 const PLAYER_HOMEBASE_POS := Vector2.DOWN * 3000.0
 const ENEMY_HOMEBASE_POS := Vector2.UP * 3000.0
@@ -28,7 +30,9 @@ var _targeting: TargetingController
 var _ability: AbilityController
 
 var _player_ship_data_path: String = DEFAULT_PLAYER_SHIP_DATA_PATH
+var _player_ship_scene_path: String = DEFAULT_PLAYER_SHIP_SCENE_PATH
 var _enemy_ship_data_path: String = DEFAULT_ENEMY_SHIP_DATA_PATH
+var _enemy_ship_scene_path: String = DEFAULT_ENEMY_SHIP_SCENE_PATH
 
 var _enemy_ships: Array[Ship] = []
 var _enemy_spawn_timer: float = 0.0
@@ -54,17 +58,8 @@ func _ready() -> void:
 	if not _enemy_faction:
 		_enemy_faction = load(DEFAULT_ENEMY_FACTION_PATH) as FactionData
 	GameState.player_faction = _player_faction
-	
-	# Load MVP data for the player ship.
-	if _ship:
-		_ship.is_player_ship = true
-		_ship.ship_data = load(_player_ship_data_path) as ShipData
-		if not _ship.ship_data:
-			_ship.ship_data = load(DEFAULT_PLAYER_SHIP_DATA_PATH) as ShipData
-		_ship.faction_data = _player_faction
-		_ship.update_stats()
-		_targeting = _ship.get_node(^"TargetingController") as TargetingController
-		_ability = _ship.get_node(^"AbilityController") as AbilityController
+
+	_spawn_player_ship()
 	
 	_spawn_homebases()
 	_setup_camera_and_path()
@@ -108,22 +103,75 @@ func _spawn_homebases() -> void:
 	enemy_hb.faction_data = _enemy_faction
 	add_child(enemy_hb)
 
+func _spawn_player_ship() -> void:
+	var placeholder_ship: Ship = _ship
+	var spawn_position := Vector2.ZERO
+	if placeholder_ship:
+		spawn_position = placeholder_ship.global_position
+
+	var player_ship_scene: PackedScene = _load_ship_scene(_player_ship_scene_path, DEFAULT_PLAYER_SHIP_SCENE_PATH)
+	var player_ship: Ship = player_ship_scene.instantiate() as Ship if player_ship_scene else null
+	if player_ship:
+		add_child(player_ship)
+		player_ship.global_position = spawn_position
+		if placeholder_ship:
+			placeholder_ship.queue_free()
+		_ship = player_ship
+	else:
+		_ship = placeholder_ship
+
+	if not _ship:
+		return
+
+	_ship.is_player_ship = true
+	_apply_ship_data_override(_ship, _player_ship_data_path, DEFAULT_PLAYER_SHIP_DATA_PATH)
+	_ship.faction_data = _player_faction
+	_ship.update_stats()
+	_targeting = _ship.get_node_or_null(^"TargetingController") as TargetingController
+	_ability = _ship.get_node_or_null(^"AbilityController") as AbilityController
+
 func _spawn_enemy() -> void:
-	var enemy: Ship = AIS_SHIP_SCENE.instantiate() as Ship
+	var enemy_scene: PackedScene = _load_ship_scene(_enemy_ship_scene_path, DEFAULT_ENEMY_SHIP_SCENE_PATH)
+	if not enemy_scene:
+		return
+	var enemy: Ship = enemy_scene.instantiate() as Ship
+	if not enemy:
+		return
 	enemy.is_player_ship = false
 	var spawn_offset: Vector2 = Vector2.RIGHT * randf_range(-300.0, 300.0) + Vector2.DOWN * randf_range(200.0, 500.0)
 	enemy.position = ENEMY_HOMEBASE_POS + spawn_offset
-	enemy.ship_data = load(_enemy_ship_data_path) as ShipData
-	if not enemy.ship_data:
-		enemy.ship_data = load(DEFAULT_ENEMY_SHIP_DATA_PATH) as ShipData
+	_apply_ship_data_override(enemy, _enemy_ship_data_path, DEFAULT_ENEMY_SHIP_DATA_PATH)
 	enemy.faction_data = _enemy_faction
+	_configure_enemy_ai(enemy)
 	add_child(enemy)
 	enemy.update_stats()
 	_enemy_ships.append(enemy)
 
 func _resolve_match_setup() -> void:
 	_player_ship_data_path = GameState.selected_ship_data_path if not GameState.selected_ship_data_path.is_empty() else DEFAULT_PLAYER_SHIP_DATA_PATH
+	_player_ship_scene_path = GameState.selected_ship_scene_path if not GameState.selected_ship_scene_path.is_empty() else DEFAULT_PLAYER_SHIP_SCENE_PATH
 	_enemy_ship_data_path = GameState.selected_enemy_ship_data_path if not GameState.selected_enemy_ship_data_path.is_empty() else DEFAULT_ENEMY_SHIP_DATA_PATH
+	_enemy_ship_scene_path = GameState.selected_enemy_ship_scene_path if not GameState.selected_enemy_ship_scene_path.is_empty() else DEFAULT_ENEMY_SHIP_SCENE_PATH
+
+func _load_ship_scene(primary_path: String, fallback_path: String) -> PackedScene:
+	var scene: PackedScene = load(primary_path) as PackedScene
+	if scene:
+		return scene
+	return load(fallback_path) as PackedScene
+
+func _apply_ship_data_override(target_ship: Ship, primary_path: String, fallback_path: String) -> void:
+	if not target_ship:
+		return
+	target_ship.ship_data = load(primary_path) as ShipData
+	if not target_ship.ship_data:
+		target_ship.ship_data = load(fallback_path) as ShipData
+
+func _configure_enemy_ai(enemy_ship: Ship) -> void:
+	if not enemy_ship:
+		return
+	var state_machine: Node = enemy_ship.get_node_or_null(^"StateMachine")
+	if state_machine:
+		state_machine.set_script(AI_SHIP_CONTROLLER_SCRIPT)
 
 func _on_ship_destroyed(ship: Ship, _killer: Node2D) -> void:
 	if ship == _ship:

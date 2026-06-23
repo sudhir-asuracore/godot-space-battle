@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://rh5wjq4oc64j"
-path="res://.godot/imported/hangar.png-6eefec5624b6f10ad491c95fd94d8428.ctex"
+uid="uid://brglcic5bnbgw"
+path="res://.godot/imported/lower.png-cd508768035d2937534973270076536f.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/factions/solaris/homebase/hangar.png"
-dest_files=["res://.godot/imported/hangar.png-6eefec5624b6f10ad491c95fd94d8428.ctex"]
+source_file="res://assets/factions/solarion/ships/striker_lance/lower.png"
+dest_files=["res://.godot/imported/lower.png-cd508768035d2937534973270076536f.ctex"]
 
 [params]
 

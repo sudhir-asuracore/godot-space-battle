@@ -22,20 +22,26 @@ const FACTION_CONFIG := {
 	"Solaris": {
 		"faction_path": "res://resources/factions/solarion_collective/solarion_collective.tres",
 		"ship_path": "res://resources/factions/solarion_collective/ships/striker_lance.tres",
+		"ship_scene_path": "res://scenes/ship/solarion_collective/StrikerLance.tscn",
 		"enemy_faction_path": "res://resources/factions/zarak/zarak_confedaracy.tres",
-		"enemy_ship_path": "res://resources/factions/zarak/ships/t1_assault_ship.tres"
+		"enemy_ship_path": "res://resources/factions/zarak/ships/scout.tres",
+		"enemy_ship_scene_path": "res://scenes/ship/zarak/Scout.tscn"
 	},
 	"Zerek": {
 		"faction_path": "res://resources/factions/zarak/zarak_confedaracy.tres",
-		"ship_path": "res://resources/factions/zarak/ships/t1_assault_ship.tres",
+		"ship_path": "res://resources/factions/zarak/ships/scout.tres",
+		"ship_scene_path": "res://scenes/ship/zarak/Scout.tscn",
 		"enemy_faction_path": "res://resources/factions/solarion_collective/solarion_collective.tres",
-		"enemy_ship_path": "res://resources/factions/solarion_collective/ships/striker_lance.tres"
+		"enemy_ship_path": "res://resources/factions/solarion_collective/ships/striker_lance.tres",
+		"enemy_ship_scene_path": "res://scenes/ship/solarion_collective/StrikerLance.tscn"
 	},
 	"Aegis": {
 		"faction_path": "res://resources/factions/solarion_collective/solarion_collective.tres",
 		"ship_path": "res://resources/factions/solarion_collective/ships/striker_lance.tres",
+		"ship_scene_path": "res://scenes/ship/solarion_collective/StrikerLance.tscn",
 		"enemy_faction_path": "res://resources/factions/zarak/zarak_confedaracy.tres",
-		"enemy_ship_path": "res://resources/factions/zarak/ships/t1_assault_ship.tres"
+		"enemy_ship_path": "res://resources/factions/zarak/ships/scout.tres",
+		"enemy_ship_scene_path": "res://scenes/ship/zarak/Scout.tscn"
 	}
 }
 
@@ -213,8 +219,10 @@ func _on_play_pressed() -> void:
 	GameState.selected_faction_id = _selected_faction_name
 	GameState.selected_faction_path = str(selected_config.get("faction_path", ""))
 	GameState.selected_ship_data_path = str(selected_config.get("ship_path", ""))
+	GameState.selected_ship_scene_path = str(selected_config.get("ship_scene_path", ""))
 	GameState.selected_enemy_faction_path = str(selected_config.get("enemy_faction_path", ""))
 	GameState.selected_enemy_ship_data_path = str(selected_config.get("enemy_ship_path", ""))
+	GameState.selected_enemy_ship_scene_path = str(selected_config.get("enemy_ship_scene_path", ""))
 	get_tree().change_scene_to_file(GAME_SCENE_PATH)
 
 func _on_back_pressed() -> void:

@@ -1,5 +1,4 @@
 extends Ship
-class_name StrikerLance
 
 const SHIP_NAME := "Striker Lance"
 

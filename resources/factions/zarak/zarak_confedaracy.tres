@@ -1,11 +1,27 @@
-[gd_resource type="Resource" script_class="FactionData" format=3 uid="uid://cdeulawvmbjwh"]
+[gd_resource type="Resource" script_class="FactionData" load_steps=4 format=3 uid="uid://cdeulawvmbjwh"]
 
 [ext_resource type="Script" uid="uid://dhfeooppt1gk4" path="res://scripts/resources/FactionData.gd" id="1_script"]
+[ext_resource type="PackedScene" path="res://scenes/homebase/SolarionDefenseRing.tscn" id="2_ring"]
+[ext_resource type="Resource" path="res://resources/factions/zarak/ships/scout.tres" id="3_ship"]
 
 [resource]
 script = ExtResource("1_script")
+name = "Zarak Confedaracy"
 description = "Chonky, brutalist metallic hulls with bright orange thrusters"
 primary_color = Color(0.45, 0.45, 0.5, 1)
 secondary_color = Color(1, 0.5, 0, 1)
+shield_color = Color(1, 0.42, 0.1, 1)
 hull_multiplier = 1.25
 speed_multiplier = 0.9
+defense_ring_scene = ExtResource("2_ring")
+defense_ring_scale = 1.9
+shield_scale = 1.65
+turret_attack_range = 820.0
+turret_min_attack_range = 95.0
+turret_turn_speed = 2.6
+turret_attack_cone_degrees = 20.0
+turret_fire_rate = 1.8
+turret_hull_damage = 24.0
+turret_shield_damage = 12.0
+turret_projectile_speed = 860.0
+hangar_ship_options = Array[Resource("res://scripts/resources/ShipData.gd")]([ExtResource("3_ship")])

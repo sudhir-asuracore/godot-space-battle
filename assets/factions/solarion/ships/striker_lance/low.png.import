@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://c2xbvqdjktbp7"
-path="res://.godot/imported/lower.png-c9f28d290f8572ab9f6999013bff67e7.ctex"
+uid="uid://68w211dbgdgo"
+path="res://.godot/imported/low.png-0765aafb1d28d4735b10c97b097d9e51.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/factions/solaris/ships/striker_raptor/lower.png"
-dest_files=["res://.godot/imported/lower.png-c9f28d290f8572ab9f6999013bff67e7.ctex"]
+source_file="res://assets/factions/solarion/ships/striker_lance/low.png"
+dest_files=["res://.godot/imported/low.png-0765aafb1d28d4735b10c97b097d9e51.ctex"]
 
 [params]
 

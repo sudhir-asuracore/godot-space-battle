@@ -15,6 +15,7 @@ signal homebase_destroyed(faction: FactionData)
 
 # Economy
 signal prestige_changed(faction: FactionData, amount: float)
+signal hangar_shop_requested(faction: FactionData, ships: Array)
 
 # Match flow
 signal match_ended(winning_faction: FactionData)

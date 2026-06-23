@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://coaa000yxk42i"
-path="res://.godot/imported/low.png-3fd50d3ad445b113db2f9f6f8ca95eab.ctex"
+path="res://.godot/imported/low.png-107a5bd6cfe87d89b33a333116fe4230.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/factions/solaris/ships/striker_raptor/low.png"
-dest_files=["res://.godot/imported/low.png-3fd50d3ad445b113db2f9f6f8ca95eab.ctex"]
+source_file="res://assets/factions/solarion/ships/striker_raptor/low.png"
+dest_files=["res://.godot/imported/low.png-107a5bd6cfe87d89b33a333116fe4230.ctex"]
 
 [params]
 

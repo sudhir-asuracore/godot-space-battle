@@ -1,19 +1,33 @@
-[gd_scene format=3 uid="uid://ekxyeln5cmvr"]
+[gd_scene load_steps=7 format=3 uid="uid://ekxyeln5cmvr"]
 
 [ext_resource type="Texture2D" uid="uid://d2wtih32ahmny" path="res://assets/factions/solaris/homebase/defense_ring_low.png" id="1_bdl80"]
 [ext_resource type="Texture2D" uid="uid://rh5wjq4oc64j" path="res://assets/factions/solaris/homebase/hangar.png" id="2_81lju"]
 [ext_resource type="Texture2D" uid="uid://bdsa26gnk11bo" path="res://assets/factions/solaris/homebase/turret.png" id="3_ai0lx"]
+[ext_resource type="Script" path="res://scenes/homebase/DefenseRing.gd" id="4_ring_script"]
+[ext_resource type="Script" path="res://scenes/homebase/DefenseTurret.gd" id="5_turret_script"]
+[ext_resource type="Script" path="res://scenes/homebase/DefenseHangar.gd" id="6_hangar_script"]
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_hangar"]
+radius = 96.0
 
 [node name="DefenseRing" type="Node2D" unique_id=996657195]
+script = ExtResource("4_ring_script")
 
 [node name="DefenseRingLow" type="Sprite2D" parent="." unique_id=2049318194]
 texture = ExtResource("1_bdl80")
 
-[node name="Hangar" type="Sprite2D" parent="." unique_id=496819070]
+[node name="Hangar" type="Area2D" parent="." unique_id=496819070]
 position = Vector2(-294.00003, -285)
 rotation = 0.7853982
 scale = Vector2(0.36573032, 0.36573035)
+input_pickable = true
+script = ExtResource("6_hangar_script")
+
+[node name="Visual" type="Sprite2D" parent="Hangar"]
 texture = ExtResource("2_81lju")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Hangar"]
+shape = SubResource("CircleShape2D_hangar")
 
 [node name="Turret_0" type="Sprite2D" parent="." unique_id=1121582591]
 position = Vector2(-303, -5.9999995)
@@ -21,6 +35,7 @@ rotation = 3.1415927
 scale = Vector2(0.402572, 0.3981317)
 texture = ExtResource("3_ai0lx")
 offset = Vector2(102.69537, 1.3550053)
+script = ExtResource("5_turret_script")
 
 [node name="Muzzle" type="Marker2D" parent="Turret_0" unique_id=1799220937]
 position = Vector2(231.01456, 5.0234814)
@@ -31,6 +46,7 @@ rotation = -1.5707964
 scale = Vector2(0.402572, 0.3981317)
 texture = ExtResource("3_ai0lx")
 offset = Vector2(102.69537, 1.3550053)
+script = ExtResource("5_turret_script")
 
 [node name="Muzzle" type="Marker2D" parent="Turret_1" unique_id=1299491423]
 position = Vector2(231.01456, 5.0234814)
@@ -40,6 +56,7 @@ position = Vector2(297, -6.9999995)
 scale = Vector2(0.402572, 0.3981317)
 texture = ExtResource("3_ai0lx")
 offset = Vector2(102.69537, 1.3550053)
+script = ExtResource("5_turret_script")
 
 [node name="Muzzle" type="Marker2D" parent="Turret_2" unique_id=1715777883]
 position = Vector2(231.01456, 5.0234814)
@@ -50,6 +67,7 @@ rotation = 1.5707964
 scale = Vector2(0.402572, 0.3981317)
 texture = ExtResource("3_ai0lx")
 offset = Vector2(102.69537, 1.3550053)
+script = ExtResource("5_turret_script")
 
 [node name="Muzzle" type="Marker2D" parent="Turret_3" unique_id=123215362]
 position = Vector2(231.01456, 5.0234814)

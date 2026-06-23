@@ -18,10 +18,16 @@ var _majority_label: Label
 var _shield_label: Label
 var _ability_label: Label
 var _target_label: Label
+var _hangar_shop_panel: Panel
+var _hangar_shop_title: Label
+var _hangar_shop_list: Label
+
+var _shop_faction: FactionData = null
 
 func _ready() -> void:
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_build_ui()
+	EventBus.hangar_shop_requested.connect(_on_hangar_shop_requested)
 
 func setup(ship: Ship, player_faction: FactionData, enemy_faction: FactionData, ability: AbilityController) -> void:
 	_ship = ship
@@ -68,6 +74,52 @@ func _build_ui() -> void:
 	vbox.add_child(_ability_label)
 	_target_label = _make_label("Target: none")
 	vbox.add_child(_target_label)
+
+	_hangar_shop_panel = Panel.new()
+	_hangar_shop_panel.set_anchors_preset(Control.PRESET_TOP_RIGHT)
+	_hangar_shop_panel.position = Vector2(-365, 16)
+	_hangar_shop_panel.custom_minimum_size = Vector2(350, 210)
+	_hangar_shop_panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_hangar_shop_panel.visible = false
+	add_child(_hangar_shop_panel)
+
+	var hangar_box := VBoxContainer.new()
+	hangar_box.position = Vector2(10, 8)
+	hangar_box.custom_minimum_size = Vector2(330, 190)
+	hangar_box.add_theme_constant_override("separation", 6)
+	hangar_box.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_hangar_shop_panel.add_child(hangar_box)
+
+	_hangar_shop_title = _make_label("Hangar")
+	hangar_box.add_child(_hangar_shop_title)
+
+	_hangar_shop_list = _make_label("No ships configured")
+	_hangar_shop_list.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	hangar_box.add_child(_hangar_shop_list)
+
+func _on_hangar_shop_requested(faction: FactionData, ships: Array) -> void:
+	if not faction:
+		return
+
+	if _hangar_shop_panel.visible and faction == _shop_faction:
+		_hangar_shop_panel.visible = false
+		_shop_faction = null
+		return
+
+	_shop_faction = faction
+	_hangar_shop_title.text = "%s Hangar" % faction.name
+
+	var lines: Array[String] = ["Purchase / Upgrade (stub)", ""]
+	for entry in ships:
+		var ship_data := entry as ShipData
+		if ship_data:
+			lines.append("• %s (Tier %d)" % [ship_data.name, ship_data.tier])
+
+	if lines.size() <= 2:
+		lines.append("• No ships configured")
+
+	_hangar_shop_list.text = "\n".join(lines)
+	_hangar_shop_panel.visible = true
 
 func _make_label(text: String) -> Label:
 	var l := Label.new()
