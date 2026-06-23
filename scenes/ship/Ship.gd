@@ -18,7 +18,7 @@ var is_player_ship: bool = false
 @onready var _shield_sprite: ColorRect = $Shield
 
 
-const RIBBON_TRAIL_SCENE = preload("res://scenes/RibbonTrail.tscn")
+const RIBBON_TRAIL_SCENE = preload("res://scenes/ship/RibbonTrail.tscn")
 const DAMAGE_MARKER_EFFECT_SCENE = preload("res://scenes/ship/ShipDamageFlames.tscn")
 const DAMAGE_MARKER_PREFIX := "damage_"
 const THRUSTER_NODE_PREFIX := "thruster_"

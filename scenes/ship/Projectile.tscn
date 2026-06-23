@@ -1,6 +1,6 @@
 [gd_scene format=3 uid="uid://clj6i0q5n3k4u"]
 
-[ext_resource type="Script" uid="uid://b1rlaun4qx15i" path="res://scenes/Projectile.gd" id="1"]
+[ext_resource type="Script" uid="uid://b1rlaun4qx15i" path="res://scenes/ship/Projectile.gd" id="1"]
 [ext_resource type="Shader" uid="uid://b0t6p1fjgyeuo" path="res://shaders/basic_bullet.gdshader" id="3_kdm4f"]
 
 [sub_resource type="CircleShape2D" id="3"]

@@ -12,7 +12,7 @@ var _active_weapon: WeaponData
 var _shots_since_fire_audio: int = 0
 var _fire_audio_weapon: WeaponData
 
-const PROJECTILE_SCENE = preload("res://scenes/Projectile.tscn")
+const PROJECTILE_SCENE = preload("res://scenes/ship/Projectile.tscn")
 
 func _process(delta: float) -> void:
 	if not _can_process_weapon_logic():

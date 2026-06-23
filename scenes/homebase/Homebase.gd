@@ -7,7 +7,7 @@ class_name Homebase
 var current_hull: float
 var is_shield_active: bool = true
 
-@onready var _shield_sprite: Sprite2D = $ShieldSprite # Visual indicator
+@onready var _shield: Sprite2D = $Shield # Visual indicator
 
 func _ready() -> void:
 	current_hull = max_hull
@@ -16,8 +16,7 @@ func _ready() -> void:
 	EventBus.homebase_shield_warning.connect(_on_shield_warning)
 	is_shield_active = GameState.is_homebase_shield_active(faction_data)
 	if faction_data:
-		_shield_sprite.modulate = faction_data.primary_color
-#		$Sprite2D.modulate = faction_data.primary_color
+		_shield.modulate = faction_data.primary_color
 	_update_shield_visual()
 
 func _on_shield_toggled(faction: FactionData, active: bool) -> void:
@@ -38,8 +37,8 @@ func _on_shield_warning(faction: FactionData, will_be_active: bool) -> void:
 			print("WARNING: Homebase ", faction_data.name, " shield dropping soon")
 
 func _update_shield_visual() -> void:
-	if _shield_sprite:
-		_shield_sprite.visible = is_shield_active
+	if _shield:
+		_shield.visible = is_shield_active
 
 func take_damage(hull_dmg: float, _shield_dmg: float, _attacker: Node2D = null) -> void:
 	if is_shield_active:

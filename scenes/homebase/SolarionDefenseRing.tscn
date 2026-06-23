@@ -1,0 +1,55 @@
+[gd_scene format=3 uid="uid://ekxyeln5cmvr"]
+
+[ext_resource type="Texture2D" uid="uid://d2wtih32ahmny" path="res://assets/factions/solaris/homebase/defense_ring_low.png" id="1_bdl80"]
+[ext_resource type="Texture2D" uid="uid://rh5wjq4oc64j" path="res://assets/factions/solaris/homebase/hangar.png" id="2_81lju"]
+[ext_resource type="Texture2D" uid="uid://bdsa26gnk11bo" path="res://assets/factions/solaris/homebase/turret.png" id="3_ai0lx"]
+
+[node name="DefenseRing" type="Node2D" unique_id=996657195]
+
+[node name="DefenseRingLow" type="Sprite2D" parent="." unique_id=2049318194]
+texture = ExtResource("1_bdl80")
+
+[node name="Hangar" type="Sprite2D" parent="." unique_id=496819070]
+position = Vector2(-294.00003, -285)
+rotation = 0.7853982
+scale = Vector2(0.36573032, 0.36573035)
+texture = ExtResource("2_81lju")
+
+[node name="Turret_0" type="Sprite2D" parent="." unique_id=1121582591]
+position = Vector2(-303, -5.9999995)
+rotation = 3.1415927
+scale = Vector2(0.402572, 0.3981317)
+texture = ExtResource("3_ai0lx")
+offset = Vector2(102.69537, 1.3550053)
+
+[node name="Muzzle" type="Marker2D" parent="Turret_0" unique_id=1799220937]
+position = Vector2(231.01456, 5.0234814)
+
+[node name="Turret_1" type="Sprite2D" parent="." unique_id=1472969825]
+position = Vector2(-2, -317)
+rotation = -1.5707964
+scale = Vector2(0.402572, 0.3981317)
+texture = ExtResource("3_ai0lx")
+offset = Vector2(102.69537, 1.3550053)
+
+[node name="Muzzle" type="Marker2D" parent="Turret_1" unique_id=1299491423]
+position = Vector2(231.01456, 5.0234814)
+
+[node name="Turret_2" type="Sprite2D" parent="." unique_id=1777843090]
+position = Vector2(297, -6.9999995)
+scale = Vector2(0.402572, 0.3981317)
+texture = ExtResource("3_ai0lx")
+offset = Vector2(102.69537, 1.3550053)
+
+[node name="Muzzle" type="Marker2D" parent="Turret_2" unique_id=1715777883]
+position = Vector2(231.01456, 5.0234814)
+
+[node name="Turret_3" type="Sprite2D" parent="." unique_id=630292077]
+position = Vector2(-1, 300)
+rotation = 1.5707964
+scale = Vector2(0.402572, 0.3981317)
+texture = ExtResource("3_ai0lx")
+offset = Vector2(102.69537, 1.3550053)
+
+[node name="Muzzle" type="Marker2D" parent="Turret_3" unique_id=123215362]
+position = Vector2(231.01456, 5.0234814)

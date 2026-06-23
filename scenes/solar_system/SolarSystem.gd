@@ -19,6 +19,7 @@ func _ready() -> void:
 	# 1. Instance the Sun
 	var sun_instance: Node2D = SUN_SCENE.instantiate() as Node2D
 	sun_instance.name = "Sun"
+	sun_instance.scale = Vector2(2, 2)
 	add_child(sun_instance)
 	
 	# 2. Number of planets for MVP

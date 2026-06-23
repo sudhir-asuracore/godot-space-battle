@@ -3,7 +3,7 @@
 [ext_resource type="Script" uid="uid://budrxpnnkro2j" path="res://scenes/homebase/Homebase.gd" id="1_script"]
 [ext_resource type="Texture2D" uid="uid://dc6xsn1y2v1mb" path="res://assets/kenney_planets/Planets/planet08.png" id="2_tex"]
 [ext_resource type="Shader" uid="uid://detcaj8nybdbe" path="res://shaders/HomebaseShield.gdshader" id="3_lscak"]
-[ext_resource type="Texture2D" uid="uid://d2wtih32ahmny" path="res://assets/factions/solaris/homebase/defense_ring_low.png" id="3_sex2b"]
+[ext_resource type="PackedScene" uid="uid://ekxyeln5cmvr" path="res://scenes/homebase/SolarionDefenseRing.tscn" id="4_1wxv7"]
 [ext_resource type="Script" uid="uid://b3l3resvp81sd" path="res://scenes/homebase/HomebaseShield.gd" id="4_2r8xy"]
 
 [sub_resource type="CircleShape2D" id="CircleShape2D_hb"]
@@ -30,14 +30,12 @@ texture = ExtResource("2_tex")
 [node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=1098195104]
 shape = SubResource("CircleShape2D_hb")
 
-[node name="DefenseRingLow" type="Sprite2D" parent="." unique_id=382971152]
-modulate = Color(1, 1, 1, 0.75686276)
-scale = Vector2(1.9, 1.9)
-texture = ExtResource("3_sex2b")
+[node name="DefenseRing" parent="." unique_id=996657195 instance=ExtResource("4_1wxv7")]
+scale = Vector2(2, 2)
 
-[node name="ShieldSprite" type="Sprite2D" parent="." unique_id=1801694914]
+[node name="Shield" type="Sprite2D" parent="." unique_id=1801694914]
 modulate = Color(0, 0.5, 1, 0.3)
 material = SubResource("ShaderMaterial_lscak")
-scale = Vector2(0.8, 0.8)
+scale = Vector2(1.7, 1.7)
 texture = ExtResource("2_tex")
 script = ExtResource("4_2r8xy")
