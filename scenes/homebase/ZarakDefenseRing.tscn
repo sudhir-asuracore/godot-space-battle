@@ -1,0 +1,72 @@
+[gd_scene format=3 uid="uid://dk8awxuyukfcc"]
+
+[ext_resource type="Script" uid="uid://c383l6tlme5ub" path="res://scenes/homebase/DefenseRing.gd" id="1_dixe8"]
+[ext_resource type="Texture2D" uid="uid://d0b6oyvhvnb65" path="res://assets/factions/zarak/homebase/defense_ring_low.png" id="2_dixe8"]
+[ext_resource type="Script" uid="uid://bdn7s36ab81h" path="res://scenes/homebase/DefenseHangar.gd" id="3_ol408"]
+[ext_resource type="Texture2D" uid="uid://juakv8cxhjw0" path="res://assets/factions/zarak/homebase/hangar.png" id="4_qnkf2"]
+[ext_resource type="Texture2D" uid="uid://dlkjgr74le0o7" path="res://assets/factions/zarak/homebase/defense_canon_low.png" id="5_dixe8"]
+[ext_resource type="Script" uid="uid://bla3dpxggcrmh" path="res://scenes/homebase/DefenseTurret.gd" id="6_i8a3x"]
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_hangar"]
+radius = 427.804
+
+[node name="DefenseRing" type="Node2D" unique_id=996657195]
+script = ExtResource("1_dixe8")
+
+[node name="DefenseRingLow" type="Sprite2D" parent="." unique_id=1020762655]
+scale = Vector2(1.1, 1.1)
+texture = ExtResource("2_dixe8")
+
+[node name="Hangar" type="Area2D" parent="." unique_id=496819070]
+position = Vector2(-294.00003, -285)
+rotation = 0.7853982
+scale = Vector2(0.36573032, 0.36573035)
+script = ExtResource("3_ol408")
+
+[node name="Visual" type="Sprite2D" parent="Hangar" unique_id=1287667333]
+position = Vector2(-36.734726, -5.800274)
+rotation = -1.5707964
+scale = Vector2(0.99999994, 0.99999994)
+texture = ExtResource("4_qnkf2")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Hangar" unique_id=1826981862]
+shape = SubResource("CircleShape2D_hangar")
+
+[node name="Turret_0" type="Sprite2D" parent="." unique_id=158205257]
+position = Vector2(-2, -326)
+rotation = -1.5707964
+scale = Vector2(0.37264147, 0.3726415)
+texture = ExtResource("5_dixe8")
+script = ExtResource("6_i8a3x")
+
+[node name="Muzzle" type="Marker2D" parent="Turret_0" unique_id=751381750]
+position = Vector2(166.37976, -10.734177)
+
+[node name="Turret_1" type="Sprite2D" parent="." unique_id=822193456]
+position = Vector2(-324, 5.9604645e-08)
+rotation = 3.1415927
+scale = Vector2(0.37264147, 0.3726415)
+texture = ExtResource("5_dixe8")
+script = ExtResource("6_i8a3x")
+
+[node name="Muzzle" type="Marker2D" parent="Turret_1" unique_id=836462393]
+position = Vector2(166.37976, -10.734177)
+
+[node name="Turret_2" type="Sprite2D" parent="." unique_id=50750570]
+position = Vector2(3.8146973e-06, 330)
+rotation = 1.5707964
+scale = Vector2(0.37264147, 0.3726415)
+texture = ExtResource("5_dixe8")
+script = ExtResource("6_i8a3x")
+
+[node name="Muzzle" type="Marker2D" parent="Turret_2" unique_id=613850895]
+position = Vector2(166.37976, -10.734177)
+
+[node name="Turret_3" type="Sprite2D" parent="." unique_id=646841362]
+position = Vector2(320.00003, 3.0517578e-05)
+scale = Vector2(0.37264147, 0.3726415)
+texture = ExtResource("5_dixe8")
+script = ExtResource("6_i8a3x")
+
+[node name="Muzzle" type="Marker2D" parent="Turret_3" unique_id=2065680669]
+position = Vector2(166.37976, -10.734177)

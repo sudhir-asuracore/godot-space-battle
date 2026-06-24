@@ -10,12 +10,12 @@ radius = 409.9573
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_lscak"]
 shader = ExtResource("3_lscak")
-shader_parameter/shield_color = Color(0.6120922, 0.6020588, 0.27354357, 0.4)
+shader_parameter/shield_color = Color(0.813469, 0.20612001, 0.15080324, 0.4)
 shader_parameter/grid_scale = 29.142001336745
-shader_parameter/line_thickness = 0.22000000975148
+shader_parameter/line_thickness = 0.08200000319648
 shader_parameter/edge_glow_power = 10.0
 shader_parameter/impact_pos = Vector2(0.5, 0.5)
-shader_parameter/impact_radius = 0.0
+shader_parameter/impact_radius = 0.19200000912
 
 [node name="Homebase" type="StaticBody2D" unique_id=1685546274]
 collision_layer = 64
@@ -27,6 +27,7 @@ scale = Vector2(0.8, 0.8)
 texture = ExtResource("2_tex")
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=1098195104]
+visible = false
 scale = Vector2(2.7, 2.7)
 shape = SubResource("CircleShape2D_hb")
 

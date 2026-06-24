@@ -1,14 +1,14 @@
-[gd_scene load_steps=7 format=3 uid="uid://ekxyeln5cmvr"]
+[gd_scene format=3 uid="uid://ekxyeln5cmvr"]
 
-[ext_resource type="Texture2D" uid="uid://d2wtih32ahmny" path="res://assets/factions/solaris/homebase/defense_ring_low.png" id="1_bdl80"]
-[ext_resource type="Texture2D" uid="uid://rh5wjq4oc64j" path="res://assets/factions/solaris/homebase/hangar.png" id="2_81lju"]
-[ext_resource type="Texture2D" uid="uid://bdsa26gnk11bo" path="res://assets/factions/solaris/homebase/turret.png" id="3_ai0lx"]
-[ext_resource type="Script" path="res://scenes/homebase/DefenseRing.gd" id="4_ring_script"]
-[ext_resource type="Script" path="res://scenes/homebase/DefenseTurret.gd" id="5_turret_script"]
-[ext_resource type="Script" path="res://scenes/homebase/DefenseHangar.gd" id="6_hangar_script"]
+[ext_resource type="Texture2D" uid="uid://d2wtih32ahmny" path="res://assets/factions/solarion/homebase/defense_ring_low.png" id="1_bdl80"]
+[ext_resource type="Texture2D" uid="uid://rh5wjq4oc64j" path="res://assets/factions/solarion/homebase/hangar.png" id="2_81lju"]
+[ext_resource type="Texture2D" uid="uid://bdsa26gnk11bo" path="res://assets/factions/solarion/homebase/turret.png" id="3_ai0lx"]
+[ext_resource type="Script" uid="uid://c383l6tlme5ub" path="res://scenes/homebase/DefenseRing.gd" id="4_ring_script"]
+[ext_resource type="Script" uid="uid://bla3dpxggcrmh" path="res://scenes/homebase/DefenseTurret.gd" id="5_turret_script"]
+[ext_resource type="Script" uid="uid://bdn7s36ab81h" path="res://scenes/homebase/DefenseHangar.gd" id="6_hangar_script"]
 
 [sub_resource type="CircleShape2D" id="CircleShape2D_hangar"]
-radius = 96.0
+radius = 433.0581
 
 [node name="DefenseRing" type="Node2D" unique_id=996657195]
 script = ExtResource("4_ring_script")
@@ -20,13 +20,12 @@ texture = ExtResource("1_bdl80")
 position = Vector2(-294.00003, -285)
 rotation = 0.7853982
 scale = Vector2(0.36573032, 0.36573035)
-input_pickable = true
 script = ExtResource("6_hangar_script")
 
-[node name="Visual" type="Sprite2D" parent="Hangar"]
+[node name="Visual" type="Sprite2D" parent="Hangar" unique_id=1655438763]
 texture = ExtResource("2_81lju")
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="Hangar"]
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Hangar" unique_id=1394255532]
 shape = SubResource("CircleShape2D_hangar")
 
 [node name="Turret_0" type="Sprite2D" parent="." unique_id=1121582591]

@@ -6,7 +6,7 @@
 [ext_resource type="Script" uid="uid://csclx8xvdnu4u" path="res://scripts/TargetingController.gd" id="4_targeting_ctrl"]
 [ext_resource type="Texture2D" uid="uid://cvgeulgpu7s1v" path="res://assets/ships/white-assault-01-super-low.png" id="4_tgbo8"]
 [ext_resource type="Script" uid="uid://ce7dxwfhmrobl" path="res://scripts/WeaponController.gd" id="5_weapon_ctrl"]
-[ext_resource type="PackedScene" uid="uid://cyfh6mhr1uyqg" path="res://scenes/ship/Thruster.tscn" id="6_slbyd"]
+[ext_resource type="PackedScene" uid="uid://cyfh6mhr1uyqg" path="res://scenes/ship/accessories/Thruster.tscn" id="6_slbyd"]
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_swkrw"]
 shader = ExtResource("3_7ty2q")

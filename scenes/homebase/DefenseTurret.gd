@@ -1,7 +1,7 @@
 extends Sprite2D
 class_name DefenseTurret
 
-const PROJECTILE_SCENE := preload("res://scenes/ship/Projectile.tscn")
+const PROJECTILE_SCENE := preload("res://scenes/ship/accessories/Projectile.tscn")
 
 var faction_data: FactionData = null
 var homebase: Homebase = null
