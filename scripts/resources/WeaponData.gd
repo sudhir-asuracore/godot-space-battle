@@ -3,6 +3,8 @@ class_name WeaponData
 
 @export var name: String = "Autocannon"
 @export var weapon_range: float = 500.0
+@export_range(0.0, 360.0, 0.5) var attack_cone_degrees: float = 360.0
+@export var show_coverage_grid: bool = true
 @export var fire_rate: float = 4.0
 @export var ammo: int = 0
 @export var cooldown: float = 0.25

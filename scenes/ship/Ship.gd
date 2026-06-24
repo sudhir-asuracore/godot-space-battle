@@ -22,9 +22,6 @@ const RIBBON_TRAIL_SCENE = preload("res://scenes/ship/accessories/RibbonTrail.ts
 const DAMAGE_MARKER_EFFECT_SCENE = preload("res://scenes/ship/accessories/ShipDamageFlames.tscn")
 const DAMAGE_MARKER_PREFIX := "damage_"
 const THRUSTER_NODE_PREFIX := "thruster_"
-const IDLE_STRAFE_SPEED_FACTOR := 0.15
-const IDLE_TURN_SPEED_FACTOR := 0.08
-const IDLE_LATERAL_RESPONSE_FACTOR := 0.35
 
 var _trail: Node = null
 var _damage_markers: Array[Marker2D] = []
@@ -64,7 +61,12 @@ func _ready() -> void:
 
 func _exit_tree() -> void:
 	if is_player_ship:
-		AudioManager.stop_player_thruster_audio(true)
+		var audio_manager := _get_audio_manager()
+		if audio_manager:
+			audio_manager.call("stop_player_thruster_audio", true)
+
+func _get_audio_manager() -> Node:
+	return get_node_or_null(^"/root/AudioManager")
 
 func _before_ship_ready() -> void:
 	pass
@@ -307,7 +309,9 @@ func _on_stats_updated() -> void:
 func _physics_process(delta: float) -> void:
 	if is_dead:
 		if is_player_ship:
-			AudioManager.set_player_thruster_intensity(0.0)
+			var audio_manager := _get_audio_manager()
+			if audio_manager:
+				audio_manager.call("set_player_thruster_intensity", 0.0)
 		return
 	
 	# 0. Regenerate capacitor and (delayed) shields.
@@ -316,13 +320,11 @@ func _physics_process(delta: float) -> void:
 	# 1. Handle Damping (Fake Space Friction)
 	_apply_friction(delta)
 	
-	var has_manual_instruction: bool = _process_manual_movement_input(delta)
-	
+	_process_manual_movement_input(delta)
+
 	if is_moving:
 		_process_movement(delta)
-	elif not has_manual_instruction:
-		_process_idle_stabilization(delta)
-	
+
 	_update_thruster_vfx(delta)
 	_update_player_thruster_audio()
 	_thrust_intensity = 0.0
@@ -354,24 +356,6 @@ func _process_manual_movement_input(delta: float) -> bool:
 
 	velocity = forward_dir * forward_vel + lateral_dir * lateral_vel
 	return true
-
-func _process_idle_stabilization(delta: float) -> void:
-	var idle_strafe_speed: float = _strafe_speed * IDLE_STRAFE_SPEED_FACTOR
-	if idle_strafe_speed <= 0.0 and _turn_speed <= 0.0:
-		return
-
-	var t: float = Time.get_ticks_msec() * 0.001
-	var phase: float = float(get_instance_id() % 97)
-	var strafe_target: float = sin(t * 1.2 + phase) * idle_strafe_speed
-	var turn_delta: float = sin(t * 0.9 + phase * 0.5) * _turn_speed * IDLE_TURN_SPEED_FACTOR
-	global_rotation += turn_delta * delta
-
-	var forward_dir: Vector2 = Vector2.from_angle(global_rotation)
-	var lateral_dir: Vector2 = forward_dir.rotated(PI / 2.0)
-	var forward_vel: float = velocity.dot(forward_dir)
-	var lateral_vel: float = velocity.dot(lateral_dir)
-	lateral_vel = move_toward(lateral_vel, strafe_target, _acceleration * IDLE_LATERAL_RESPONSE_FACTOR * delta)
-	velocity = forward_dir * forward_vel + lateral_dir * lateral_vel
 
 func apply_acceleration(accel: Vector2) -> void:
 	velocity += accel * get_physics_process_delta_time()
@@ -408,7 +392,9 @@ func _update_thruster_vfx(delta: float) -> void:
 func _update_player_thruster_audio() -> void:
 	if not is_player_ship:
 		return
-	AudioManager.set_player_thruster_intensity(_visual_thrust)
+	var audio_manager := _get_audio_manager()
+	if audio_manager:
+		audio_manager.call("set_player_thruster_intensity", _visual_thrust)
 
 func _process_regen(delta: float) -> void:
 	if not ship_data:
@@ -544,7 +530,9 @@ func _die() -> void:
 	is_moving = false
 	velocity = Vector2.ZERO
 	if is_player_ship:
-		AudioManager.set_player_thruster_intensity(0.0)
+		var audio_manager := _get_audio_manager()
+		if audio_manager:
+			audio_manager.call("set_player_thruster_intensity", 0.0)
 	# Hide or explode
 	visible = false
 	if _trail:

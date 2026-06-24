@@ -15,10 +15,15 @@ var _defense_ring_instance: Node2D = null
 func _ready() -> void:
 	current_hull = max_hull
 	add_to_group("homebases")
-	GameState.register_homebase(faction_data)
-	EventBus.homebase_shield_toggled.connect(_on_shield_toggled)
-	EventBus.homebase_shield_warning.connect(_on_shield_warning)
-	is_shield_active = GameState.is_homebase_shield_active(faction_data)
+	var game_state := _get_game_state()
+	if game_state and faction_data:
+		game_state.call("register_homebase", faction_data)
+	var event_bus := _get_event_bus()
+	if event_bus:
+		event_bus.connect(&"homebase_shield_toggled", Callable(self, "_on_shield_toggled"))
+		event_bus.connect(&"homebase_shield_warning", Callable(self, "_on_shield_warning"))
+	if game_state and faction_data:
+		is_shield_active = bool(game_state.call("is_homebase_shield_active", faction_data))
 	_apply_faction_visuals()
 	_update_shield_visual()
 
@@ -87,13 +92,24 @@ func take_damage(hull_dmg: float, _shield_dmg: float, _attacker: Node2D = null) 
 
 func _die() -> void:
 	print("Homebase ", faction_data.name, " DESTROYED!")
-	EventBus.homebase_destroyed.emit(faction_data)
-	EventBus.match_ended.emit(_other_faction())
+	var event_bus := _get_event_bus()
+	if event_bus:
+		event_bus.call("emit_signal", &"homebase_destroyed", faction_data)
+		event_bus.call("emit_signal", &"match_ended", _other_faction())
 	queue_free()
+
+func _get_game_state() -> Node:
+	return get_node_or_null(^"/root/GameState")
+
+func _get_event_bus() -> Node:
+	return get_node_or_null(^"/root/EventBus")
 
 func _other_faction() -> FactionData:
 	# The winner is whichever faction did NOT just lose its homebase.
-	var majority := GameState.get_majority_faction()
+	var majority: FactionData = null
+	var game_state := _get_game_state()
+	if game_state:
+		majority = game_state.call("get_majority_faction") as FactionData
 	if majority and majority != faction_data:
 		return majority
 	return null

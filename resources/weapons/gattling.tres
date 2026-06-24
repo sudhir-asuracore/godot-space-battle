@@ -2,11 +2,13 @@
 
 [ext_resource type="Script" uid="uid://cegt3oesh5v7k" path="res://scripts/resources/WeaponData.gd" id="1_script"]
 [ext_resource type="AudioStream" uid="uid://jmddotqkxeqr" path="res://assets/audio/a10_brrt.wav" id="2_fire_audio"]
-[ext_resource type="PackedScene" uid="uid://cxt5gla5r5l8x" path="res://scenes/ship/accessories/MuzzleFlash_GunPowder.tscn" id="3_muzzle_flash"]
 
 [resource]
 script = ExtResource("1_script")
 name = "Kinetic Autocannon"
+weapon_range = 820.0
+attack_cone_degrees = 24.0
+show_coverage_grid = false
 fire_rate = 64.0
 ammo = 64
 cooldown = 2.0

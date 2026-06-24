@@ -1,6 +1,8 @@
 extends Node2D
 class_name WeaponController
 
+const WEAPON_COVERAGE_OVERLAY_SCRIPT := preload("res://scripts/WeaponCoverageOverlay.gd")
+
 @onready var _ship: Ship = get_parent() as Ship
 @onready var _targeting: TargetingController = get_parent().get_node(^"TargetingController")
 @onready var _muzzle: Marker2D = get_parent().get_node(^"Muzzle")
@@ -11,16 +13,24 @@ var _ammo_in_mag: int = -1
 var _active_weapon: WeaponData
 var _shots_since_fire_audio: int = 0
 var _fire_audio_weapon: WeaponData
+var _coverage_overlay = null
 
 const PROJECTILE_SCENE = preload("res://scenes/ship/accessories/Projectile.tscn")
 
+func _ready() -> void:
+	_ensure_coverage_overlay()
+
 func _process(delta: float) -> void:
 	if not _can_process_weapon_logic():
+		_set_coverage_overlay_visible(false)
 		return
 
 	var weapon: WeaponData = _get_active_weapon_data()
 	if not weapon:
+		_set_coverage_overlay_visible(false)
 		return
+
+	_update_coverage_overlay(weapon)
 
 	_sync_weapon_state(weapon)
 	_tick_timers(delta, weapon)
@@ -241,3 +251,32 @@ func _spawn_muzzle_flash(weapon: WeaponData) -> void:
 		flash_lifetime = computed_lifetime if computed_lifetime > 0.05 else 0.05
 
 	get_tree().create_timer(flash_lifetime).timeout.connect(muzzle_flash_instance.queue_free)
+
+func _ensure_coverage_overlay() -> void:
+	if _coverage_overlay and is_instance_valid(_coverage_overlay):
+		return
+
+	_coverage_overlay = WEAPON_COVERAGE_OVERLAY_SCRIPT.new()
+	if not _coverage_overlay:
+		return
+
+	_coverage_overlay.name = "WeaponCoverageOverlay"
+	add_child(_coverage_overlay)
+	_coverage_overlay.follow(self)
+
+func _set_coverage_overlay_visible(visible_now: bool) -> void:
+	if not _coverage_overlay or not is_instance_valid(_coverage_overlay):
+		return
+	_coverage_overlay.set_overlay_visible(visible_now)
+
+func _update_coverage_overlay(weapon: WeaponData) -> void:
+	_ensure_coverage_overlay()
+	if not _coverage_overlay:
+		return
+
+	var should_show := _ship != null and _ship.is_player_ship and weapon.show_coverage_grid and weapon.weapon_range > 0.0
+	_coverage_overlay.set_overlay_visible(should_show)
+	if not should_show:
+		return
+
+	_coverage_overlay.set_coverage(weapon.weapon_range, 0.0, weapon.attack_cone_degrees)

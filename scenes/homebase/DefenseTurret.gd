@@ -2,6 +2,7 @@ extends Sprite2D
 class_name DefenseTurret
 
 const PROJECTILE_SCENE := preload("res://scenes/ship/accessories/Projectile.tscn")
+const WEAPON_COVERAGE_OVERLAY_SCRIPT := preload("res://scripts/WeaponCoverageOverlay.gd")
 
 var faction_data: FactionData = null
 var homebase: Homebase = null
@@ -10,14 +11,22 @@ var homebase: Homebase = null
 
 var _target: Variant = null
 var _shot_timer: float = 0.0
+var _coverage_overlay = null
+
+func _ready() -> void:
+	_ensure_coverage_overlay()
 
 func configure(faction: FactionData, owner_homebase: Homebase) -> void:
 	faction_data = faction
 	homebase = owner_homebase
+	_sync_coverage_overlay()
 
 func _process(delta: float) -> void:
 	if not faction_data or not homebase:
+		_set_coverage_overlay_visible(false)
 		return
+
+	_sync_coverage_overlay()
 
 	_shot_timer = maxf(0.0, _shot_timer - delta)
 
@@ -112,3 +121,36 @@ func _fire_projectile(target: Node2D) -> void:
 	projectile.source_ship = self
 
 	get_tree().root.add_child(projectile)
+
+func _ensure_coverage_overlay() -> void:
+	if _coverage_overlay and is_instance_valid(_coverage_overlay):
+		return
+
+	_coverage_overlay = WEAPON_COVERAGE_OVERLAY_SCRIPT.new()
+	if not _coverage_overlay:
+		return
+
+	_coverage_overlay.name = "WeaponCoverageOverlay"
+	add_child(_coverage_overlay)
+	_coverage_overlay.follow(self)
+
+func _set_coverage_overlay_visible(visible_now: bool) -> void:
+	if not _coverage_overlay or not is_instance_valid(_coverage_overlay):
+		return
+	_coverage_overlay.set_overlay_visible(visible_now)
+
+func _sync_coverage_overlay() -> void:
+	_ensure_coverage_overlay()
+	if not _coverage_overlay:
+		return
+
+	if not faction_data:
+		_coverage_overlay.set_overlay_visible(false)
+		return
+
+	_coverage_overlay.set_overlay_visible(true)
+	_coverage_overlay.set_coverage(
+		faction_data.turret_attack_range,
+		faction_data.turret_min_attack_range,
+		faction_data.turret_attack_cone_degrees
+	)

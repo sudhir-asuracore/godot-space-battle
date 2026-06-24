@@ -1,7 +1,7 @@
 extends Camera2D
 class_name GameCamera
 
-@export var min_zoom: float = 0.01
+@export var min_zoom: float = 0.3
 @export var max_zoom: float = 4.0
 @export var zoom_speed: float = 0.15
 @export var move_speed: float = 1800.0 # Keyboard movement speed
@@ -13,15 +13,16 @@ var _drag_start: Vector2 = Vector2.ZERO
 var _dragging: bool = false
 
 func _ready() -> void:
-	# Start zoomed out to see the massive sun and initial space environment
-	zoom = Vector2(0.4, 0.4)
+	# Start at default 100% zoom
+	zoom = Vector2(1.0, 1.0)
 
-func _process(delta: float) -> void:
-	# 1. Smoothly follow target if enabled
+func _physics_process(delta: float) -> void:
+	# Keep follow movement in the physics tick so it stays in sync with physics-driven ships.
 	if follow_target and target_node:
 		global_position = global_position.lerp(target_node.global_position, 6.0 * delta)
-	
-	# 2. Keyboard movement (WASD or Arrow keys)
+
+func _process(delta: float) -> void:
+	# Keyboard movement (WASD or Arrow keys)
 	var move_dir: Vector2 = Vector2.ZERO
 	if Input.is_key_pressed(KEY_W) or Input.is_key_pressed(KEY_UP):
 		move_dir.y -= 1
