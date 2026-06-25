@@ -4,6 +4,8 @@
 [ext_resource type="Script" uid="uid://deo8044sl5k4r" path="res://scripts/resources/ShipData.gd" id="2_304yb"]
 [ext_resource type="PackedScene" uid="uid://dk8awxuyukfcc" path="res://scenes/homebase/ZarakDefenseRing.tscn" id="2_ring"]
 [ext_resource type="Resource" path="res://resources/factions/zarak/ships/scout.tres" id="3_ship"]
+[ext_resource type="PackedScene" uid="uid://cdo4s0p3gpjfn" path="res://scenes/ship/accessories/projectiles/ZarakGattlingProjectile.tscn" id="4_projectile"]
+[ext_resource type="PackedScene" uid="uid://cenrgybeamhb01" path="res://scenes/ship/accessories/EnergyBeam.tscn" id="5_beam"]
 
 [resource]
 script = ExtResource("1_script")
@@ -15,6 +17,27 @@ defense_ring_scene = ExtResource("2_ring")
 defense_ring_scale = 1.9
 shield_scale = 0.1
 turret_projectiles = PackedStringArray("cannon", "laser")
+turret_projectile_cannon_scene = ExtResource("4_projectile")
+turret_projectile_cannon_speed = 860.0
+turret_projectile_cannon_attack_range = 820.0
+turret_projectile_cannon_min_attack_range = 95.0
+turret_projectile_cannon_turn_speed = 2.6
+turret_projectile_cannon_attack_cone_degrees = 20.0
+turret_projectile_cannon_fire_rate = 1.8
+turret_projectile_cannon_hull_damage = 24.0
+turret_projectile_cannon_shield_damage = 12.0
+turret_projectile_cannon_is_beam = false
+turret_projectile_laser_scene = ExtResource("5_beam")
+turret_projectile_laser_speed = 1000.0
+turret_projectile_laser_attack_range = 1550.0
+turret_projectile_laser_min_attack_range = 70.0
+turret_projectile_laser_turn_speed = 5.0
+turret_projectile_laser_attack_cone_degrees = 20.0
+turret_projectile_laser_fire_rate = 1.3
+turret_projectile_laser_hull_damage = 7.0
+turret_projectile_laser_shield_damage = 14.0
+turret_projectile_laser_is_beam = true
+turret_projectile_laser_beam_duration = 0.7
 hangar_ship_options = Array[ExtResource("2_304yb")]([ExtResource("3_ship")])
 hull_multiplier = 1.25
 speed_multiplier = 0.9
