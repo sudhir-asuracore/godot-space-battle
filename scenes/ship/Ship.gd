@@ -432,13 +432,16 @@ func _apply_friction(delta: float) -> void:
 	velocity = forward_dir * forward_vel + lateral_dir * lateral_vel
 
 func _process_movement(delta: float) -> void:
-	var to_target: Vector2 = target_position - global_position
-	var distance: float = to_target.length()
-	
-	if distance < 10.0:
+	var final_distance: float = global_position.distance_to(target_position)
+	if final_distance < 10.0:
 		is_moving = false
 		return
-		
+
+	var to_target: Vector2 = target_position - global_position
+	var distance: float = to_target.length()
+	if distance < 1.0:
+		return
+	
 	# 1. Rotation
 	var target_angle: float = to_target.angle()
 	global_rotation = rotate_toward(global_rotation, target_angle, _turn_speed * delta)
@@ -452,8 +455,8 @@ func _process_movement(delta: float) -> void:
 	
 	# 3. Assisted Braking
 	var speed_limit: float = _max_speed
-	if distance < ship_data.arrival_radius:
-		speed_limit = _max_speed * (distance / ship_data.arrival_radius)
+	if final_distance < ship_data.arrival_radius:
+		speed_limit = _max_speed * (final_distance / ship_data.arrival_radius)
 	
 	# Apply acceleration if below speed limit
 	if velocity.length() < speed_limit:

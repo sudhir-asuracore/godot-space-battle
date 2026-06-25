@@ -1,0 +1,36 @@
+[gd_scene format=3 uid="uid://bin4xwd3geh17"]
+
+[ext_resource type="Script" uid="uid://b1rlaun4qx15i" path="res://scenes/ship/accessories/Projectile.gd" id="1_beam"]
+[ext_resource type="Shader" uid="uid://b0t6p1fjgyeuo" path="res://shaders/basic_bullet.gdshader" id="2_beam"]
+
+[sub_resource type="RectangleShape2D" id="1"]
+size = Vector2(48, 4)
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_beam"]
+shader = ExtResource("2_beam")
+shader_parameter/core_color = Color(1, 0.95, 0.8, 1)
+shader_parameter/glow_color = Color(1, 0.4, 0.1, 1)
+shader_parameter/core_width = 0.12
+shader_parameter/glow_width = 0.4
+shader_parameter/laser_length = 0.95
+shader_parameter/pulse_speed = 24.0
+shader_parameter/pulse_intensity = 0.03
+
+[node name="Projectile" type="Area2D" unique_id=1564926885]
+collision_layer = 16
+collision_mask = 79
+script = ExtResource("1_beam")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=232432488]
+shape = SubResource("1")
+
+[node name="ColorRect" type="ColorRect" parent="." unique_id=91975747]
+material = SubResource("ShaderMaterial_beam")
+offset_left = -28.0
+offset_top = -4.0
+offset_right = 28.0
+offset_bottom = 4.0
+pivot_offset = Vector2(28, 4)
+
+[connection signal="body_entered" from="." to="." method="_on_body_entered"]
+[connection signal="area_entered" from="." to="." method="_on_area_entered"]

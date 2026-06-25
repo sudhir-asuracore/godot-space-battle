@@ -39,8 +39,10 @@ scale = Vector2(0.37264147, 0.3726415)
 texture = ExtResource("5_dixe8")
 script = ExtResource("6_i8a3x")
 
-[node name="Muzzle" type="Marker2D" parent="Turret_0" unique_id=751381750]
+[node name="cannon_0" type="Marker2D" parent="Turret_0" unique_id=751381750]
 position = Vector2(166.37976, -10.734177)
+
+[node name="laser_0" type="Marker2D" parent="Turret_0" unique_id=1587954120]
 
 [node name="Turret_1" type="Sprite2D" parent="." unique_id=822193456]
 position = Vector2(-324, 5.9604645e-08)
@@ -49,8 +51,10 @@ scale = Vector2(0.37264147, 0.3726415)
 texture = ExtResource("5_dixe8")
 script = ExtResource("6_i8a3x")
 
-[node name="Muzzle" type="Marker2D" parent="Turret_1" unique_id=836462393]
+[node name="cannon_0" type="Marker2D" parent="Turret_1" unique_id=836462393]
 position = Vector2(166.37976, -10.734177)
+
+[node name="laser_0" type="Marker2D" parent="Turret_1" unique_id=1114309198]
 
 [node name="Turret_2" type="Sprite2D" parent="." unique_id=50750570]
 position = Vector2(3.8146973e-06, 330)
@@ -59,8 +63,10 @@ scale = Vector2(0.37264147, 0.3726415)
 texture = ExtResource("5_dixe8")
 script = ExtResource("6_i8a3x")
 
-[node name="Muzzle" type="Marker2D" parent="Turret_2" unique_id=613850895]
+[node name="cannon_0" type="Marker2D" parent="Turret_2" unique_id=613850895]
 position = Vector2(166.37976, -10.734177)
+
+[node name="laser_0" type="Marker2D" parent="Turret_2" unique_id=1165200208]
 
 [node name="Turret_3" type="Sprite2D" parent="." unique_id=646841362]
 position = Vector2(320.00003, 3.0517578e-05)
@@ -68,5 +74,7 @@ scale = Vector2(0.37264147, 0.3726415)
 texture = ExtResource("5_dixe8")
 script = ExtResource("6_i8a3x")
 
-[node name="Muzzle" type="Marker2D" parent="Turret_3" unique_id=2065680669]
+[node name="cannon_0" type="Marker2D" parent="Turret_3" unique_id=2065680669]
 position = Vector2(166.37976, -10.734177)
+
+[node name="laser_0" type="Marker2D" parent="Turret_3" unique_id=789974472]

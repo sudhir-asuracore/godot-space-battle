@@ -14,6 +14,9 @@ var _planets: Array[OrbitData] = []
 
 const SUN_SCENE = preload("res://scenes/solar_system/SunCorona.tscn")
 const PLANET_SCENE = preload("res://scenes/solar_system/Planet.tscn")
+const FIRST_PLANET_ORBIT_RADIUS := 2800.0
+const PLANET_ORBIT_SPACING_MIN := 2600.0
+const PLANET_ORBIT_SPACING_VARIANCE := 1200.0
 
 func _ready() -> void:
 	# 1. Instance the Sun
@@ -33,10 +36,10 @@ func _ready() -> void:
 	
 	var default_planet_data: PlanetData = load("res://resources/planets/default_planet.tres") as PlanetData
 
-	var current_radius: float = 2000.0
+	var current_radius: float = FIRST_PLANET_ORBIT_RADIUS
 	for i in range(num_planets):
 		if i > 0:
-			current_radius += 2000.0 + randf() * 1000.0
+			current_radius += PLANET_ORBIT_SPACING_MIN + randf() * PLANET_ORBIT_SPACING_VARIANCE
 		
 		var texture_path: String = planet_textures[i % planet_textures.size()]
 		

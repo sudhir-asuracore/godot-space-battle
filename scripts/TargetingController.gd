@@ -9,12 +9,10 @@ var auto_target: Node2D = null
 # Priority: Manual target > Ship with least health nearby > Ship
 var locked_target: Node2D:
 	get:
-		if is_instance_valid(manual_target):
-			if not manual_target is Ship or not manual_target.is_dead:
-				return manual_target
-		if is_instance_valid(auto_target):
-			if not auto_target is Ship or not auto_target.is_dead:
-				return auto_target
+		if _is_target_still_attackable(manual_target):
+			return manual_target
+		if _is_target_still_attackable(auto_target):
+			return auto_target
 		return null
 	set(v):
 		manual_target = v
@@ -40,16 +38,19 @@ func _attempt_lock() -> void:
 	
 	var found_target: Node2D = null
 	for result: Dictionary in results:
-		var collider: Node2D = result.get("collider") as Node2D
+		var collider := result.get("collider") as Node
 		if not collider:
 			continue
-		if collider == _ship:
+		var candidate: Node2D = _resolve_attackable_target(collider)
+		if not candidate:
+			continue
+		if candidate == _ship:
 			continue
 		# Skip friendly units / structures.
-		if "faction_data" in collider and collider.faction_data == _ship.faction_data:
+		if "faction_data" in candidate and candidate.faction_data == _ship.faction_data:
 			continue
-		if collider is Ship or collider.has_method("is_enemy"):
-			found_target = collider
+		if candidate is Ship or candidate.has_method("is_enemy"):
+			found_target = candidate
 			break
 			
 	if found_target:
@@ -67,11 +68,16 @@ func _process(_delta: float) -> void:
 func _update_targets() -> void:
 	# 1. Validate Manual Target
 	if manual_target:
-		if not is_instance_valid(manual_target) or (manual_target is Ship and manual_target.is_dead):
+		if not _is_target_still_attackable(manual_target):
 			manual_target = null
 			
-	# 2. Find Auto Target (if no manual target or just to have it ready)
-	var ships: Array[Node] = get_tree().get_nodes_in_group("ships")
+	# 2. Find Auto Target (if no manual target or just to have it ready).
+	# Includes defense structures so they are treated as attackable assets.
+	var candidates: Array[Node] = []
+	candidates.append_array(get_tree().get_nodes_in_group("ships"))
+	candidates.append_array(get_tree().get_nodes_in_group("homebases"))
+	candidates.append_array(get_tree().get_nodes_in_group("homebase_defenses"))
+
 	var best_target: Node2D = null
 	var min_health: float = INF
 	
@@ -79,18 +85,67 @@ func _update_targets() -> void:
 	# ShipData has target_lock_range.
 	var search_range: float = _ship.ship_data.target_lock_range
 	
-	for s: Node in ships:
-		if s == _ship or not is_instance_valid(s) or (s is Ship and s.is_dead):
+	for candidate in candidates:
+		var target: Node2D = _resolve_attackable_target(candidate)
+		if not _is_valid_auto_target(target):
 			continue
-		if s.faction_data == _ship.faction_data:
+		if "faction_data" in target and target.faction_data == _ship.faction_data:
 			continue
 			
-		var dist: float = _ship.global_position.distance_to(s.global_position)
+		var dist: float = _ship.global_position.distance_to(target.global_position)
 		if dist <= search_range:
 			# Priority: Ship with least health nearby
-			var health: float = s.current_hull + s.current_shield
+			var health: float = _get_target_health(target)
 			if health < min_health:
 				min_health = health
-				best_target = s
+				best_target = target
 	
 	auto_target = best_target
+
+func _resolve_attackable_target(collider: Node) -> Node2D:
+	var direct := collider as Node2D
+	if direct:
+		if direct.has_meta("damage_receiver"):
+			var receiver_meta: Variant = direct.get_meta("damage_receiver")
+			if receiver_meta is Node2D and is_instance_valid(receiver_meta):
+				return receiver_meta
+		return direct
+
+	if collider.has_meta("damage_receiver"):
+		var receiver: Variant = collider.get_meta("damage_receiver")
+		if receiver is Node2D and is_instance_valid(receiver):
+			return receiver
+
+	return null
+
+func _is_target_still_attackable(target: Variant) -> bool:
+	if target == null:
+		return false
+	if not is_instance_valid(target):
+		return false
+
+	var target_node := target as Node2D
+	if not target_node:
+		return false
+
+	if target_node is Ship and target_node.is_dead:
+		return false
+	if "is_destroyed" in target_node and target_node.is_destroyed:
+		return false
+	return true
+
+func _is_valid_auto_target(target: Node2D) -> bool:
+	if not target:
+		return false
+	if target == _ship:
+		return false
+	return _is_target_still_attackable(target)
+
+func _get_target_health(target: Node2D) -> float:
+	var hull: float = float(target.get("current_hull")) if "current_hull" in target else 0.0
+	var shield: float = float(target.get("current_shield")) if "current_shield" in target else 0.0
+
+	var total: float = hull + shield
+	if total <= 0.0:
+		return INF
+	return total

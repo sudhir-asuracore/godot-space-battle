@@ -13,7 +13,9 @@ var capturing_faction: FactionData = null
 
 func _ready() -> void:
 	add_to_group("planets")
-	GameState.planet_ownership[self] = owning_faction
+	var game_state := get_node_or_null(^"/root/GameState")
+	if game_state and "planet_ownership" in game_state:
+		game_state.planet_ownership[self] = owning_faction
 	if planet_data:
 		# Set up collision and capture zone based on data
 		var circle = CircleShape2D.new()
@@ -101,5 +103,7 @@ func _apply_pressure(faction: FactionData, pressure: float, delta: float) -> voi
 func _capture_planet(faction: FactionData) -> void:
 	owning_faction = faction
 	_update_ring_color()
-	EventBus.planet_captured.emit(self, faction)
+	var event_bus := get_node_or_null(^"/root/EventBus")
+	if event_bus:
+		event_bus.call("emit_signal", &"planet_captured", self, faction)
 	print("Planet captured by ", faction.name)
