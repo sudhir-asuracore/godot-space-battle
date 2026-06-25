@@ -48,6 +48,9 @@ var _visual_thrust: float = 0.0
 var _shield_regen_delay_timer: float = 0.0
 var _last_attacker: Node2D = null
 var _shield_active: bool = true
+# Cached AudioManager autoload reference (resolved once; the singleton lives for
+# the whole game so the per-frame node-path lookup is avoidable).
+var _audio_manager: Node = null
 
 func _ready() -> void:
 	_before_ship_ready()
@@ -66,7 +69,9 @@ func _exit_tree() -> void:
 			audio_manager.call("stop_player_thruster_audio", true)
 
 func _get_audio_manager() -> Node:
-	return get_node_or_null(^"/root/AudioManager")
+	if _audio_manager == null or not is_instance_valid(_audio_manager):
+		_audio_manager = get_node_or_null(^"/root/AudioManager")
+	return _audio_manager
 
 func _before_ship_ready() -> void:
 	pass

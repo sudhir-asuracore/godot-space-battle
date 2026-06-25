@@ -21,6 +21,14 @@ var _coverage_overlay = null
 var _hitbox: Area2D = null
 var _repair_cooldown: float = 0.0
 
+# Combined weapon stats are derived purely from the (static) faction data, so
+# they are computed once per configuration instead of every frame.
+var _combined_stats_valid: bool = false
+var _cached_attack_range: float = 0.0
+var _cached_min_attack_range: float = 0.0
+var _cached_turn_speed: float = 0.0
+var _cached_attack_cone_degrees: float = 0.0
+
 func _ready() -> void:
 	add_to_group("homebase_defenses")
 	_ensure_hitbox()
@@ -30,6 +38,7 @@ func _ready() -> void:
 func configure(faction: FactionData, owner_homebase: Homebase) -> void:
 	faction_data = faction
 	homebase = owner_homebase
+	_combined_stats_valid = false
 	max_hull = maxf(1.0, faction_data.defense_structure_max_hull) if faction_data else 420.0
 	current_hull = max_hull
 	is_destroyed = false
@@ -159,29 +168,44 @@ func _is_target_in_attack_cone(target: Node2D) -> bool:
 	var angle_diff_deg := absf(rad_to_deg(forward.angle_to(to_target)))
 	return angle_diff_deg <= maxf(0.0, _combined_attack_cone_degrees()) * 0.5
 
-func _combined_attack_range() -> float:
-	var best := 0.0
+# Computes the combined weapon stats once and caches them. They only depend on
+# the static faction data, so recomputing every frame (and per helper call) was
+# wasted work on the turret hot path.
+func _ensure_combined_stats() -> void:
+	if _combined_stats_valid or not faction_data:
+		return
+
+	var range_best := 0.0
+	var min_best := INF
+	var turn_best := 0.0
+	var cone_best := 0.0
 	for weapon in faction_data.get_turret_weapons():
-		best = maxf(best, faction_data.turret_weapon_attack_range(weapon))
-	return best
+		range_best = maxf(range_best, faction_data.turret_weapon_attack_range(weapon))
+		min_best = minf(min_best, faction_data.turret_weapon_min_attack_range(weapon))
+		turn_best = maxf(turn_best, faction_data.turret_weapon_turn_speed(weapon))
+		cone_best = maxf(cone_best, faction_data.turret_weapon_attack_cone_degrees(weapon))
+
+	_cached_attack_range = range_best
+	_cached_min_attack_range = min_best if min_best != INF else 0.0
+	_cached_turn_speed = turn_best
+	_cached_attack_cone_degrees = cone_best
+	_combined_stats_valid = true
+
+func _combined_attack_range() -> float:
+	_ensure_combined_stats()
+	return _cached_attack_range
 
 func _combined_min_attack_range() -> float:
-	var best := INF
-	for weapon in faction_data.get_turret_weapons():
-		best = minf(best, faction_data.turret_weapon_min_attack_range(weapon))
-	return best if best != INF else 0.0
+	_ensure_combined_stats()
+	return _cached_min_attack_range
 
 func _combined_turn_speed() -> float:
-	var best := 0.0
-	for weapon in faction_data.get_turret_weapons():
-		best = maxf(best, faction_data.turret_weapon_turn_speed(weapon))
-	return best
+	_ensure_combined_stats()
+	return _cached_turn_speed
 
 func _combined_attack_cone_degrees() -> float:
-	var best := 0.0
-	for weapon in faction_data.get_turret_weapons():
-		best = maxf(best, faction_data.turret_weapon_attack_cone_degrees(weapon))
-	return best
+	_ensure_combined_stats()
+	return _cached_attack_cone_degrees
 
 # Backward compatible helper: fires every configured weapon at the target.
 func _fire_projectile(target: Node2D) -> void:

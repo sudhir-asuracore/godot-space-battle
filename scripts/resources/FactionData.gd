@@ -45,6 +45,14 @@ const TURRET_WEAPON_PREFIX := "turret_projectile_"
 # are not declared as explicit members above.
 var _turret_weapon_overrides: Dictionary = {}
 
+# Cached result of get_turret_weapons(). The weapon list is static at runtime,
+# so it is built once and reused, avoiding a per-call Array allocation on the
+# turret hot path. The cache is rebuilt automatically if turret_projectiles
+# changes (e.g. when edited in the editor).
+var _turret_weapons_cache: Array = []
+var _turret_weapons_source: PackedStringArray = PackedStringArray()
+var _turret_weapons_cache_valid: bool = false
+
 func _set(property: StringName, value: Variant) -> bool:
 	var key := String(property)
 	if _is_dynamic_weapon_property(key):
@@ -76,13 +84,22 @@ func _is_dynamic_weapon_property(key: String) -> bool:
 
 # Returns the configured weapon names. Falls back to a single implicit weapon
 # (empty name) that uses the turret level defaults for legacy turrets.
+# The result is cached because it is queried many times per frame per turret.
 func get_turret_weapons() -> Array:
+	if not _turret_weapons_cache_valid or _turret_weapons_source != turret_projectiles:
+		_rebuild_turret_weapons_cache()
+	return _turret_weapons_cache
+
+func _rebuild_turret_weapons_cache() -> void:
+	var names: Array = []
 	if turret_projectiles.size() > 0:
-		var names: Array = []
 		for weapon in turret_projectiles:
 			names.append(String(weapon))
-		return names
-	return [""]
+	else:
+		names.append("")
+	_turret_weapons_cache = names
+	_turret_weapons_source = turret_projectiles.duplicate()
+	_turret_weapons_cache_valid = true
 
 func _turret_weapon_value(weapon: String, suffix: String, default_value: Variant) -> Variant:
 	var key := "%s%s_%s" % [TURRET_WEAPON_PREFIX, weapon, suffix]
