@@ -1,0 +1,11 @@
+[gd_resource type="Resource" script_class="AbilityData" load_steps=2 format=3]
+[ext_resource type="Script" path="res://scripts/resources/AbilityData.gd" id="1_script"]
+
+[resource]
+script = ExtResource("1_script")
+name = "Overcharge"
+description = "Temporarily boosts weapon damage and fire rate"
+capacitor_cost = 45.0
+cooldown = 12.0
+duration = 4.0
+ability_type = "Offense"

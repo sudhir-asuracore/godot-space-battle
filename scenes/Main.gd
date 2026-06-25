@@ -129,6 +129,17 @@ func _spawn_player_ship() -> void:
 	_ship.update_stats()
 	_targeting = _ship.get_node_or_null(^"TargetingController") as TargetingController
 	_ability = _ship.get_node_or_null(^"AbilityController") as AbilityController
+	_attach_range_indicator(_ship)
+
+func _attach_range_indicator(ship: Ship) -> void:
+	if not ship:
+		return
+	if ship.has_node(^"RangeIndicator"):
+		return
+	var indicator := ShipRangeIndicator.new()
+	indicator.name = &"RangeIndicator"
+	ship.add_child(indicator)
+	indicator.setup(ship)
 
 func _spawn_enemy() -> void:
 	var enemy_scene: PackedScene = _load_ship_scene(_enemy_ship_scene_path, DEFAULT_ENEMY_SHIP_SCENE_PATH)

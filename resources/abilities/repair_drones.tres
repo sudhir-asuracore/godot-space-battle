@@ -1,0 +1,11 @@
+[gd_resource type="Resource" script_class="AbilityData" load_steps=2 format=3]
+[ext_resource type="Script" path="res://scripts/resources/AbilityData.gd" id="1_script"]
+
+[resource]
+script = ExtResource("1_script")
+name = "Repair Drones"
+description = "Deploys autonomous drones that repair the ship"
+capacitor_cost = 35.0
+cooldown = 20.0
+duration = 6.0
+ability_type = "Support"

@@ -31,7 +31,7 @@ class_name ShipData
 
 @export_category("Weapons")
 @export var basic_weapon: WeaponData
-@export var target_lock_range: float = 600.0
+@export var target_lock_range: float = 300.0
 
 @export_category("Visuals")
 @export var trail_color: Color = Color(1.0, 0.5, 0.2, 0.8)

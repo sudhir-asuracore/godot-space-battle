@@ -1,0 +1,11 @@
+[gd_resource type="Resource" script_class="AbilityData" load_steps=2 format=3]
+[ext_resource type="Script" path="res://scripts/resources/AbilityData.gd" id="1_script"]
+
+[resource]
+script = ExtResource("1_script")
+name = "Supershield"
+description = "Projects a reinforced shield that absorbs heavy damage"
+capacitor_cost = 50.0
+cooldown = 15.0
+duration = 5.0
+ability_type = "Defense"

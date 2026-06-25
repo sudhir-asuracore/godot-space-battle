@@ -52,6 +52,7 @@ texture = ExtResource("2_stars")
 centered = false
 
 [node name="Parallax2D_Nebula" type="Parallax2D" parent="Background" unique_id=585829479]
+visible = false
 scroll_scale = Vector2(0.2, 0.2)
 repeat_size = Vector2(1920, 1080)
 autoscroll = Vector2(0.1, 0.1)

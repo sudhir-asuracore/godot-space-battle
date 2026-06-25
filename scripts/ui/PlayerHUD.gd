@@ -21,6 +21,8 @@ var _target_label: Label
 var _hangar_shop_panel: Panel
 var _hangar_shop_title: Label
 var _hangar_shop_list: Label
+var _abilities_bar: AbilitiesBar
+var _pointer_reticle: PointerReticle
 
 var _shop_faction: FactionData = null
 
@@ -34,8 +36,22 @@ func setup(ship: Ship, player_faction: FactionData, enemy_faction: FactionData, 
 	_player_faction = player_faction
 	_enemy_faction = enemy_faction
 	_ability = ability
+	if _abilities_bar:
+		_abilities_bar.setup(ship, ability)
+	if _pointer_reticle:
+		_pointer_reticle.setup(ship)
 
 func _build_ui() -> void:
+	_abilities_bar = AbilitiesBar.new()
+	_abilities_bar.set_anchors_preset(Control.PRESET_FULL_RECT)
+	_abilities_bar.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	add_child(_abilities_bar)
+
+	_pointer_reticle = PointerReticle.new()
+	_pointer_reticle.set_anchors_preset(Control.PRESET_FULL_RECT)
+	_pointer_reticle.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	add_child(_pointer_reticle)
+
 	var panel := Panel.new()
 	panel.set_anchors_preset(Control.PRESET_BOTTOM_LEFT)
 	panel.position = Vector2(15, -250)
