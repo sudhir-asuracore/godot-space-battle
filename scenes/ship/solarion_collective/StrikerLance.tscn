@@ -1,13 +1,18 @@
-[gd_scene format=3]
+[gd_scene format=3 uid="uid://b8u5ukqmjkuxd"]
 
-[ext_resource type="Script" path="res://scenes/ship/solarion_collective/StrikerLance.gd" id="1_ship_script"]
-[ext_resource type="Texture2D" path="res://assets/factions/solarion/ships/striker_lance/lower.png" id="2_ship_texture"]
+[ext_resource type="Script" uid="uid://d4dccqub1h7qx" path="res://scenes/ship/solarion_collective/StrikerLance.gd" id="1_ship_script"]
+[ext_resource type="Texture2D" uid="uid://brglcic5bnbgw" path="res://assets/factions/solarion/ships/striker_lance/lower.png" id="2_ship_texture"]
 [ext_resource type="Resource" path="res://resources/factions/solarion_collective/ships/striker_lance.tres" id="3_ship_data"]
+[ext_resource type="Texture2D" uid="uid://bqsac2bs218na" path="res://assets/factions/solarion/ships/striker_lance/n-map.png" id="4_jie5h"]
 [ext_resource type="Shader" uid="uid://ygy6nmx7ntkx" path="res://shaders/ship_shield.gdshader" id="4_shield_shader"]
 [ext_resource type="Script" uid="uid://2uyc2o7ii6i8" path="res://scripts/AbilityController.gd" id="5_ability_ctrl"]
 [ext_resource type="Script" uid="uid://csclx8xvdnu4u" path="res://scripts/TargetingController.gd" id="6_targeting_ctrl"]
 [ext_resource type="Script" uid="uid://ce7dxwfhmrobl" path="res://scripts/WeaponController.gd" id="7_weapon_ctrl"]
 [ext_resource type="PackedScene" uid="uid://cyfh6mhr1uyqg" path="res://scenes/ship/accessories/Thruster.tscn" id="8_thruster"]
+
+[sub_resource type="CanvasTexture" id="CanvasTexture_nxtc6"]
+diffuse_texture = ExtResource("2_ship_texture")
+normal_texture = ExtResource("4_jie5h")
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_striker_lance_shield"]
 shader = ExtResource("4_shield_shader")
@@ -24,17 +29,17 @@ shader_parameter/grow_from_right = true
 radius = 25.0
 height = 80.0
 
-[node name="StrikerLance" type="CharacterBody2D"]
+[node name="StrikerLance" type="CharacterBody2D" unique_id=46216839]
 script = ExtResource("1_ship_script")
 ship_data = ExtResource("3_ship_data")
 
-[node name="Sprite2D-superlow" type="Sprite2D" parent="."]
+[node name="Sprite2D-superlow" type="Sprite2D" parent="." unique_id=724312479]
 position = Vector2(-1.2185352, 0.6787586)
 rotation = 1.5707964
 scale = Vector2(0.1, 0.094)
-texture = ExtResource("2_ship_texture")
+texture = SubResource("CanvasTexture_nxtc6")
 
-[node name="Shield" type="ColorRect" parent="."]
+[node name="Shield" type="ColorRect" parent="." unique_id=236542781]
 material = SubResource("ShaderMaterial_striker_lance_shield")
 offset_left = -58.0
 offset_top = -43.0
@@ -42,51 +47,51 @@ offset_right = 51.0
 offset_bottom = 40.0
 pivot_offset = Vector2(42, 25)
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=1345135575]
 rotation = 1.5708
 shape = SubResource("CapsuleShape2D_striker_lance")
 
-[node name="Muzzle" type="Marker2D" parent="."]
+[node name="Muzzle" type="Marker2D" parent="." unique_id=1342596275]
 position = Vector2(42, 0)
 
-[node name="Engine" type="Marker2D" parent="."]
+[node name="Engine" type="Marker2D" parent="." unique_id=518682322]
 position = Vector2(-31, -1)
 
-[node name="damage_0" type="Marker2D" parent="."]
+[node name="damage_0" type="Marker2D" parent="." unique_id=481845458]
 position = Vector2(-17, 0)
 
-[node name="thruster_rear_0" parent="." instance=ExtResource("8_thruster")]
+[node name="thruster_rear_0" parent="." unique_id=178791902 instance=ExtResource("8_thruster")]
 position = Vector2(-38.7, -9)
 rotation = 1.5707964
 scale = Vector2(0.007285808, 0.022202449)
 
-[node name="thruster_rear_1" parent="." instance=ExtResource("8_thruster")]
+[node name="thruster_rear_1" parent="." unique_id=214674882 instance=ExtResource("8_thruster")]
 position = Vector2(-38.7, 10)
 rotation = 1.5707964
 scale = Vector2(0.007285808, 0.022202449)
 
-[node name="thruster_rear_2" parent="." instance=ExtResource("8_thruster")]
+[node name="thruster_rear_2" parent="." unique_id=1429810884 instance=ExtResource("8_thruster")]
 position = Vector2(-36, -21)
 rotation = 1.5707964
 scale = Vector2(0.009, 0.04)
 
-[node name="thruster_rear_3" parent="." instance=ExtResource("8_thruster")]
+[node name="thruster_rear_3" parent="." unique_id=1463326290 instance=ExtResource("8_thruster")]
 position = Vector2(-36, 22)
 rotation = 1.5707964
 scale = Vector2(0.009, 0.04)
 
-[node name="thruster_rear_4" parent="." instance=ExtResource("8_thruster")]
+[node name="thruster_rear_4" parent="." unique_id=1393963801 instance=ExtResource("8_thruster")]
 position = Vector2(-38.585, 0.5)
 rotation = 1.5707964
 scale = Vector2(0.018, 0.08)
 
-[node name="WeaponController" type="Node2D" parent="."]
+[node name="WeaponController" type="Node2D" parent="." unique_id=2107797252]
 script = ExtResource("7_weapon_ctrl")
 
-[node name="AbilityController" type="Node2D" parent="."]
+[node name="AbilityController" type="Node2D" parent="." unique_id=179436908]
 script = ExtResource("5_ability_ctrl")
 
-[node name="TargetingController" type="Node2D" parent="."]
+[node name="TargetingController" type="Node2D" parent="." unique_id=1295658060]
 script = ExtResource("6_targeting_ctrl")
 
-[node name="StateMachine" type="Node" parent="."]
+[node name="StateMachine" type="Node" parent="." unique_id=800719105]

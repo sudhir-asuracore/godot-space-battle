@@ -1,12 +1,13 @@
 extends Node2D
 class_name GameMain
 
-@onready var _ship: Ship = $Ship as Ship
+var _ship: Ship = null
 @onready var _path_line: Line2D = $PathLine as Line2D
 @onready var _camera: GameCamera = $Camera2D as GameCamera
 @onready var _zoom_label: Label = $HUD/Control/ZoomPanel/Label as Label
 @onready var _reticle: TargetReticle = $HUD/TargetReticle as TargetReticle
 @onready var _player_hud: PlayerHUD = $HUD/PlayerHUD as PlayerHUD
+@onready var _solar_system: SolarSystem = $SolarSystem as SolarSystem
 
 const AI_SHIP_CONTROLLER_SCRIPT = preload("res://scripts/AIShipController.gd")
 const HOMEBASE_SCENE = preload("res://scenes/homebase/Homebase.tscn")
@@ -17,8 +18,11 @@ const DEFAULT_ENEMY_SHIP_DATA_PATH := "res://resources/factions/solarion_collect
 const DEFAULT_ENEMY_FACTION_PATH := "res://resources/factions/solarion_collective/solarion_collective.tres"
 const DEFAULT_ENEMY_SHIP_SCENE_PATH := "res://scenes/ship/solarion_collective/StrikerLance.tscn"
 
+# Fallback layout used only if the solar system is unavailable. The live
+# values come from SolarSystem, which anchors the two homebase planets.
 const PLAYER_HOMEBASE_POS := Vector2.DOWN * 3000.0
 const ENEMY_HOMEBASE_POS := Vector2.UP * 3000.0
+const PLAYER_SPAWN_POSITION := Vector2(0, 500)
 
 const PLAYER_RESPAWN_DELAY := 5.0
 const ENEMY_SPAWN_INTERVAL := 10.0
@@ -38,6 +42,11 @@ var _enemy_ships: Array[Ship] = []
 var _enemy_spawn_timer: float = 0.0
 var _match_over: bool = false
 
+# Live homebase / spawn positions resolved from the solar system layout.
+var _player_homebase_pos: Vector2 = PLAYER_HOMEBASE_POS
+var _enemy_homebase_pos: Vector2 = ENEMY_HOMEBASE_POS
+var _player_spawn_pos: Vector2 = PLAYER_SPAWN_POSITION
+
 func _ready() -> void:
 	AudioManager.stop_menu_ambient()
 	# Programmatically register required Input Map actions.
@@ -51,6 +60,7 @@ func _ready() -> void:
 	_register_key_action(&"reverse_thrust", KEY_R)
 	
 	_resolve_match_setup()
+	_resolve_solar_system_layout()
 	_player_faction = load(GameState.selected_faction_path if not GameState.selected_faction_path.is_empty() else DEFAULT_PLAYER_FACTION_PATH) as FactionData
 	_enemy_faction = load(GameState.selected_enemy_faction_path if not GameState.selected_enemy_faction_path.is_empty() else DEFAULT_ENEMY_FACTION_PATH) as FactionData
 	if not _player_faction:
@@ -93,35 +103,24 @@ func _setup_camera_and_path() -> void:
 func _spawn_homebases() -> void:
 	var player_hb: Homebase = HOMEBASE_SCENE.instantiate() as Homebase
 	player_hb.name = &"PlayerHomebase"
-	player_hb.position = PLAYER_HOMEBASE_POS
+	player_hb.position = _player_homebase_pos
 	player_hb.faction_data = _player_faction
 	add_child(player_hb)
 	
 	var enemy_hb: Homebase = HOMEBASE_SCENE.instantiate() as Homebase
 	enemy_hb.name = &"EnemyHomebase"
-	enemy_hb.position = ENEMY_HOMEBASE_POS
+	enemy_hb.position = _enemy_homebase_pos
 	enemy_hb.faction_data = _enemy_faction
 	add_child(enemy_hb)
 
 func _spawn_player_ship() -> void:
-	var placeholder_ship: Ship = _ship
-	var spawn_position := Vector2.ZERO
-	if placeholder_ship:
-		spawn_position = placeholder_ship.global_position
-
 	var player_ship_scene: PackedScene = _load_ship_scene(_player_ship_scene_path, DEFAULT_PLAYER_SHIP_SCENE_PATH)
 	var player_ship: Ship = player_ship_scene.instantiate() as Ship if player_ship_scene else null
-	if player_ship:
-		add_child(player_ship)
-		player_ship.global_position = spawn_position
-		if placeholder_ship:
-			placeholder_ship.queue_free()
-		_ship = player_ship
-	else:
-		_ship = placeholder_ship
-
-	if not _ship:
+	if not player_ship:
 		return
+	add_child(player_ship)
+	player_ship.global_position = _player_spawn_pos
+	_ship = player_ship
 
 	_ship.is_player_ship = true
 	_apply_ship_data_override(_ship, _player_ship_data_path, DEFAULT_PLAYER_SHIP_DATA_PATH)
@@ -150,13 +149,22 @@ func _spawn_enemy() -> void:
 		return
 	enemy.is_player_ship = false
 	var spawn_offset: Vector2 = Vector2.RIGHT * randf_range(-300.0, 300.0) + Vector2.DOWN * randf_range(200.0, 500.0)
-	enemy.position = ENEMY_HOMEBASE_POS + spawn_offset
+	enemy.position = _enemy_homebase_pos + spawn_offset
 	_apply_ship_data_override(enemy, _enemy_ship_data_path, DEFAULT_ENEMY_SHIP_DATA_PATH)
 	enemy.faction_data = _enemy_faction
 	_configure_enemy_ai(enemy)
 	add_child(enemy)
 	enemy.update_stats()
 	_enemy_ships.append(enemy)
+
+func _resolve_solar_system_layout() -> void:
+	# SolarSystem is a child node, so it is ready before Main: read the homebase
+	# ends (2nd / last-but-2nd planet) and player spawn it chose for this match.
+	if not _solar_system:
+		return
+	_player_homebase_pos = _solar_system.player_homebase_position
+	_enemy_homebase_pos = _solar_system.enemy_homebase_position
+	_player_spawn_pos = _solar_system.player_spawn_position
 
 func _resolve_match_setup() -> void:
 	_player_ship_data_path = GameState.selected_ship_data_path if not GameState.selected_ship_data_path.is_empty() else DEFAULT_PLAYER_SHIP_DATA_PATH
@@ -198,7 +206,7 @@ func _respawn_player() -> void:
 	if not _ship or _match_over:
 		return
 	# Free T1 fallback so the player can never softlock (PRD section 10.4).
-	_ship.respawn(PLAYER_HOMEBASE_POS)
+	_ship.respawn(_player_homebase_pos)
 	if _targeting:
 		_targeting.locked_target = null
 	print("Player respawned at homebase!")
@@ -239,6 +247,7 @@ func _process(delta: float) -> void:
 		# destroyed enemy ship) before TargetingController clears it this frame.
 		if not is_instance_valid(_targeting.locked_target):
 			_targeting.locked_target = null
+		_reticle.player_ship = _ship
 		_reticle.target = _targeting.locked_target
 	
 	# 4. Keep the enemy faction alive (basic respawn / reinforcement).

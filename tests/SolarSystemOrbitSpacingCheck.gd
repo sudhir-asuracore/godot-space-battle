@@ -12,8 +12,8 @@ func _run() -> void:
 	await process_frame
 
 	var orbits: Array = solar_system.get("_planets")
-	if orbits.size() < 3 or orbits.size() > 5:
-		failures.append("Expected 3-5 planets, got %d" % orbits.size())
+	if orbits.size() < 6 or orbits.size() > 12:
+		failures.append("Expected 6-12 planets, got %d" % orbits.size())
 
 	if not orbits.is_empty():
 		var first_radius: float = float(orbits[0].radius)

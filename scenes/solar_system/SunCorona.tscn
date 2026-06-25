@@ -35,6 +35,7 @@ mouse_filter = 2
 [node name="PointLight2D" type="PointLight2D" parent="."]
 color = Color(1, 0.75, 0.3, 1)
 energy = 2.5
+height = 2500.0
 shadow_enabled = true
 shadow_color = Color(0, 0, 0, 0.9)
 texture = ExtResource("3_light0")
