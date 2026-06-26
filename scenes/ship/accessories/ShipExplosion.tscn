@@ -1,0 +1,62 @@
+[gd_scene format=3 uid="uid://dxlohswbatqth"]
+
+[ext_resource type="Script" uid="uid://bxibty8ojs1t6" path="res://scenes/ship/accessories/ShipExplosion.gd" id="1_script"]
+[ext_resource type="AudioStream" uid="uid://caflh2ueak06l" path="res://assets/audio/explosion/medium.mp3" id="2_audio"]
+[ext_resource type="Texture2D" uid="uid://d1b1nleckc7g2" path="res://assets/textures/explosion/fire_01.png" id="3_fire"]
+[ext_resource type="Texture2D" uid="uid://c6hroqmrc4kyn" path="res://assets/textures/smoke/smoke_01.png" id="4_smoke"]
+
+[sub_resource type="CanvasItemMaterial" id="CanvasItemMaterial_flash"]
+blend_mode = 1
+
+[sub_resource type="ParticleProcessMaterial" id="ParticleProcessMaterial_fire"]
+particle_flag_disable_z = true
+gravity = Vector3(0, 98, 0)
+
+[sub_resource type="ParticleProcessMaterial" id="ParticleProcessMaterial_smoke"]
+particle_flag_disable_z = true
+gravity = Vector3(0, 98, 0)
+
+[sub_resource type="ParticleProcessMaterial" id="ParticleProcessMaterial_sparks"]
+particle_flag_disable_z = true
+gravity = Vector3(0, 98, 0)
+
+[node name="ShipExplosion" type="Node2D" unique_id=1419639215]
+script = ExtResource("1_script")
+
+[node name="Fire" type="GPUParticles2D" parent="." unique_id=260742520]
+material = SubResource("CanvasItemMaterial_flash")
+emitting = false
+amount = 40
+texture = ExtResource("3_fire")
+lifetime = 0.7
+one_shot = true
+explosiveness = 0.95
+local_coords = true
+process_material = SubResource("ParticleProcessMaterial_fire")
+
+[node name="Smoke" type="GPUParticles2D" parent="." unique_id=721223511]
+emitting = false
+amount = 28
+texture = ExtResource("4_smoke")
+lifetime = 1.6
+one_shot = true
+explosiveness = 0.8
+local_coords = true
+process_material = SubResource("ParticleProcessMaterial_smoke")
+
+[node name="Sparks" type="GPUParticles2D" parent="." unique_id=2112968816]
+material = SubResource("CanvasItemMaterial_flash")
+emitting = false
+amount = 24
+lifetime = 0.6
+one_shot = true
+explosiveness = 1.0
+local_coords = true
+process_material = SubResource("ParticleProcessMaterial_sparks")
+
+[node name="Flash" type="Sprite2D" parent="." unique_id=741695361]
+material = SubResource("CanvasItemMaterial_flash")
+texture = ExtResource("3_fire")
+
+[node name="Audio" type="AudioStreamPlayer2D" parent="." unique_id=2079125492]
+stream = ExtResource("2_audio")

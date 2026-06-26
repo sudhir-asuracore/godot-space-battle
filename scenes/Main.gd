@@ -7,6 +7,7 @@ var _ship: Ship = null
 @onready var _zoom_label: Label = $HUD/Control/ZoomPanel/Label as Label
 @onready var _reticle: TargetReticle = $HUD/TargetReticle as TargetReticle
 @onready var _player_hud: PlayerHUD = $HUD/PlayerHUD as PlayerHUD
+@onready var _debug_panel: DebugPanel = $HUD/DebugPanel as DebugPanel
 @onready var _solar_system: SolarSystem = $SolarSystem as SolarSystem
 
 const AI_SHIP_CONTROLLER_SCRIPT = preload("res://scripts/AIShipController.gd")
@@ -77,6 +78,8 @@ func _ready() -> void:
 	
 	if _player_hud:
 		_player_hud.setup(_ship, _player_faction, _enemy_faction, _ability)
+	if _debug_panel:
+		_debug_panel.setup(_ship)
 	
 	EventBus.homebase_destroyed.connect(_on_homebase_destroyed)
 	EventBus.match_ended.connect(_on_match_ended)

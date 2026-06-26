@@ -1,11 +1,16 @@
 extends Resource
 class_name ShipData
 
+# Physical size class of the ship. Drives the destruction explosion scale,
+# duration and audio so larger hulls blow up bigger, longer and louder.
+enum ShipSize { SMALL, MEDIUM, LARGE, CAPITAL }
+
 @export_category("Profile")
 @export var name: String = "Scout"
 @export var tier: int = 1
 @export var ship_class: String = "Assault"
 @export var faction: String = ""
+@export var ship_size: ShipSize = ShipSize.MEDIUM
 
 @export_category("Vitals")
 @export var max_hull: float = 100.0

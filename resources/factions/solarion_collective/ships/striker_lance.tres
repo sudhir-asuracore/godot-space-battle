@@ -1,20 +1,21 @@
-[gd_resource type="Resource" script_class="ShipData" load_steps=3 format=3]
+[gd_resource type="Resource" script_class="ShipData" format=3 uid="uid://c037p2jq4y0s7"]
 
-[ext_resource type="Resource" path="res://resources/weapons/gattling.tres" id="1_weapon"]
-[ext_resource type="Script" path="res://scripts/resources/ShipData.gd" id="2_script"]
+[ext_resource type="Resource" uid="uid://bib8dja4sl371" path="res://resources/weapons/gattling.tres" id="1_weapon"]
+[ext_resource type="Script" uid="uid://deo8044sl5k4r" path="res://scripts/resources/ShipData.gd" id="2_script"]
 
 [resource]
 script = ExtResource("2_script")
 name = "Striker Lance"
 ship_class = "Striker"
 faction = "Solaris"
+ship_size = 0
+max_hull = 175.0
+max_shield = 60.0
+shield_angle = 230.0
 max_speed = 265.0
 acceleration = 360.0
 strafe_speed = 90.0
 reverse_speed = 62.0
-max_hull = 175.0
-max_shield = 60.0
-shield_angle = 230.0
 basic_weapon = ExtResource("1_weapon")
 trail_color = Color(0.25, 0.7, 1, 0.8)
 trail_brightness = 2.2

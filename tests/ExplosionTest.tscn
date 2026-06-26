@@ -1,0 +1,10 @@
+[gd_scene format=3 uid="uid://c1aorbdqk1xll"]
+
+[ext_resource type="Script" uid="uid://cm5oebgox0w5d" path="res://tests/explosion_test.gd" id="1_1yppx"]
+
+[node name="ExplosionTest" type="Node2D" unique_id=2114313572]
+script = ExtResource("1_1yppx")
+
+[node name="ColorRect" type="ColorRect" parent="." unique_id=1932612821]
+offset_right = 486.21655
+offset_bottom = 367.0

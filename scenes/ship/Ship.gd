@@ -13,6 +13,8 @@ var current_shield: float = 0.0
 var current_capacitor: float = 0.0
 var is_dead: bool = false
 var is_player_ship: bool = false
+# Debug cheat: when enabled the ship's hull never takes damage (shields still work).
+var infinite_hull: bool = false
 
 @onready var _engine: Marker2D = $Engine
 @onready var _shield_sprite: ColorRect = $Shield
@@ -20,6 +22,7 @@ var is_player_ship: bool = false
 
 const RIBBON_TRAIL_SCENE = preload("res://scenes/ship/accessories/RibbonTrail.tscn")
 const DAMAGE_MARKER_EFFECT_SCENE = preload("res://scenes/ship/accessories/ShipDamageFlames.tscn")
+const SHIP_EXPLOSION_SCENE = preload("res://scenes/trial/ExplosionSprite.tscn")
 const DAMAGE_MARKER_PREFIX := "damage_"
 const THRUSTER_NODE_PREFIX := "thruster_"
 
@@ -479,6 +482,9 @@ func set_target(pos: Vector2) -> void:
 func take_damage(hull_dmg: float, shield_dmg: float, attacker: Node2D = null) -> void:
 	if is_dead:
 		return
+	# Debug cheat: ignore all hull damage while invulnerable.
+	if infinite_hull:
+		hull_dmg = 0.0
 	
 	_last_attacker = attacker
 	# Any damage resets the shield regeneration delay.
@@ -541,7 +547,8 @@ func _die() -> void:
 		var audio_manager := _get_audio_manager()
 		if audio_manager:
 			audio_manager.call("set_player_thruster_intensity", 0.0)
-	# Hide or explode
+	# Spawn the destruction explosion (scaled to the ship size) then hide the hull.
+	_spawn_destruction_explosion()
 	visible = false
 	if _trail:
 		_trail.call("stop_emitting")
@@ -558,6 +565,19 @@ func _die() -> void:
 
 func _on_ship_destroyed(_killer: Node2D) -> void:
 	pass
+
+func _spawn_destruction_explosion() -> void:
+	var spawn_parent: Node = get_parent()
+	if spawn_parent == null:
+		return
+	# Spawn the one-shot explosion sprite (it plays its animation + audio and
+	# frees itself once the effect is over).
+	var explosion := SHIP_EXPLOSION_SCENE.instantiate() as Node2D
+	if explosion == null:
+		return
+	spawn_parent.add_child(explosion)
+	explosion.global_position = global_position
+	explosion.global_rotation = global_rotation
 	
 func is_enemy() -> bool:
 	return faction_data != null # Simple check for MVP

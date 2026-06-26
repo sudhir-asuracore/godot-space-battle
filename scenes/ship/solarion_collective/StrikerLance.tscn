@@ -2,7 +2,7 @@
 
 [ext_resource type="Script" uid="uid://d4dccqub1h7qx" path="res://scenes/ship/solarion_collective/StrikerLance.gd" id="1_ship_script"]
 [ext_resource type="Texture2D" uid="uid://brglcic5bnbgw" path="res://assets/factions/solarion/ships/striker_lance/lower.png" id="2_ship_texture"]
-[ext_resource type="Resource" path="res://resources/factions/solarion_collective/ships/striker_lance.tres" id="3_ship_data"]
+[ext_resource type="Resource" uid="uid://c037p2jq4y0s7" path="res://resources/factions/solarion_collective/ships/striker_lance.tres" id="3_ship_data"]
 [ext_resource type="Texture2D" uid="uid://bqsac2bs218na" path="res://assets/factions/solarion/ships/striker_lance/n-map.png" id="4_jie5h"]
 [ext_resource type="Shader" uid="uid://ygy6nmx7ntkx" path="res://shaders/ship_shield.gdshader" id="4_shield_shader"]
 [ext_resource type="Script" uid="uid://2uyc2o7ii6i8" path="res://scripts/AbilityController.gd" id="5_ability_ctrl"]
@@ -10,19 +10,19 @@
 [ext_resource type="Script" uid="uid://ce7dxwfhmrobl" path="res://scripts/WeaponController.gd" id="7_weapon_ctrl"]
 [ext_resource type="PackedScene" uid="uid://cyfh6mhr1uyqg" path="res://scenes/ship/accessories/Thruster.tscn" id="8_thruster"]
 
-[sub_resource type="CanvasTexture" id="CanvasTexture_nxtc6"]
+[sub_resource type="CanvasTexture" id="CanvasTexture_3ek63"]
 diffuse_texture = ExtResource("2_ship_texture")
 normal_texture = ExtResource("4_jie5h")
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_striker_lance_shield"]
 shader = ExtResource("4_shield_shader")
-shader_parameter/shield_fill_color = Color(0.15, 0.2, 0.45, 0.35)
-shader_parameter/shield_rim_color = Color(0.6, 0.8, 1, 1)
-shader_parameter/radius = 0.4610000218975
-shader_parameter/rim_thickness = 0.0030000001425
-shader_parameter/glow_intensity = 2.0550000501125
-shader_parameter/shield_angle = 237.282011270895
-shader_parameter/edge_smoothness = 0.43500001996398
+shader_parameter/shield_fill_color = Color(0.13725491, 0.18039216, 0.49803922, 0.7176471)
+shader_parameter/shield_rim_color = Color(0, 0.4, 0.9019608, 1)
+shader_parameter/radius = 0.4670000221825
+shader_parameter/rim_thickness = 0.0090000004275
+shader_parameter/glow_intensity = 1.9970000473575
+shader_parameter/shield_angle = 235.30401117694
+shader_parameter/edge_smoothness = 0.5
 shader_parameter/grow_from_right = true
 
 [sub_resource type="CapsuleShape2D" id="CapsuleShape2D_striker_lance"]
@@ -37,14 +37,14 @@ ship_data = ExtResource("3_ship_data")
 position = Vector2(-1.2185352, 0.6787586)
 rotation = 1.5707964
 scale = Vector2(0.1, 0.094)
-texture = SubResource("CanvasTexture_nxtc6")
+texture = SubResource("CanvasTexture_3ek63")
 
 [node name="Shield" type="ColorRect" parent="." unique_id=236542781]
 material = SubResource("ShaderMaterial_striker_lance_shield")
-offset_left = -58.0
-offset_top = -43.0
-offset_right = 51.0
-offset_bottom = 40.0
+offset_left = -83.0
+offset_top = -77.0
+offset_right = 74.0
+offset_bottom = 77.0
 pivot_offset = Vector2(42, 25)
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=1345135575]
@@ -61,27 +61,32 @@ position = Vector2(-31, -1)
 position = Vector2(-17, 0)
 
 [node name="thruster_rear_0" parent="." unique_id=178791902 instance=ExtResource("8_thruster")]
-position = Vector2(-38.7, -9)
+position = Vector2(-38, -10.000001)
 rotation = 1.5707964
 scale = Vector2(0.007285808, 0.022202449)
 
 [node name="thruster_rear_1" parent="." unique_id=214674882 instance=ExtResource("8_thruster")]
-position = Vector2(-38.7, 10)
+position = Vector2(-39, 12.000001)
 rotation = 1.5707964
 scale = Vector2(0.007285808, 0.022202449)
 
 [node name="thruster_rear_2" parent="." unique_id=1429810884 instance=ExtResource("8_thruster")]
-position = Vector2(-36, -21)
+position = Vector2(-32, -24)
 rotation = 1.5707964
 scale = Vector2(0.009, 0.04)
 
 [node name="thruster_rear_3" parent="." unique_id=1463326290 instance=ExtResource("8_thruster")]
-position = Vector2(-36, 22)
+position = Vector2(-32, 26)
 rotation = 1.5707964
 scale = Vector2(0.009, 0.04)
 
 [node name="thruster_rear_4" parent="." unique_id=1393963801 instance=ExtResource("8_thruster")]
-position = Vector2(-38.585, 0.5)
+position = Vector2(-41.000004, 1)
+rotation = 1.5707964
+scale = Vector2(0.018, 0.16)
+
+[node name="thruster_rear_5" parent="." unique_id=2012412625 instance=ExtResource("8_thruster")]
+position = Vector2(-33, 1)
 rotation = 1.5707964
 scale = Vector2(0.018, 0.08)
 
