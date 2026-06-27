@@ -96,6 +96,11 @@ func _apply_damage(delta: float) -> void:
 		return
 	if not target.has_method("take_damage"):
 		return
+	# The firing ship may have been destroyed (freed) while the beam was still
+	# active. Drop the stale reference so a previously freed object is never
+	# passed along to take_damage().
+	if not is_instance_valid(source_ship):
+		source_ship = null
 	target.call("take_damage", damage_hull_per_second * delta, damage_shield_per_second * delta, source_ship)
 
 func _is_target_valid() -> bool:

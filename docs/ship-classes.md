@@ -249,3 +249,33 @@ Optional:
 ```
 
 For your game's scale (1–6 players per faction), this is probably the sweet spot: **simple enough to learn in 10 minutes, but deep enough to master over dozens of matches.**
+-----
+
+
+Ship: I removed older scout and Striker Lance ships. A new ship is now available: res://scenes/ship/solarion_collective/Frigate.tscn
+
+Changes:
+Collision: The ship defines 4 collisionShape2D's. collision_front, collision_rear, collision_left, collision_right. Define different damage taken percentages by direction. eg: rear would be the highest. front will be the least.
+
+Engine: engine_0, engine_1.. will be available. Thruster trail needs to be rendered for each engine.
+
+Damage indicators: damage_0, damage_1.. are where res://scenes/ship/DamageMarkerEffect.tscn will be displayed. eg: if there are 3 markers, display each one after 1/3rd damage to hull has occured.
+
+Thrusters: thruster_rear_0,thruster_rear_1.. define thrusters on the rear.
+thruster_left_0, thruster_left_1.. and thruster_right_0, thruster_right_1 etc.. are side thrusters. These should be fired for side movement. Q and E keys will be used by user to  turn/point the ship to left and right.
+
+Muzzle: Weapons on the ship are defined in this pattern: muzzle_cannon_left_0, muzzle_cannon_left_1 = meaning, resource defined for muzzle_cannon in the ship specific tres file will be used as the projectile. Simmilarly muzzle_laser_front_0, muzzle_gattling_front_0 and any such patterns in future will follow the same definition structure. For now, use gattling.tres as the weapon projectile for all muzzles. We will customize it later.
+
+Make all possible parsing changes to handle the dynamic systems. 
+
+Texture LOD: Each ship may provide up to three `Sprite2D` children holding the same hull artwork at decreasing resolutions:
+- `lod_near`  – high resolution (e.g. 1024h.png), used for close camera / hangar / selection screen.
+- `lod_medium` – medium detail (e.g. 512h.png), used at normal gameplay zoom.
+- `lod_far`   – low resolution (e.g. 256h.png), used when zoomed far out, simplified to reduce shimmering / pixel crawl.
+
+`Ship.gd` shows exactly one of these based on the active `Camera2D` zoom (`zoom.x >= 1.6` → near, `>= 0.6` → medium, otherwise far). The lowest-detail level (`lod_far`) is the guaranteed fallback. Ships with no `lod_*` children, or only a single sprite, keep rendering their existing sprite unchanged, so the system is additive and backwards compatible.
+
+Recommended Godot import settings for each LOD texture:
+- Import > Compress > Mode: Lossless.
+- Import > Mipmaps > Generate: On.
+- Sprite2D/CanvasItem `texture_filter`: Linear With Mipmaps.

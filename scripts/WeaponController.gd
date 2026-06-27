@@ -5,7 +5,14 @@ const WEAPON_COVERAGE_OVERLAY_SCRIPT := preload("res://scripts/WeaponCoverageOve
 
 @onready var _ship: Ship = get_parent() as Ship
 @onready var _targeting: TargetingController = get_parent().get_node(^"TargetingController")
-@onready var _muzzle: Marker2D = get_parent().get_node(^"Muzzle")
+
+const MUZZLE_NODE_PREFIX := "muzzle_"
+
+# Every muzzle marker on the ship, parsed from nodes named
+# muzzle_<weapon_type>_<side>_<index>. A legacy single "Muzzle" node is also
+# supported. The primary muzzle is used as the representative point for audio.
+var _muzzles: Array[Dictionary] = []
+var _primary_muzzle: Marker2D = null
 
 var _shot_timer: float = 0.0
 var _reload_timer: float = 0.0
@@ -18,7 +25,86 @@ var _coverage_overlay = null
 const PROJECTILE_SCENE = preload("res://scenes/ship/accessories/Projectile.tscn")
 
 func _ready() -> void:
+	_resolve_muzzles()
 	_ensure_coverage_overlay()
+
+func _resolve_muzzles() -> void:
+	_muzzles.clear()
+	_primary_muzzle = null
+
+	var parent := get_parent()
+	if not parent:
+		return
+
+	# Legacy single "Muzzle" node support for older ship scenes.
+	var legacy_muzzle := parent.get_node_or_null(^"Muzzle") as Marker2D
+	if legacy_muzzle:
+		_muzzles.append({"node": legacy_muzzle, "weapon_type": &"", "side": &"", "index": 0})
+
+	for child in parent.get_children():
+		var marker := child as Marker2D
+		if not marker:
+			continue
+		var muzzle_metadata := _parse_muzzle_node_name(marker.name)
+		if muzzle_metadata.is_empty():
+			continue
+		muzzle_metadata["node"] = marker
+		_muzzles.append(muzzle_metadata)
+
+	_muzzles.sort_custom(func(a: Dictionary, b: Dictionary) -> bool:
+		var a_type: String = str(a.get("weapon_type", &""))
+		var b_type: String = str(b.get("weapon_type", &""))
+		if a_type != b_type:
+			return a_type < b_type
+		var a_side: String = str(a.get("side", &""))
+		var b_side: String = str(b.get("side", &""))
+		if a_side != b_side:
+			return a_side < b_side
+		return int(a.get("index", 0)) < int(b.get("index", 0))
+	)
+
+	if not _muzzles.is_empty():
+		_primary_muzzle = _muzzles[0].get("node") as Marker2D
+
+func _parse_muzzle_node_name(node_name: StringName) -> Dictionary:
+	# Expected pattern: muzzle_<weapon_type>_<side>_<index>
+	# e.g. muzzle_cannon_left_0, muzzle_gattling_front_0.
+	var raw_name: String = str(node_name)
+	if not raw_name.begins_with(MUZZLE_NODE_PREFIX):
+		return {}
+
+	var parts: PackedStringArray = raw_name.split("_")
+	if parts.size() != 4:
+		return {}
+	if parts[0] != "muzzle":
+		return {}
+
+	var weapon_type: String = parts[1]
+	var side: String = parts[2]
+	var index_text: String = parts[3]
+	if weapon_type.is_empty() or side.is_empty() or not index_text.is_valid_int():
+		return {}
+
+	return {
+		"weapon_type": StringName(weapon_type),
+		"side": StringName(side),
+		"index": int(index_text),
+	}
+
+func _muzzle_audio_position() -> Vector2:
+	if _primary_muzzle and is_instance_valid(_primary_muzzle):
+		return _primary_muzzle.global_position
+	if _ship:
+		return _ship.global_position
+	return global_position
+
+func _get_weapon_for_muzzle(muzzle_entry: Dictionary, fallback_weapon: WeaponData) -> WeaponData:
+	var weapon_type: StringName = muzzle_entry.get("weapon_type", &"")
+	if weapon_type != &"" and _ship and _ship.ship_data:
+		var mapped: WeaponData = _ship.ship_data.get_muzzle_weapon(weapon_type)
+		if mapped:
+			return mapped
+	return fallback_weapon
 
 func _process(delta: float) -> void:
 	if not _can_process_weapon_logic():
@@ -171,24 +257,42 @@ func _fire(target: Node2D, weapon: WeaponData) -> bool:
 		print("Error: Projectile scene not preloaded!")
 		return false
 
-	_play_fire_audio(weapon)
-	_spawn_muzzle_flash(weapon)
-
-	var projectile: Projectile = _create_projectile()
-	if not projectile:
+	if _muzzles.is_empty():
 		return false
 
-	_configure_projectile(projectile, target, weapon)
-	_add_projectile_to_world(projectile)
-	_after_projectile_spawned(projectile, target, weapon)
-	return true
+	_play_fire_audio(weapon)
+
+	# Fire a projectile from every muzzle, each using the projectile mapped to
+	# its weapon type (falling back to the ship's basic weapon).
+	var fired_any: bool = false
+	for muzzle_entry in _muzzles:
+		var muzzle_node := muzzle_entry.get("node") as Marker2D
+		if not muzzle_node or not is_instance_valid(muzzle_node):
+			continue
+
+		var muzzle_weapon: WeaponData = _get_weapon_for_muzzle(muzzle_entry, weapon)
+		if not muzzle_weapon:
+			continue
+
+		_spawn_muzzle_flash(muzzle_weapon, muzzle_node)
+
+		var projectile: Projectile = _create_projectile()
+		if not projectile:
+			continue
+
+		_configure_projectile(projectile, muzzle_node, target, muzzle_weapon)
+		_add_projectile_to_world(projectile)
+		_after_projectile_spawned(projectile, target, muzzle_weapon)
+		fired_any = true
+
+	return fired_any
 
 func _create_projectile() -> Projectile:
 	return PROJECTILE_SCENE.instantiate() as Projectile
 
-func _configure_projectile(projectile: Projectile, target: Node2D, weapon: WeaponData) -> void:
-	projectile.global_position = _muzzle.global_position
-	projectile.direction = (_muzzle.global_position.direction_to(target.global_position)).normalized()
+func _configure_projectile(projectile: Projectile, muzzle: Marker2D, target: Node2D, weapon: WeaponData) -> void:
+	projectile.global_position = muzzle.global_position
+	projectile.direction = (muzzle.global_position.direction_to(target.global_position)).normalized()
 	projectile.speed = weapon.projectile_speed
 	projectile.damage_hull = weapon.hull_damage
 	projectile.damage_shield = weapon.shield_damage
@@ -224,17 +328,19 @@ func _play_fire_audio(weapon: WeaponData) -> void:
 	var is_player_shot: bool = false
 	if _ship.faction_data != null and player_faction != null:
 		is_player_shot = _ship.faction_data == player_faction
-	audio_manager.call("play_weapon_fire", weapon.fire_audio, _muzzle.global_position, is_player_shot, _ship)
+	audio_manager.call("play_weapon_fire", weapon.fire_audio, _muzzle_audio_position(), is_player_shot, _ship)
 
-func _spawn_muzzle_flash(weapon: WeaponData) -> void:
+func _spawn_muzzle_flash(weapon: WeaponData, muzzle: Marker2D) -> void:
 	if not weapon.muzzle_flash:
+		return
+	if not muzzle or not is_instance_valid(muzzle):
 		return
 
 	var muzzle_flash_instance := weapon.muzzle_flash.instantiate() as Node2D
 	if not muzzle_flash_instance:
 		return
 
-	_muzzle.add_child(muzzle_flash_instance)
+	muzzle.add_child(muzzle_flash_instance)
 	muzzle_flash_instance.position = Vector2.ZERO
 	muzzle_flash_instance.rotation = 0.0
 	muzzle_flash_instance.scale = Vector2.ONE * maxf(0.0, weapon.muzzle_flash_scale)

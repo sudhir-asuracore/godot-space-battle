@@ -16,21 +16,52 @@ var is_player_ship: bool = false
 # Debug cheat: when enabled the ship's hull never takes damage (shields still work).
 var infinite_hull: bool = false
 
-@onready var _engine: Marker2D = $Engine
-@onready var _shield_sprite: ColorRect = $Shield
+@onready var _engine: Marker2D = get_node_or_null(^"Engine") as Marker2D
+@onready var _shield_sprite: ColorRect = get_node_or_null(^"Shield") as ColorRect
 
 
 const RIBBON_TRAIL_SCENE = preload("res://scenes/ship/accessories/RibbonTrail.tscn")
-const DAMAGE_MARKER_EFFECT_SCENE = preload("res://scenes/ship/accessories/ShipDamageFlames.tscn")
+const DAMAGE_MARKER_EFFECT_SCENE = preload("res://scenes/ship/DamageMarkerEffect.tscn")
 const SHIP_EXPLOSION_SCENE = preload("res://scenes/trial/ExplosionSprite.tscn")
 const DAMAGE_MARKER_PREFIX := "damage_"
 const THRUSTER_NODE_PREFIX := "thruster_"
+const ENGINE_NODE_PREFIX := "engine_"
+const COLLISION_NODE_PREFIX := "collision_"
+
+# Texture level-of-detail. Ships may provide up to three Sprite2D children
+# (lod_near / lod_medium / lod_far) holding the same artwork at decreasing
+# resolutions. The appropriate one is shown based on the active camera zoom so
+# the hull stays crisp when zoomed in and avoids shimmering when zoomed out.
+# Ordered from highest detail to lowest; each level is shown while the camera
+# zoom is at or above its minimum threshold.
+const LOD_LEVELS: Array[Dictionary] = [
+	{"name": &"lod_near", "min_zoom": 1.6},
+	{"name": &"lod_medium", "min_zoom": 0.6},
+	{"name": &"lod_far", "min_zoom": 0.0},
+]
+
+# Per-direction multipliers applied to incoming damage. Only directions that
+# have a matching collision_<dir> shape on the ship are used; everything else
+# falls back to 1.0. Rear is the most vulnerable, the front the least.
+const DIRECTIONAL_DAMAGE_MULTIPLIERS := {
+	&"front": 0.6,
+	&"left": 1.0,
+	&"right": 1.0,
+	&"rear": 1.6,
+}
 
 var _trail: Node = null
+var _trails: Array[Node] = []
+var _engines: Array[Marker2D] = []
+var _collision_directions: Dictionary = {}
 var _damage_markers: Array[Marker2D] = []
 var _damage_marker_effects: Array[Node2D] = []
 var _thruster_entries: Array[Dictionary] = []
 var _thrusters_by_category: Dictionary = {}
+# Ordered list of available texture LOD sprites (highest detail first) and the
+# name of the level currently shown so we only toggle visibility on change.
+var _lod_sprites: Array[Dictionary] = []
+var _current_lod: StringName = &""
 
 # Internal calculated stats (data + faction multipliers)
 var max_hull: float
@@ -47,6 +78,9 @@ var _braking_strength: float
 
 var _thrust_intensity: float = 0.0
 var _visual_thrust: float = 0.0
+# Per-side thruster intensities (driven by the Q/E turn input). Keys: "left"/"right".
+var _side_thrust_intensity: Dictionary = {&"left": 0.0, &"right": 0.0}
+var _visual_side_thrust: Dictionary = {&"left": 0.0, &"right": 0.0}
 
 var _shield_regen_delay_timer: float = 0.0
 var _last_attacker: Node2D = null
@@ -59,11 +93,19 @@ func _ready() -> void:
 	_before_ship_ready()
 	add_to_group("ships")
 	target_position = global_position
+	_cache_engines()
+	_cache_collision_directions()
 	_cache_thrusters()
 	update_stats()
 	_duplicate_runtime_materials()
 	_initialize_ship_visuals()
+	_cache_lod_sprites()
+	_update_lod()
 	_after_ship_ready()
+
+func _process(_delta: float) -> void:
+	# Presentation-only: keep the visible texture LOD in sync with camera zoom.
+	_update_lod()
 
 func _exit_tree() -> void:
 	if is_player_ship:
@@ -152,6 +194,111 @@ func _parse_thruster_node_name(node_name: StringName) -> Dictionary:
 		"index": int(index_text),
 	}
 
+func _cache_engines() -> void:
+	# Collect every engine_<index> Marker2D so each one can drive its own
+	# thruster trail. Falls back to a legacy single "Engine" node if present.
+	_engines.clear()
+
+	for child in get_children():
+		var engine_marker := child as Marker2D
+		if not engine_marker:
+			continue
+		var engine_name := str(engine_marker.name)
+		if not engine_name.begins_with(ENGINE_NODE_PREFIX):
+			continue
+		var index_text := engine_name.substr(ENGINE_NODE_PREFIX.length())
+		if index_text.is_valid_int():
+			_engines.append(engine_marker)
+
+	_engines.sort_custom(func(a: Marker2D, b: Marker2D) -> bool:
+		return _engine_index(a.name) < _engine_index(b.name)
+	)
+
+	if _engines.is_empty() and _engine != null:
+		_engines.append(_engine)
+
+func _engine_index(engine_name: StringName) -> int:
+	var engine_name_text := str(engine_name)
+	if not engine_name_text.begins_with(ENGINE_NODE_PREFIX):
+		return 1_000_000
+	var index_text := engine_name_text.substr(ENGINE_NODE_PREFIX.length())
+	if index_text.is_valid_int():
+		return index_text.to_int()
+	return 1_000_000
+
+func _cache_collision_directions() -> void:
+	# Record which collision_<dir> shapes exist so directional damage scaling
+	# only kicks in for directions the ship actually models.
+	_collision_directions.clear()
+
+	for child in get_children():
+		var collision_shape := child as CollisionShape2D
+		if not collision_shape:
+			continue
+		var collision_name := str(collision_shape.name)
+		if not collision_name.begins_with(COLLISION_NODE_PREFIX):
+			continue
+		var direction := collision_name.substr(COLLISION_NODE_PREFIX.length())
+		if direction.is_empty():
+			continue
+		_collision_directions[StringName(direction)] = collision_shape
+
+func _cache_lod_sprites() -> void:
+	# Collect the lod_near / lod_medium / lod_far Sprite2D children (in detail
+	# order) so render logic can switch between them by camera zoom. Ships that
+	# don't define LOD sprites simply end up with an empty list and are left to
+	# render whatever single sprite they ship with.
+	_lod_sprites.clear()
+	_current_lod = &""
+
+	for level in LOD_LEVELS:
+		var level_name: StringName = level.get("name", &"")
+		var sprite := get_node_or_null(NodePath(String(level_name))) as Sprite2D
+		if sprite:
+			_lod_sprites.append({
+				"name": level_name,
+				"sprite": sprite,
+				"min_zoom": float(level.get("min_zoom", 0.0)),
+			})
+
+func _update_lod() -> void:
+	# No LOD sprites means this ship uses a single static sprite: nothing to do.
+	if _lod_sprites.size() < 2:
+		if _lod_sprites.size() == 1 and _current_lod == &"":
+			var only := _lod_sprites[0]
+			(only["sprite"] as Sprite2D).visible = true
+			_current_lod = only["name"]
+		return
+
+	var zoom := _get_camera_zoom()
+	var selected: Dictionary = _select_lod_level(zoom)
+	var selected_name: StringName = selected.get("name", &"")
+	if selected_name == _current_lod:
+		return
+
+	_current_lod = selected_name
+	for entry in _lod_sprites:
+		var sprite := entry["sprite"] as Sprite2D
+		if sprite:
+			sprite.visible = entry["name"] == selected_name
+
+func _select_lod_level(zoom: float) -> Dictionary:
+	# Pick the highest-detail level whose minimum zoom threshold is satisfied.
+	# LOD entries are stored highest-detail first, so the first match wins; the
+	# lowest-detail level (min_zoom 0.0) is the guaranteed fallback.
+	for entry in _lod_sprites:
+		if zoom >= float(entry.get("min_zoom", 0.0)):
+			return entry
+	return _lod_sprites[_lod_sprites.size() - 1]
+
+func _get_camera_zoom() -> float:
+	if not is_inside_tree():
+		return 1.0
+	var camera := get_viewport().get_camera_2d()
+	if camera == null:
+		return 1.0
+	return camera.zoom.x
+
 func _initialize_ship_visuals() -> void:
 	_setup_trail()
 	_cache_damage_markers()
@@ -161,23 +308,40 @@ func _initialize_ship_visuals() -> void:
 func _setup_trail() -> void:
 	if not ship_data or not is_inside_tree():
 		return
-	
-	# If we already have a trail (e.g. from previous life that didn't clean up), 
-	# stop it so it can fade out and clean itself up
-	if _trail:
-		_trail.call("stop_emitting")
-		_trail.call("set_target", null)
-		_trail = null
-		
-	_trail = RIBBON_TRAIL_SCENE.instantiate()
-	# Add as sibling so it's in world space but managed by the same parent
-	get_parent().add_child(_trail)
-	_trail.call("setup", ship_data)
-	var trail_target: Node2D = self
-	if _engine != null:
-		trail_target = _engine
-	_trail.call("set_target", trail_target)
-	_trail.call("set_emitting", false)
+
+	# Tear down any trails left over from a previous life so they can fade out
+	# and clean themselves up.
+	_clear_trails()
+
+	# Render one trail per engine marker. Ships without explicit engine markers
+	# fall back to a single trail emitted from the ship origin.
+	var trail_targets: Array[Node2D] = []
+	if _engines.is_empty():
+		trail_targets.append(self)
+	else:
+		for engine_marker in _engines:
+			trail_targets.append(engine_marker)
+
+	for trail_target in trail_targets:
+		var trail: Node = RIBBON_TRAIL_SCENE.instantiate()
+		# Add as sibling so it's in world space but managed by the same parent.
+		get_parent().add_child(trail)
+		trail.call("setup", ship_data)
+		trail.call("set_target", trail_target)
+		trail.call("set_emitting", false)
+		_trails.append(trail)
+
+	# Keep the legacy single-trail reference pointing at the first trail so any
+	# external code relying on it keeps working.
+	_trail = _trails[0] if not _trails.is_empty() else null
+
+func _clear_trails() -> void:
+	for trail in _trails:
+		if trail and is_instance_valid(trail):
+			trail.call("stop_emitting")
+			trail.call("set_target", null)
+	_trails.clear()
+	_trail = null
 
 func _cache_damage_markers() -> void:
 	_damage_markers.clear()
@@ -340,23 +504,33 @@ func _physics_process(delta: float) -> void:
 	move_and_slide()
 
 func _process_manual_movement_input(delta: float) -> bool:
-	var strafe_input: float = 0.0
-	if InputMap.has_action("strafe_left") and Input.is_action_pressed("strafe_left"):
-		strafe_input -= 1.0
-	if InputMap.has_action("strafe_right") and Input.is_action_pressed("strafe_right"):
-		strafe_input += 1.0
+	# Q/E manually turn (point) the ship. Negative = turn left (counter-clockwise),
+	# positive = turn right (clockwise).
+	var turn_input: float = 0.0
+	if InputMap.has_action("turn_left") and Input.is_action_pressed("turn_left"):
+		turn_input -= 1.0
+	if InputMap.has_action("turn_right") and Input.is_action_pressed("turn_right"):
+		turn_input += 1.0
+
+	# Drive the side-thruster VFX from the turn input. Turning the nose left
+	# fires the right-hand thrusters (their push rotates the bow left) and
+	# turning right fires the left-hand thrusters.
+	_side_thrust_intensity[&"right"] = 1.0 if turn_input < 0.0 else 0.0
+	_side_thrust_intensity[&"left"] = 1.0 if turn_input > 0.0 else 0.0
+
+	if not is_zero_approx(turn_input):
+		global_rotation += turn_input * _turn_speed * delta
+		# Manual steering takes over from any click-to-move heading.
+		is_moving = false
 
 	var reverse_input: bool = InputMap.has_action("reverse_thrust") and Input.is_action_pressed("reverse_thrust")
-	if is_zero_approx(strafe_input) and not reverse_input:
+	if is_zero_approx(turn_input) and not reverse_input:
 		return false
 
 	var forward_dir: Vector2 = Vector2.from_angle(global_rotation)
 	var lateral_dir: Vector2 = forward_dir.rotated(PI / 2.0)
 	var forward_vel: float = velocity.dot(forward_dir)
 	var lateral_vel: float = velocity.dot(lateral_dir)
-
-	if not is_zero_approx(strafe_input):
-		lateral_vel = move_toward(lateral_vel, strafe_input * _strafe_speed, _acceleration * delta)
 
 	if reverse_input:
 		forward_vel = move_toward(forward_vel, -_reverse_speed, _acceleration * delta)
@@ -379,23 +553,37 @@ func apply_acceleration(accel: Vector2) -> void:
 
 func _update_thruster_vfx(delta: float) -> void:
 	_visual_thrust = move_toward(_visual_thrust, _thrust_intensity, delta * 5.0)
-	
-	if _visual_thrust > 0.001:
-		var thrust_scale: float = lerp(0.008, 0.05, _visual_thrust)
+	_visual_side_thrust[&"left"] = move_toward(_visual_side_thrust[&"left"], _side_thrust_intensity[&"left"], delta * 8.0)
+	_visual_side_thrust[&"right"] = move_toward(_visual_side_thrust[&"right"], _side_thrust_intensity[&"right"], delta * 8.0)
 
-		for thruster_entry in _thruster_entries:
-			var thruster_node := thruster_entry.get("node") as Node2D
-			if thruster_node:
-				thruster_node.scale.y = thrust_scale
+	# Each thruster group reacts to the relevant intensity: rear thrusters track
+	# forward thrust, while the left/right side thrusters track the turn input.
+	for thruster_entry in _thruster_entries:
+		var category: StringName = thruster_entry.get("category", &"")
+		var intensity: float = _visual_thrust
+		if _visual_side_thrust.has(category):
+			intensity = _visual_side_thrust[category]
+		_apply_thruster_intensity(thruster_entry, intensity)
 
-			var thruster_sprite := thruster_entry.get("sprite") as Sprite2D
-			if thruster_sprite and thruster_sprite.material:
-				var shader_material := thruster_sprite.material as ShaderMaterial
-				if shader_material:
-					shader_material.set_shader_parameter(&"emission_glow", _visual_thrust)
-	
-	if _trail:
-		_trail.call("set_emitting", _visual_thrust > 0.01)
+	# Drive every engine trail from the forward thrust.
+	var trail_emitting: bool = _visual_thrust > 0.01
+	for trail in _trails:
+		if trail and is_instance_valid(trail):
+			trail.call("set_emitting", trail_emitting)
+
+func _apply_thruster_intensity(thruster_entry: Dictionary, intensity: float) -> void:
+	var clamped_intensity: float = clampf(intensity, 0.0, 1.0)
+	var thrust_scale: float = lerp(0.008, 0.05, clamped_intensity)
+
+	var thruster_node := thruster_entry.get("node") as Node2D
+	if thruster_node:
+		thruster_node.scale.y = thrust_scale
+
+	var thruster_sprite := thruster_entry.get("sprite") as Sprite2D
+	if thruster_sprite and thruster_sprite.material:
+		var shader_material := thruster_sprite.material as ShaderMaterial
+		if shader_material:
+			shader_material.set_shader_parameter(&"emission_glow", clamped_intensity)
 
 func _update_player_thruster_audio() -> void:
 	if not is_player_ship:
@@ -485,7 +673,13 @@ func take_damage(hull_dmg: float, shield_dmg: float, attacker: Node2D = null) ->
 	# Debug cheat: ignore all hull damage while invulnerable.
 	if infinite_hull:
 		hull_dmg = 0.0
-	
+
+	# Scale incoming damage by the impacted side. Hits to weaker faces (rear)
+	# hurt more than hits to the reinforced bow.
+	var directional_multiplier: float = _get_directional_damage_multiplier(attacker)
+	hull_dmg *= directional_multiplier
+	shield_dmg *= directional_multiplier
+
 	_last_attacker = attacker
 	# Any damage resets the shield regeneration delay.
 	if ship_data:
@@ -508,6 +702,36 @@ func take_damage(hull_dmg: float, shield_dmg: float, attacker: Node2D = null) ->
 		
 	if current_hull <= 0:
 		_die()
+
+func _get_directional_damage_multiplier(attacker: Node2D) -> float:
+	# No attacker reference (e.g. environmental damage) means no directional bias.
+	if attacker == null or not is_instance_valid(attacker):
+		return 1.0
+	if _collision_directions.is_empty():
+		return 1.0
+
+	var to_attacker: Vector2 = attacker.global_position - global_position
+	if to_attacker.length_squared() <= 0.0001:
+		return 1.0
+
+	# Express the hit direction in the ship's local frame where +x is forward
+	# and +y is the ship's right-hand (starboard) side.
+	var local_angle: float = to_attacker.rotated(-global_rotation).angle()
+	var direction: StringName = _hit_direction_from_angle(local_angle)
+
+	# Only bias damage for directions the ship actually models with a collider.
+	if not _collision_directions.has(direction):
+		return 1.0
+	return float(DIRECTIONAL_DAMAGE_MULTIPLIERS.get(direction, 1.0))
+
+func _hit_direction_from_angle(local_angle: float) -> StringName:
+	var abs_angle: float = abs(local_angle)
+	if abs_angle <= PI / 4.0:
+		return &"front"
+	if abs_angle >= 3.0 * PI / 4.0:
+		return &"rear"
+	# Positive local angle points toward +y (the ship's right side).
+	return &"right" if local_angle > 0.0 else &"left"
 
 func _on_damage_taken(_hull_dmg: float, _shield_dmg: float, _attacker: Node2D) -> void:
 	pass
@@ -550,10 +774,7 @@ func _die() -> void:
 	# Spawn the destruction explosion (scaled to the ship size) then hide the hull.
 	_spawn_destruction_explosion()
 	visible = false
-	if _trail:
-		_trail.call("stop_emitting")
-		_trail.call("set_target", null)
-		_trail = null
+	_clear_trails()
 
 	_update_damage_marker_effects()
 	_on_ship_destroyed(_last_attacker)

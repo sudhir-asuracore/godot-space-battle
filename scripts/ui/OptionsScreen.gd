@@ -20,15 +20,15 @@ const THEME_ACCENT_BG := Color(0.41, 0.26, 0.05, 0.96)
 const ACTION_DEFAULT_KEYS := {
 	&"ability_1": KEY_1,
 	&"reverse_thrust": KEY_R,
-	&"strafe_left": KEY_Q,
-	&"strafe_right": KEY_E
+	&"turn_left": KEY_Q,
+	&"turn_right": KEY_E
 }
 
 const ACTION_LABELS := {
 	&"ability_1": "Ability 1",
 	&"reverse_thrust": "Reverse Thrust",
-	&"strafe_left": "Strafe Left",
-	&"strafe_right": "Strafe Right"
+	&"turn_left": "Turn Left",
+	&"turn_right": "Turn Right"
 }
 
 const KEY_OPTIONS := [

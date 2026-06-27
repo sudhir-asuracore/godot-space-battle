@@ -1,0 +1,119 @@
+[gd_scene format=3 uid="uid://be743mvmx3vij"]
+
+[ext_resource type="Script" uid="uid://b7lhnl0g13wt" path="res://scenes/ship/solarion_collective/frigate.gd" id="1_1ciex"]
+[ext_resource type="Texture2D" uid="uid://pt1fpi6qgg0t" path="res://assets/factions/solarion/ships/frigate/normal.png" id="4_vf23u"]
+[ext_resource type="Shader" uid="uid://ygy6nmx7ntkx" path="res://shaders/ship_shield.gdshader" id="5_ultto"]
+[ext_resource type="PackedScene" uid="uid://br83fq677s4yr" path="res://scenes/ship/accessories/Thruster_solarion.tscn" id="6_eh0r1"]
+[ext_resource type="Script" uid="uid://ce7dxwfhmrobl" path="res://scripts/WeaponController.gd" id="7_rgaqf"]
+[ext_resource type="Script" uid="uid://2uyc2o7ii6i8" path="res://scripts/AbilityController.gd" id="8_mic7c"]
+[ext_resource type="Script" uid="uid://csclx8xvdnu4u" path="res://scripts/TargetingController.gd" id="9_jkuic"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_ghxl5"]
+size = Vector2(37.5, 66.5)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_swkrw"]
+size = Vector2(13, 58)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_ass0e"]
+size = Vector2(146, 54)
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_striker_lance_shield"]
+shader = ExtResource("5_ultto")
+shader_parameter/shield_fill_color = Color(0.13725491, 0.18039216, 0.49803922, 0.7176471)
+shader_parameter/shield_rim_color = Color(0, 0.4, 0.9019608, 1)
+shader_parameter/radius = 0.5
+shader_parameter/rim_thickness = 0.0090000004275
+shader_parameter/glow_intensity = 1.9970000473575
+shader_parameter/shield_angle = 270.000012825
+shader_parameter/edge_smoothness = 0.5
+shader_parameter/grow_from_right = true
+
+[node name="Ship" type="CharacterBody2D" unique_id=46216839]
+script = ExtResource("1_1ciex")
+
+[node name="collision_front" type="CollisionShape2D" parent="." unique_id=418808862]
+position = Vector2(114.25, 0)
+shape = SubResource("RectangleShape2D_ghxl5")
+
+[node name="collision_rear" type="CollisionShape2D" parent="." unique_id=44680908]
+position = Vector2(-61, 0)
+shape = SubResource("RectangleShape2D_swkrw")
+
+[node name="collision_left" type="CollisionShape2D" parent="." unique_id=2013418174]
+position = Vector2(20, -45)
+shape = SubResource("RectangleShape2D_ass0e")
+
+[node name="collision_right" type="CollisionShape2D" parent="." unique_id=1117143045]
+position = Vector2(20, 45)
+shape = SubResource("RectangleShape2D_ass0e")
+
+[node name="Shield" type="ColorRect" parent="." unique_id=236542781]
+visible = false
+material = SubResource("ShaderMaterial_striker_lance_shield")
+offset_left = -342.0
+offset_top = -200.0
+offset_right = 458.0
+offset_bottom = 200.0
+
+[node name="muzzle_cannon_left_0" type="Marker2D" parent="." unique_id=1342596275]
+position = Vector2(21, -60)
+
+[node name="muzzle_cannon_right_0" type="Marker2D" parent="." unique_id=1127078243]
+position = Vector2(22, 59)
+
+[node name="muzzle_gattling_front_0" type="Marker2D" parent="." unique_id=981469173]
+position = Vector2(126, 0)
+
+[node name="muzzle_laser_front_0" type="Marker2D" parent="." unique_id=938890835]
+position = Vector2(127, 0)
+
+[node name="engine_0" type="Marker2D" parent="." unique_id=518682322]
+position = Vector2(-58, -13)
+
+[node name="engine_1" type="Marker2D" parent="." unique_id=181678505]
+position = Vector2(-59, 13)
+
+[node name="damage_0" type="Marker2D" parent="." unique_id=481845458]
+position = Vector2(-46, 0)
+
+[node name="damage_1" type="Marker2D" parent="." unique_id=90024912]
+position = Vector2(10, -43)
+
+[node name="damage_2" type="Marker2D" parent="." unique_id=994458793]
+position = Vector2(6, 41)
+
+[node name="thruster_rear_0" parent="." unique_id=2012412625 instance=ExtResource("6_eh0r1")]
+position = Vector2(-58, -13.000002)
+rotation = 1.5707964
+scale = Vector2(0.03, 1)
+
+[node name="thruster_rear_1" parent="." unique_id=1466614262 instance=ExtResource("6_eh0r1")]
+position = Vector2(-59, 13.000001)
+rotation = 1.5707964
+scale = Vector2(0.03, 1)
+
+[node name="thruster_right_0" parent="." unique_id=1596287746 instance=ExtResource("6_eh0r1")]
+position = Vector2(101, 15)
+scale = Vector2(0.02, 0.1)
+
+[node name="thruster_left_0" parent="." unique_id=1573192254 instance=ExtResource("6_eh0r1")]
+position = Vector2(101.00001, -14.000004)
+rotation = 3.1415927
+scale = Vector2(0.02, 0.1)
+
+[node name="Normal" type="Sprite2D" parent="." unique_id=447489579]
+position = Vector2(24, 7.1054274e-15)
+rotation = 1.5707964
+scale = Vector2(0.15, 0.15)
+texture = ExtResource("4_vf23u")
+
+[node name="WeaponController" type="Node2D" parent="." unique_id=2107797252]
+script = ExtResource("7_rgaqf")
+
+[node name="AbilityController" type="Node2D" parent="." unique_id=179436908]
+script = ExtResource("8_mic7c")
+
+[node name="TargetingController" type="Node2D" parent="." unique_id=1295658060]
+script = ExtResource("9_jkuic")
+
+[node name="StateMachine" type="Node" parent="." unique_id=800719105]

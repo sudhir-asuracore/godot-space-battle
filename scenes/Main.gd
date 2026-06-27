@@ -14,10 +14,10 @@ const AI_SHIP_CONTROLLER_SCRIPT = preload("res://scripts/AIShipController.gd")
 const HOMEBASE_SCENE = preload("res://scenes/homebase/Homebase.tscn")
 const DEFAULT_PLAYER_SHIP_DATA_PATH := "res://resources/factions/zarak/ships/scout.tres"
 const DEFAULT_PLAYER_FACTION_PATH := "res://resources/factions/zarak/zarak_confedaracy.tres"
-const DEFAULT_PLAYER_SHIP_SCENE_PATH := "res://scenes/ship/zarak/Scout.tscn"
+const DEFAULT_PLAYER_SHIP_SCENE_PATH := "res://scenes/ship/solarion_collective/Frigate.tscn"
 const DEFAULT_ENEMY_SHIP_DATA_PATH := "res://resources/factions/solarion_collective/ships/striker_lance.tres"
 const DEFAULT_ENEMY_FACTION_PATH := "res://resources/factions/solarion_collective/solarion_collective.tres"
-const DEFAULT_ENEMY_SHIP_SCENE_PATH := "res://scenes/ship/solarion_collective/StrikerLance.tscn"
+const DEFAULT_ENEMY_SHIP_SCENE_PATH := "res://scenes/ship/solarion_collective/Frigate.tscn"
 
 # Fallback layout used only if the solar system is unavailable. The live
 # values come from SolarSystem, which anchors the two homebase planets.
@@ -56,8 +56,9 @@ func _ready() -> void:
 	_register_input_action(&"zoom_in", MOUSE_BUTTON_WHEEL_UP)
 	_register_input_action(&"zoom_out", MOUSE_BUTTON_WHEEL_DOWN)
 	_register_key_action(&"ability_1", KEY_1)
-	_register_key_action(&"strafe_left", KEY_Q)
-	_register_key_action(&"strafe_right", KEY_E)
+	# Q/E point (turn) the ship left/right.
+	_register_key_action(&"turn_left", KEY_Q)
+	_register_key_action(&"turn_right", KEY_E)
 	_register_key_action(&"reverse_thrust", KEY_R)
 	
 	_resolve_match_setup()
@@ -70,20 +71,40 @@ func _ready() -> void:
 		_enemy_faction = load(DEFAULT_ENEMY_FACTION_PATH) as FactionData
 	GameState.player_faction = _player_faction
 
-	_spawn_player_ship()
-	
+	EventBus.player_ship_selected.connect(_on_player_ship_selected)
+
 	_spawn_homebases()
-	_setup_camera_and_path()
 	_spawn_enemy()
-	
-	if _player_hud:
-		_player_hud.setup(_ship, _player_faction, _enemy_faction, _ability)
-	if _debug_panel:
-		_debug_panel.setup(_ship)
-	
+
 	EventBus.homebase_destroyed.connect(_on_homebase_destroyed)
 	EventBus.match_ended.connect(_on_match_ended)
 	EventBus.ship_destroyed.connect(_on_ship_destroyed)
+
+	# Present the faction's available ships and spawn the one the player picks.
+	_prompt_initial_ship_selection()
+
+# Shows the start-of-match ship picker. Falls back to the configured default
+# ship data when the faction has no hangar options.
+func _prompt_initial_ship_selection() -> void:
+	var ships: Array = []
+	if _player_faction:
+		ships = _player_faction.hangar_ship_options.duplicate()
+	if _player_hud and ships.size() > 0:
+		_player_hud.show_ship_selection(_player_faction, ships, "Select your ship to deploy")
+	else:
+		_on_player_ship_selected(load(_player_ship_data_path) as ShipData)
+
+# Spawns the chosen ship, replacing the current player ship if one exists
+# (start-of-match deployment and later hangar swaps both route through here).
+func _on_player_ship_selected(ship_data: ShipData) -> void:
+	if not ship_data:
+		return
+	var spawn_pos: Vector2 = _player_spawn_pos
+	if _ship and is_instance_valid(_ship):
+		spawn_pos = _ship.global_position
+		_ship.queue_free()
+		_ship = null
+	_spawn_player_ship_from_data(ship_data, spawn_pos)
 
 func _setup_camera_and_path() -> void:
 	# Camera follows the player ship automatically on launch.
@@ -116,22 +137,35 @@ func _spawn_homebases() -> void:
 	enemy_hb.faction_data = _enemy_faction
 	add_child(enemy_hb)
 
-func _spawn_player_ship() -> void:
-	var player_ship_scene: PackedScene = _load_ship_scene(_player_ship_scene_path, DEFAULT_PLAYER_SHIP_SCENE_PATH)
+func _spawn_player_ship_from_data(ship_data: ShipData, spawn_pos: Vector2) -> void:
+	# Prefer the scene declared on the ship resource; fall back to the match's
+	# configured player scene (and finally the hard default) when unset.
+	var player_ship_scene: PackedScene = ship_data.ship_scene if ship_data else null
+	if not player_ship_scene:
+		player_ship_scene = _load_ship_scene(_player_ship_scene_path, DEFAULT_PLAYER_SHIP_SCENE_PATH)
 	var player_ship: Ship = player_ship_scene.instantiate() as Ship if player_ship_scene else null
 	if not player_ship:
 		return
 	add_child(player_ship)
-	player_ship.global_position = _player_spawn_pos
+	player_ship.global_position = spawn_pos
 	_ship = player_ship
 
 	_ship.is_player_ship = true
-	_apply_ship_data_override(_ship, _player_ship_data_path, DEFAULT_PLAYER_SHIP_DATA_PATH)
+	_ship.ship_data = ship_data
+	if not _ship.ship_data:
+		_ship.ship_data = load(DEFAULT_PLAYER_SHIP_DATA_PATH) as ShipData
 	_ship.faction_data = _player_faction
 	_ship.update_stats()
 	_targeting = _ship.get_node_or_null(^"TargetingController") as TargetingController
 	_ability = _ship.get_node_or_null(^"AbilityController") as AbilityController
 	_attach_range_indicator(_ship)
+	_setup_camera_and_path()
+	if _player_hud:
+		_player_hud.setup(_ship, _player_faction, _enemy_faction, _ability)
+		if _solar_system:
+			_player_hud.configure_system_endpoints(_solar_system.player_homebase_planet, _solar_system.enemy_homebase_planet)
+	if _debug_panel:
+		_debug_panel.setup(_ship)
 
 func _attach_range_indicator(ship: Ship) -> void:
 	if not ship:

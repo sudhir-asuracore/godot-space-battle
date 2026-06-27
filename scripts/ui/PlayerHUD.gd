@@ -18,11 +18,13 @@ var _majority_label: Label
 var _shield_label: Label
 var _ability_label: Label
 var _target_label: Label
-var _hangar_shop_panel: Panel
-var _hangar_shop_title: Label
-var _hangar_shop_list: Label
+var _ship_select_panel: Panel
+var _ship_select_title: Label
+var _ship_select_subtitle: Label
+var _ship_select_buttons: VBoxContainer
 var _abilities_bar: AbilitiesBar
 var _pointer_reticle: PointerReticle
+var _planet_bar: SystemPlanetBar
 
 var _shop_faction: FactionData = null
 
@@ -40,6 +42,14 @@ func setup(ship: Ship, player_faction: FactionData, enemy_faction: FactionData, 
 		_abilities_bar.setup(ship, ability)
 	if _pointer_reticle:
 		_pointer_reticle.setup(ship)
+	if _planet_bar:
+		_planet_bar.setup(player_faction, enemy_faction)
+
+# Provides the system's two homebase planets so the top planet bar can orient
+# itself (player end on the left) and highlight the homebase nodes.
+func configure_system_endpoints(player_home_planet: Planet, enemy_home_planet: Planet) -> void:
+	if _planet_bar:
+		_planet_bar.configure_endpoints(player_home_planet, enemy_home_planet)
 
 func _build_ui() -> void:
 	_abilities_bar = AbilitiesBar.new()
@@ -51,6 +61,12 @@ func _build_ui() -> void:
 	_pointer_reticle.set_anchors_preset(Control.PRESET_FULL_RECT)
 	_pointer_reticle.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	add_child(_pointer_reticle)
+
+	# Top-of-screen planet array showing system control between both factions.
+	_planet_bar = SystemPlanetBar.new()
+	_planet_bar.set_anchors_preset(Control.PRESET_TOP_WIDE)
+	_planet_bar.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	add_child(_planet_bar)
 
 	var panel := Panel.new()
 	panel.set_anchors_preset(Control.PRESET_BOTTOM_LEFT)
@@ -91,51 +107,90 @@ func _build_ui() -> void:
 	_target_label = _make_label("Target: none")
 	vbox.add_child(_target_label)
 
-	_hangar_shop_panel = Panel.new()
-	_hangar_shop_panel.set_anchors_preset(Control.PRESET_TOP_RIGHT)
-	_hangar_shop_panel.position = Vector2(-365, 16)
-	_hangar_shop_panel.custom_minimum_size = Vector2(350, 210)
-	_hangar_shop_panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	_hangar_shop_panel.visible = false
-	add_child(_hangar_shop_panel)
+	# Ship selection panel: lists the faction's available ships as clickable
+	# buttons. Used both for the start-of-match picker and for swapping the
+	# active ship from the hangar.
+	_ship_select_panel = Panel.new()
+	_ship_select_panel.set_anchors_preset(Control.PRESET_CENTER)
+	_ship_select_panel.position = Vector2(-220, -180)
+	_ship_select_panel.custom_minimum_size = Vector2(440, 360)
+	_ship_select_panel.size = Vector2(440, 360)
+	_ship_select_panel.mouse_filter = Control.MOUSE_FILTER_STOP
+	_ship_select_panel.visible = false
+	add_child(_ship_select_panel)
 
-	var hangar_box := VBoxContainer.new()
-	hangar_box.position = Vector2(10, 8)
-	hangar_box.custom_minimum_size = Vector2(330, 190)
-	hangar_box.add_theme_constant_override("separation", 6)
-	hangar_box.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	_hangar_shop_panel.add_child(hangar_box)
+	var select_box := VBoxContainer.new()
+	select_box.position = Vector2(18, 16)
+	select_box.custom_minimum_size = Vector2(404, 328)
+	select_box.add_theme_constant_override("separation", 8)
+	select_box.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_ship_select_panel.add_child(select_box)
 
-	_hangar_shop_title = _make_label("Hangar")
-	hangar_box.add_child(_hangar_shop_title)
+	_ship_select_title = _make_label("Select Ship")
+	select_box.add_child(_ship_select_title)
 
-	_hangar_shop_list = _make_label("No ships configured")
-	_hangar_shop_list.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	hangar_box.add_child(_hangar_shop_list)
+	_ship_select_subtitle = _make_label("Choose a ship to deploy")
+	_ship_select_subtitle.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	select_box.add_child(_ship_select_subtitle)
+
+	_ship_select_buttons = VBoxContainer.new()
+	_ship_select_buttons.custom_minimum_size = Vector2(404, 0)
+	_ship_select_buttons.add_theme_constant_override("separation", 6)
+	select_box.add_child(_ship_select_buttons)
+
+# Populates and shows the ship selection panel for the given faction. Each ship
+# becomes a clickable button that emits EventBus.player_ship_selected.
+func show_ship_selection(faction: FactionData, ships: Array, subtitle: String = "Choose a ship to deploy") -> void:
+	if not _ship_select_panel:
+		return
+	_shop_faction = faction
+	_ship_select_title.text = "%s Hangar" % faction.name if faction else "Select Ship"
+	_ship_select_subtitle.text = subtitle
+
+	for child in _ship_select_buttons.get_children():
+		child.queue_free()
+
+	var has_ships := false
+	for entry in ships:
+		var ship_data := entry as ShipData
+		if not ship_data:
+			continue
+		has_ships = true
+		_ship_select_buttons.add_child(_make_ship_button(ship_data))
+
+	if not has_ships:
+		_ship_select_buttons.add_child(_make_label("No ships configured"))
+
+	_ship_select_panel.visible = true
+
+func hide_ship_selection() -> void:
+	if _ship_select_panel:
+		_ship_select_panel.visible = false
+	_shop_faction = null
+
+func is_ship_selection_visible() -> bool:
+	return _ship_select_panel != null and _ship_select_panel.visible
+
+func _make_ship_button(ship_data: ShipData) -> Button:
+	var button := Button.new()
+	button.text = "%s  —  %s (Tier %d)" % [ship_data.name, ship_data.ship_class, ship_data.tier]
+	button.custom_minimum_size = Vector2(404, 40)
+	button.focus_mode = Control.FOCUS_NONE
+	button.pressed.connect(_on_ship_button_pressed.bind(ship_data))
+	return button
+
+func _on_ship_button_pressed(ship_data: ShipData) -> void:
+	hide_ship_selection()
+	EventBus.player_ship_selected.emit(ship_data)
 
 func _on_hangar_shop_requested(faction: FactionData, ships: Array) -> void:
 	if not faction:
 		return
-
-	if _hangar_shop_panel.visible and faction == _shop_faction:
-		_hangar_shop_panel.visible = false
-		_shop_faction = null
+	# Toggle the panel off when the same faction's hangar is clicked again.
+	if is_ship_selection_visible() and faction == _shop_faction:
+		hide_ship_selection()
 		return
-
-	_shop_faction = faction
-	_hangar_shop_title.text = "%s Hangar" % faction.name
-
-	var lines: Array[String] = ["Purchase / Upgrade (stub)", ""]
-	for entry in ships:
-		var ship_data := entry as ShipData
-		if ship_data:
-			lines.append("• %s (Tier %d)" % [ship_data.name, ship_data.tier])
-
-	if lines.size() <= 2:
-		lines.append("• No ships configured")
-
-	_hangar_shop_list.text = "\n".join(lines)
-	_hangar_shop_panel.visible = true
+	show_ship_selection(faction, ships, "Select a ship to deploy from the hangar")
 
 func _make_label(text: String) -> Label:
 	var l := Label.new()

@@ -11,6 +11,9 @@ enum ShipSize { SMALL, MEDIUM, LARGE, CAPITAL }
 @export var ship_class: String = "Assault"
 @export var faction: String = ""
 @export var ship_size: ShipSize = ShipSize.MEDIUM
+# Scene instantiated when this ship is spawned for the player. When left unset
+# the spawner falls back to its configured default ship scene.
+@export var ship_scene: PackedScene
 
 @export_category("Vitals")
 @export var max_hull: float = 100.0
@@ -37,6 +40,21 @@ enum ShipSize { SMALL, MEDIUM, LARGE, CAPITAL }
 @export_category("Weapons")
 @export var basic_weapon: WeaponData
 @export var target_lock_range: float = 300.0
+# Maps a muzzle weapon-type (the <type> in muzzle_<type>_<side>_<index> markers,
+# e.g. "cannon", "gattling", "laser") to the WeaponData used for its projectile.
+# Any type not listed here falls back to basic_weapon.
+@export var muzzle_weapons: Dictionary = {}
+
+# Returns the weapon resource configured for a given muzzle type, or null when
+# no specific mapping exists (callers fall back to basic_weapon).
+func get_muzzle_weapon(muzzle_type: StringName) -> WeaponData:
+	if muzzle_type == &"":
+		return null
+	var mapped: Variant = muzzle_weapons.get(muzzle_type)
+	if mapped == null:
+		# Allow string keys too for convenience when authored in the inspector.
+		mapped = muzzle_weapons.get(String(muzzle_type))
+	return mapped as WeaponData
 
 @export_category("Visuals")
 @export var trail_color: Color = Color(1.0, 0.5, 0.2, 0.8)

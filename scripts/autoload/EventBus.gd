@@ -17,5 +17,8 @@ signal homebase_destroyed(faction: FactionData)
 signal prestige_changed(faction: FactionData, amount: float)
 signal hangar_shop_requested(faction: FactionData, ships: Array)
 
+# Player ship selection (start-of-match picker and hangar swap)
+signal player_ship_selected(ship_data: ShipData)
+
 # Match flow
 signal match_ended(winning_faction: FactionData)

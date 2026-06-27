@@ -1,0 +1,25 @@
+[gd_resource type="Resource" script_class="ShipData" format=3]
+
+[ext_resource type="Resource" uid="uid://bib8dja4sl371" path="res://resources/weapons/gattling.tres" id="1_weapon"]
+[ext_resource type="Script" uid="uid://deo8044sl5k4r" path="res://scripts/resources/ShipData.gd" id="2_script"]
+[ext_resource type="PackedScene" path="res://scenes/ship/zarak/ZarakFrigate.tscn" id="3_scene"]
+[ext_resource type="Resource" path="res://resources/abilities/afterburner.tres" id="4_ability"]
+
+[resource]
+script = ExtResource("2_script")
+name = "Zarak Frigate"
+tier = 2
+ship_class = "Frigate"
+faction = "Zarak Confedaracy"
+ship_size = 2
+ship_scene = ExtResource("3_scene")
+max_hull = 320.0
+max_shield = 90.0
+shield_angle = 270.0
+max_speed = 200.0
+acceleration = 280.0
+strafe_speed = 60.0
+reverse_speed = 45.0
+basic_weapon = ExtResource("1_weapon")
+trail_length = 70
+ability_1 = ExtResource("4_ability")

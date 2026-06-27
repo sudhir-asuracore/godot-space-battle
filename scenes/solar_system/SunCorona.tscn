@@ -1,4 +1,4 @@
-[gd_scene load_steps=5 format=3 uid="uid://bnsuncorona22"]
+[gd_scene format=3 uid="uid://bnsuncorona22"]
 
 [ext_resource type="Shader" uid="uid://cnsuncorona11" path="res://shaders/SunCorona.gdshader" id="1_corona_shader"]
 [ext_resource type="Script" uid="uid://dkapeqww471oq" path="res://scenes/solar_system/Sun.gd" id="2_sun_gd"]
@@ -21,10 +21,10 @@ shader_parameter/flare_detail = 4.0
 shader_parameter/flare_intensity = 1.6
 shader_parameter/flare_speed = 0.45
 
-[node name="SunCorona" type="Node2D"]
+[node name="SunCorona" type="Node2D" unique_id=1997612678]
 script = ExtResource("2_sun_gd")
 
-[node name="SunDisc" type="ColorRect" parent="."]
+[node name="SunDisc" type="ColorRect" parent="." unique_id=901696325]
 material = SubResource("ShaderMaterial_corona")
 offset_left = -960.0
 offset_top = -960.0
@@ -32,11 +32,12 @@ offset_right = 960.0
 offset_bottom = 960.0
 mouse_filter = 2
 
-[node name="PointLight2D" type="PointLight2D" parent="."]
+[node name="PointLight2D" type="PointLight2D" parent="." unique_id=595288428]
+enabled = false
 color = Color(1, 0.75, 0.3, 1)
 energy = 2.5
-height = 2500.0
 shadow_enabled = true
 shadow_color = Color(0, 0, 0, 0.9)
 texture = ExtResource("3_light0")
 texture_scale = 200.0
+height = 2500.0
