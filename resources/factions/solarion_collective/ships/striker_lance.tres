@@ -6,8 +6,8 @@
 [resource]
 script = ExtResource("2_script")
 name = "Striker Lance"
-ship_class = "Striker"
-faction = "Solaris"
+ship_class = 1
+faction = 1
 ship_size = 0
 max_hull = 175.0
 max_shield = 60.0

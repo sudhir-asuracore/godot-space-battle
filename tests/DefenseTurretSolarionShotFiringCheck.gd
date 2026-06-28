@@ -1,6 +1,6 @@
 extends SceneTree
 
-const SOLARION_SHOT_SCENE := preload("res://scenes/ship/accessories/projectiles/SolarionTurretShot.tscn")
+const SOLARION_SHOT_SCENE := preload("res://scenes/factions/solarion/weapons/SolarionTurretShot.tscn")
 
 func _init() -> void:
 	call_deferred("_run")

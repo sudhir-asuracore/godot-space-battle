@@ -22,7 +22,7 @@ var _shots_since_fire_audio: int = 0
 var _fire_audio_weapon: WeaponData
 var _coverage_overlay = null
 
-const PROJECTILE_SCENE = preload("res://scenes/ship/accessories/Projectile.tscn")
+const PROJECTILE_SCENE = preload("res://scenes/common/weapons/Projectile.tscn")
 
 func _ready() -> void:
 	_resolve_muzzles()

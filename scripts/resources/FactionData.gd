@@ -1,8 +1,45 @@
 extends Resource
 class_name FactionData
 
+# Playable factions. Single source of truth for faction identity so the full
+# and short names stay consistent everywhere they are referenced.
+enum Faction { ZARAK, SOLARION, WRAITHS }
+
+# Full display names keyed by Faction.
+const FACTION_NAMES := {
+	Faction.ZARAK: "Zarak Confideracy",
+	Faction.SOLARION: "Solarion Collective",
+	Faction.WRAITHS: "Nebula Wraiths",
+}
+
+# Short display names keyed by Faction.
+const FACTION_SHORT_NAMES := {
+	Faction.ZARAK: "Zarak",
+	Faction.SOLARION: "Solarion",
+	Faction.WRAITHS: "Wraiths",
+}
+
+# Canonical FactionData resource for each faction, keyed by Faction. This is the
+# single source of truth that lets any system resolve a faction's data from its
+# enum without hard-linking the resource (a direct ext_resource link would form
+# a load-time cycle with FactionData.hangar_ship_options).
+const FACTION_RESOURCE_PATHS := {
+	Faction.ZARAK: "res://resources/factions/zarak/zarak_confedaracy.tres",
+	Faction.SOLARION: "res://resources/factions/solarion_collective/solarion_collective.tres",
+}
+
+# Loads the canonical FactionData resource for the given faction enum, or null
+# when no resource is registered. The result is the engine-cached instance, so
+# repeated calls (and the match-level faction load) share the same object.
+static func load_faction(faction_id: Faction) -> FactionData:
+	var path: String = FACTION_RESOURCE_PATHS.get(faction_id, "")
+	if path.is_empty():
+		return null
+	return load(path) as FactionData
+
 @export_category("Profile")
-@export var name: String = "Zarak Confedaracy"
+@export var faction: Faction = Faction.ZARAK
+@export var name: String = FACTION_NAMES.get(faction, "Zarak Confideracy")
 @export var description: String = ""
 @export var primary_color: Color
 @export var secondary_color: Color
@@ -157,3 +194,12 @@ func turret_weapon_beam_duration(weapon: String) -> float:
 @export var aggression: float = 1.0
 @export var defense_bias: float = 1.0
 @export var expansion_bias: float = 1.0
+
+# Full display name for this faction (e.g. "Solarion Collective"), sourced from
+# the shared Faction lookup so naming stays consistent across the game.
+func get_faction_name() -> String:
+	return FACTION_NAMES.get(faction, "")
+
+# Short display name for this faction (e.g. "Solarion").
+func get_faction_short_name() -> String:
+	return FACTION_SHORT_NAMES.get(faction, "")

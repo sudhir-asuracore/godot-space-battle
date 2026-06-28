@@ -5,15 +5,45 @@ class_name ShipData
 # duration and audio so larger hulls blow up bigger, longer and louder.
 enum ShipSize { SMALL, MEDIUM, LARGE, CAPITAL }
 
+# Combat archetype of the ship, defining its role in the fleet.
+enum ShipClass { SCOUT, FRIGATE, DREADNAUGHT, CARRIER }
+
+# Single source of truth for ship-class display names. Change a label here and
+# it updates everywhere; wrap the return of get_ship_class_name() in tr() to add
+# localization later without touching call sites or resource files.
+const SHIP_CLASS_NAMES := {
+	ShipClass.SCOUT: "Scout",
+	ShipClass.FRIGATE: "Frigate",
+	ShipClass.DREADNAUGHT: "Dreadnaught",
+	ShipClass.CARRIER: "Carrier",
+}
+
 @export_category("Profile")
 @export var name: String = "Scout"
 @export var tier: int = 1
-@export var ship_class: String = "Assault"
-@export var faction: String = ""
+@export var ship_class: ShipClass = ShipClass.SCOUT
+@export var faction: FactionData.Faction = FactionData.Faction.ZARAK
 @export var ship_size: ShipSize = ShipSize.MEDIUM
+# Short role blurb shown in the hangar detail panel (e.g. "A fast and agile
+# strike fighter. Excellent for hit-and-run tactics.").
+@export_multiline var description: String = ""
 # Scene instantiated when this ship is spawned for the player. When left unset
 # the spawner falls back to its configured default ship scene.
 @export var ship_scene: PackedScene
+# Optional explicit FactionData override. Normally left unset: the ship's
+# `faction` enum already identifies its faction and resolve_faction_data()
+# looks the resource up via FactionData's registry, which avoids the load-time
+# cycle a direct ext_resource link would create with hangar_ship_options. Set
+# this only for ships whose faction is not registered in that map.
+@export var faction_data: FactionData
+
+# Returns the FactionData this ship belongs to. Prefers an explicit override and
+# otherwise resolves the canonical resource from the `faction` enum, so a ship
+# stays linked to its own faction without external wiring.
+func resolve_faction_data() -> FactionData:
+	if faction_data:
+		return faction_data
+	return FactionData.load_faction(faction)
 
 @export_category("Vitals")
 @export var max_hull: float = 100.0
@@ -74,3 +104,53 @@ func get_muzzle_weapon(muzzle_type: StringName) -> WeaponData:
 @export var purchase_cost: float = 150.0
 @export var kill_bounty: float = 75.0
 @export var death_penalty: float = 37.0
+# Starter ships are the always-available free fallback: they never cost prestige
+# to deploy and count as owned from the start so going broke can't softlock the
+# player (PRD section 10.4 / Milestone 7).
+@export var is_starter: bool = false
+
+@export_category("Hangar Presentation")
+# Large hero image shown on the hangar's center stage. When left unset it is
+# resolved from the ship scene's `lod_near` Sprite2D so art only has to be
+# authored once, on the scene itself (see get_hangar_portrait()).
+@export var hangar_portrait: Texture2D
+# Thumbnail shown in the scrollable ship list. Falls back to the ship scene's
+# `lod_medium` Sprite2D when unset (see get_hangar_icon()).
+@export var hangar_icon: Texture2D
+
+# Display name for this ship's class (e.g. "Frigate"), sourced from the shared
+# SHIP_CLASS_NAMES lookup so the label stays consistent everywhere it is shown.
+func get_ship_class_name() -> String:
+	return SHIP_CLASS_NAMES.get(ship_class, "")
+
+# Returns the large hangar hero image. Prefers an explicit override and
+# otherwise pulls the `lod_near` texture straight from the ship scene, so the
+# same artwork drives both the in-game hull and the hangar without duplication.
+func get_hangar_portrait() -> Texture2D:
+	if hangar_portrait:
+		return hangar_portrait
+	return _scene_sprite_texture(&"lod_near")
+
+# Returns the small hangar list thumbnail. Prefers an explicit override and
+# otherwise pulls the `lod_medium` texture from the ship scene.
+func get_hangar_icon() -> Texture2D:
+	if hangar_icon:
+		return hangar_icon
+	var medium: Texture2D = _scene_sprite_texture(&"lod_medium")
+	return medium if medium else get_hangar_portrait()
+
+# Reads the `texture` of a named Sprite2D from `ship_scene` without
+# instantiating it. PackedScene.get_state() lets us inspect authored node
+# properties directly, avoiding the side effects (trails, audio, _ready logic)
+# of spawning a live Ship just to grab its artwork for a menu.
+func _scene_sprite_texture(sprite_name: StringName) -> Texture2D:
+	if ship_scene == null:
+		return null
+	var state: SceneState = ship_scene.get_state()
+	for node_index in state.get_node_count():
+		if state.get_node_name(node_index) != String(sprite_name):
+			continue
+		for prop_index in state.get_node_property_count(node_index):
+			if state.get_node_property_name(node_index, prop_index) == &"texture":
+				return state.get_node_property_value(node_index, prop_index) as Texture2D
+	return null

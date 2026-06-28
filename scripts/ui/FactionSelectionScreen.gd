@@ -22,26 +22,26 @@ const FACTION_CONFIG := {
 	"Solaris": {
 		"faction_path": "res://resources/factions/solarion_collective/solarion_collective.tres",
 		"ship_path": "res://resources/factions/solarion_collective/ships/striker_lance.tres",
-		"ship_scene_path": "res://scenes/ship/solarion_collective/StrikerLance.tscn",
+		"ship_scene_path": "res://scenes/factions/solarion/ships/StrikerLance.tscn",
 		"enemy_faction_path": "res://resources/factions/zarak/zarak_confedaracy.tres",
 		"enemy_ship_path": "res://resources/factions/zarak/ships/scout.tres",
-		"enemy_ship_scene_path": "res://scenes/ship/zarak/Scout.tscn"
+		"enemy_ship_scene_path": "res://scenes/factions/zarak/ships/Scout.tscn"
 	},
 	"Zerek": {
 		"faction_path": "res://resources/factions/zarak/zarak_confedaracy.tres",
 		"ship_path": "res://resources/factions/zarak/ships/scout.tres",
-		"ship_scene_path": "res://scenes/ship/zarak/Scout.tscn",
+		"ship_scene_path": "res://scenes/factions/zarak/ships/Scout.tscn",
 		"enemy_faction_path": "res://resources/factions/solarion_collective/solarion_collective.tres",
 		"enemy_ship_path": "res://resources/factions/solarion_collective/ships/striker_lance.tres",
-		"enemy_ship_scene_path": "res://scenes/ship/solarion_collective/StrikerLance.tscn"
+		"enemy_ship_scene_path": "res://scenes/factions/solarion/ships/StrikerLance.tscn"
 	},
 	"Aegis": {
 		"faction_path": "res://resources/factions/solarion_collective/solarion_collective.tres",
 		"ship_path": "res://resources/factions/solarion_collective/ships/striker_lance.tres",
-		"ship_scene_path": "res://scenes/ship/solarion_collective/StrikerLance.tscn",
+		"ship_scene_path": "res://scenes/factions/solarion/ships/StrikerLance.tscn",
 		"enemy_faction_path": "res://resources/factions/zarak/zarak_confedaracy.tres",
 		"enemy_ship_path": "res://resources/factions/zarak/ships/scout.tres",
-		"enemy_ship_scene_path": "res://scenes/ship/zarak/Scout.tscn"
+		"enemy_ship_scene_path": "res://scenes/factions/zarak/ships/Scout.tscn"
 	}
 }
 

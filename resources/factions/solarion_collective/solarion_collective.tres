@@ -4,11 +4,12 @@
 [ext_resource type="Script" uid="uid://deo8044sl5k4r" path="res://scripts/resources/ShipData.gd" id="2_36u7l"]
 [ext_resource type="PackedScene" uid="uid://ekxyeln5cmvr" path="res://scenes/homebase/SolarionDefenseRing.tscn" id="2_ring"]
 [ext_resource type="Resource" path="res://resources/factions/solarion_collective/ships/striker_lance.tres" id="3_ship"]
-[ext_resource type="PackedScene" uid="uid://dxc7x871hufi6" path="res://scenes/ship/accessories/projectiles/SolarionTurretShot.tscn" id="4_projectile"]
-[ext_resource type="PackedScene" uid="uid://cenrgybeamhb01" path="res://scenes/ship/accessories/EnergyBeam.tscn" id="5_beam"]
+[ext_resource type="PackedScene" uid="uid://dxc7x871hufi6" path="res://scenes/factions/solarion/weapons/SolarionTurretShot.tscn" id="4_projectile"]
+[ext_resource type="PackedScene" uid="uid://cenrgybeamhb01" path="res://scenes/common/weapons/EnergyBeam.tscn" id="5_beam"]
 
 [resource]
 script = ExtResource("1_script")
+faction = 1
 name = "Solarion Collective"
 description = "Sleek white/gold profiles with neon blue accents"
 primary_color = Color(0.9, 0.9, 1, 1)

@@ -14,10 +14,10 @@ const AI_SHIP_CONTROLLER_SCRIPT = preload("res://scripts/AIShipController.gd")
 const HOMEBASE_SCENE = preload("res://scenes/homebase/Homebase.tscn")
 const DEFAULT_PLAYER_SHIP_DATA_PATH := "res://resources/factions/zarak/ships/scout.tres"
 const DEFAULT_PLAYER_FACTION_PATH := "res://resources/factions/zarak/zarak_confedaracy.tres"
-const DEFAULT_PLAYER_SHIP_SCENE_PATH := "res://scenes/ship/solarion_collective/Frigate.tscn"
+const DEFAULT_PLAYER_SHIP_SCENE_PATH := "res://scenes/factions/solarion/ships/Frigate.tscn"
 const DEFAULT_ENEMY_SHIP_DATA_PATH := "res://resources/factions/solarion_collective/ships/striker_lance.tres"
 const DEFAULT_ENEMY_FACTION_PATH := "res://resources/factions/solarion_collective/solarion_collective.tres"
-const DEFAULT_ENEMY_SHIP_SCENE_PATH := "res://scenes/ship/solarion_collective/Frigate.tscn"
+const DEFAULT_ENEMY_SHIP_SCENE_PATH := "res://scenes/factions/solarion/ships/Frigate.tscn"
 
 # Fallback layout used only if the solar system is unavailable. The live
 # values come from SolarSystem, which anchors the two homebase planets.
@@ -154,7 +154,10 @@ func _spawn_player_ship_from_data(ship_data: ShipData, spawn_pos: Vector2) -> vo
 	_ship.ship_data = ship_data
 	if not _ship.ship_data:
 		_ship.ship_data = load(DEFAULT_PLAYER_SHIP_DATA_PATH) as ShipData
-	_ship.faction_data = _player_faction
+	# Prefer the faction the ship resource resolves to so the ship stays linked
+	# to its own faction; fall back to the match faction when it resolves none.
+	var player_ship_faction: FactionData = _ship.ship_data.resolve_faction_data() if _ship.ship_data else null
+	_ship.faction_data = player_ship_faction if player_ship_faction else _player_faction
 	_ship.update_stats()
 	_targeting = _ship.get_node_or_null(^"TargetingController") as TargetingController
 	_ability = _ship.get_node_or_null(^"AbilityController") as AbilityController
@@ -188,7 +191,10 @@ func _spawn_enemy() -> void:
 	var spawn_offset: Vector2 = Vector2.RIGHT * randf_range(-300.0, 300.0) + Vector2.DOWN * randf_range(200.0, 500.0)
 	enemy.position = _enemy_homebase_pos + spawn_offset
 	_apply_ship_data_override(enemy, _enemy_ship_data_path, DEFAULT_ENEMY_SHIP_DATA_PATH)
-	enemy.faction_data = _enemy_faction
+	# Prefer the faction the ship resource resolves to; fall back to the match
+	# enemy faction when the resource resolves none.
+	var enemy_ship_faction: FactionData = enemy.ship_data.resolve_faction_data() if enemy.ship_data else null
+	enemy.faction_data = enemy_ship_faction if enemy_ship_faction else _enemy_faction
 	_configure_enemy_ai(enemy)
 	add_child(enemy)
 	enemy.update_stats()

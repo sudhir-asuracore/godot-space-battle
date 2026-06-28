@@ -2,7 +2,7 @@ extends Node2D
 
 # Preload your explosion scene 
 # (Make sure this path exactly matches your file)
-const EXPLOSION_SCENE = preload("res://scenes/trial/Explosion.tscn") 
+const EXPLOSION_SCENE = preload("res://scenes/common/effects/Explosion.tscn") 
 
 func _input(event: InputEvent) -> void:
 	# Check if the player left-clicked

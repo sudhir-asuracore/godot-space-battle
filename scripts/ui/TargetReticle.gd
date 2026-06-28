@@ -112,7 +112,7 @@ func _update_readout() -> void:
 	var has_class: bool = false
 	if target is Ship and target.ship_data:
 		_name_label.text = str(target.ship_data.name)
-		_class_label.text = "Class: %s" % str(target.ship_data.ship_class)
+		_class_label.text = "Class: %s" % target.ship_data.get_ship_class_name()
 		has_class = true
 		_set_bar(_hull_bar, _hull_label, "Hull", target.current_hull, target.max_hull)
 		_set_bar(_shield_bar, _shield_label, "Shield", target.current_shield, target.max_shield)

@@ -3,6 +3,10 @@ extends Node
 # Economy constants (PRD section 10.2)
 const STARTING_PRESTIGE: float = 200.0
 const CAPTURE_REWARD: float = 100.0
+# Tech points are a second currency spent on ability/tech upgrades (Milestone 7
+# header, fully used from Milestone 10). Players start with none and earn them
+# from tech-bearing planets.
+const STARTING_TECH_POINTS: float = 0.0
 
 # Homebase shield interlock warning delay (PRD section 11.6: 10-20s)
 const SHIELD_WARNING_DELAY: float = 12.0
@@ -19,6 +23,11 @@ var selected_enemy_ship_scene_path: String = ""
 
 var planet_ownership: Dictionary = {}      # Planet -> FactionData (null = neutral)
 var faction_prestige: Dictionary = {}      # FactionData -> float
+var faction_tech_points: Dictionary = {}   # FactionData -> float
+# Ships a faction has unlocked (purchased or starter). FactionData -> { ShipData -> true }.
+var _owned_ships: Dictionary = {}
+# The ship each faction currently has selected for deployment. FactionData -> ShipData.
+var _current_ship: Dictionary = {}
 
 var _homebase_factions: Array = []         # Factions that own a homebase
 var _shield_active: Dictionary = {}        # FactionData -> bool (current homebase shield state)
@@ -45,6 +54,15 @@ func register_faction(faction: FactionData) -> void:
 	if faction and not faction_prestige.has(faction):
 		faction_prestige[faction] = STARTING_PRESTIGE
 		EventBus.prestige_changed.emit(faction, faction_prestige[faction])
+	if faction and not faction_tech_points.has(faction):
+		faction_tech_points[faction] = STARTING_TECH_POINTS
+		EventBus.tech_points_changed.emit(faction, faction_tech_points[faction])
+	# Starter ships are unlocked for free so the player always has a fallback.
+	if faction:
+		for option in faction.hangar_ship_options:
+			var ship_data := option as ShipData
+			if ship_data and ship_data.is_starter:
+				grant_ship(faction, ship_data)
 
 func register_homebase(faction: FactionData) -> void:
 	register_faction(faction)
@@ -70,6 +88,81 @@ func spend_prestige(faction: FactionData, amount: float) -> bool:
 		return false
 	add_prestige(faction, -amount)
 	return true
+
+# --- Tech point helpers ------------------------------------------------------
+
+func get_tech_points(faction: FactionData) -> float:
+	return faction_tech_points.get(faction, 0.0)
+
+func add_tech_points(faction: FactionData, amount: float) -> void:
+	if not faction:
+		return
+	faction_tech_points[faction] = get_tech_points(faction) + amount
+	EventBus.tech_points_changed.emit(faction, faction_tech_points[faction])
+
+func spend_tech_points(faction: FactionData, amount: float) -> bool:
+	if get_tech_points(faction) < amount:
+		return false
+	add_tech_points(faction, -amount)
+	return true
+
+# --- Ship ownership / purchase / deploy --------------------------------------
+
+# True when the faction may deploy this ship without paying: either a starter
+# (free fallback) or a previously purchased hull.
+func is_ship_owned(faction: FactionData, ship_data: ShipData) -> bool:
+	if not ship_data:
+		return false
+	if ship_data.is_starter:
+		return true
+	var owned: Dictionary = _owned_ships.get(faction, {})
+	return owned.has(ship_data)
+
+# Marks a ship as unlocked for the faction (no prestige is spent here).
+func grant_ship(faction: FactionData, ship_data: ShipData) -> void:
+	if not faction or not ship_data:
+		return
+	var owned: Dictionary = _owned_ships.get(faction, {})
+	owned[ship_data] = true
+	_owned_ships[faction] = owned
+
+# A ship is affordable when already owned (free redeploy) or the faction holds
+# enough prestige to cover its purchase cost.
+func can_afford_ship(faction: FactionData, ship_data: ShipData) -> bool:
+	if not ship_data:
+		return false
+	if is_ship_owned(faction, ship_data):
+		return true
+	return get_prestige(faction) >= ship_data.purchase_cost
+
+# Spends prestige to unlock a ship. Returns false (and changes nothing) when the
+# faction can't afford it. Already-owned ships succeed for free. Emits
+# EventBus.ship_purchased on a fresh unlock so HUD/audio can react.
+func purchase_ship(faction: FactionData, ship_data: ShipData) -> bool:
+	if not faction or not ship_data:
+		return false
+	if is_ship_owned(faction, ship_data):
+		return true
+	if not spend_prestige(faction, ship_data.purchase_cost):
+		return false
+	grant_ship(faction, ship_data)
+	EventBus.ship_purchased.emit(faction, ship_data)
+	return true
+
+# Records the faction's active deployment choice and persists the resource paths
+# so a respawn/redeploy uses it. Emits EventBus.ship_deployed.
+func set_current_ship(faction: FactionData, ship_data: ShipData) -> void:
+	if not faction or not ship_data:
+		return
+	_current_ship[faction] = ship_data
+	if faction == player_faction:
+		selected_ship_data_path = ship_data.resource_path
+		if ship_data.ship_scene:
+			selected_ship_scene_path = ship_data.ship_scene.resource_path
+	EventBus.ship_deployed.emit(faction, ship_data)
+
+func get_current_ship(faction: FactionData) -> ShipData:
+	return _current_ship.get(faction, null) as ShipData
 
 # --- Planet / majority queries ----------------------------------------------
 

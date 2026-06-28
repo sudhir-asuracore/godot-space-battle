@@ -5,7 +5,7 @@ extends SceneTree
 # frees itself once finished. Run headless with:
 #   godot --headless --script res://tests/ShipExplosionCheck.gd
 
-const EXPLOSION_SCENE := preload("res://scenes/ship/accessories/ShipExplosion.tscn")
+const EXPLOSION_SCENE := preload("res://scenes/common/effects/ShipExplosion.tscn")
 
 func _init() -> void:
 	call_deferred("_run")

@@ -15,7 +15,12 @@ signal homebase_destroyed(faction: FactionData)
 
 # Economy
 signal prestige_changed(faction: FactionData, amount: float)
+signal tech_points_changed(faction: FactionData, amount: float)
 signal hangar_shop_requested(faction: FactionData, ships: Array)
+
+# Hangar purchase / deploy loop (Milestone 7)
+signal ship_purchased(faction: FactionData, ship_data: ShipData)
+signal ship_deployed(faction: FactionData, ship_data: ShipData)
 
 # Player ship selection (start-of-match picker and hangar swap)
 signal player_ship_selected(ship_data: ShipData)

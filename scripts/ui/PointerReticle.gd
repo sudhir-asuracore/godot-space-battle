@@ -27,7 +27,17 @@ func _exit_tree() -> void:
 func setup(ship: Ship) -> void:
 	_ship = ship
 
+# Toggles the in-game pointer. When active the custom reticle is drawn and the
+# system cursor is hidden; when inactive (e.g. a full-screen menu like the
+# hangar is open) the custom reticle is hidden and the system cursor is restored
+# so the player can actually see what they are clicking.
+func set_active(active: bool) -> void:
+	visible = active
+	Input.set_mouse_mode(Input.MOUSE_MODE_HIDDEN if active else Input.MOUSE_MODE_VISIBLE)
+
 func _process(_delta: float) -> void:
+	if not visible:
+		return
 	_update_hover()
 	queue_redraw()
 

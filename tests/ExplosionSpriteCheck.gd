@@ -5,7 +5,7 @@ extends SceneTree
 # itself once both the animation and the audio have finished. Run headless with:
 #   godot --headless --script res://tests/ExplosionSpriteCheck.gd
 
-const EXPLOSION_SCENE := preload("res://scenes/trial/ExplosionSprite.tscn")
+const EXPLOSION_SCENE := preload("res://scenes/common/effects/ExplosionSprite.tscn")
 
 func _init() -> void:
 	call_deferred("_run")

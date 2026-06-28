@@ -1,6 +1,6 @@
 extends SceneTree
 
-const SHIP_SCENE_PATH := "res://scenes/ship/zarak/Scout.tscn"
+const SHIP_SCENE_PATH := "res://scenes/factions/zarak/ships/Scout.tscn"
 const SAMPLE_FRAMES := 240
 const WARMUP_FRAMES := 12
 const JITTER_THRESHOLD := 0.6

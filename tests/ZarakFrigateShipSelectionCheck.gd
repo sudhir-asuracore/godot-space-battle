@@ -11,7 +11,7 @@ extends SceneTree
 
 const ZARAK_FACTION_PATH := "res://resources/factions/zarak/zarak_confedaracy.tres"
 const ZARAK_FRIGATE_PATH := "res://resources/factions/zarak/ships/zarak_frigate.tres"
-const ZARAK_FRIGATE_SCENE := "res://scenes/ship/zarak/ZarakFrigate.tscn"
+const ZARAK_FRIGATE_SCENE := "res://scenes/factions/zarak/ships/ZarakFrigate.tscn"
 const PLAYER_HUD_SCRIPT := "res://scripts/ui/PlayerHUD.gd"
 const MAIN_SCRIPT := "res://scenes/Main.gd"
 

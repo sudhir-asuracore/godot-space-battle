@@ -8,7 +8,7 @@
 script = ExtResource("3_script")
 name = "Base T1 Assault"
 tier = 1
-ship_class = "Assault"
+ship_class = 1
 max_speed = 250.0
 acceleration = 350.0
 strafe_speed = 80.0

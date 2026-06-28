@@ -9,7 +9,7 @@ extends SceneTree
 # The render logic is exercised live by instantiating the frigate next to a
 # Camera2D and driving the zoom across the near / medium / far bands.
 
-const ZARAK_FRIGATE_SCENE := "res://scenes/ship/zarak/ZarakFrigate.tscn"
+const ZARAK_FRIGATE_SCENE := "res://scenes/factions/zarak/ships/ZarakFrigate.tscn"
 
 const EXPECTED_LOD_NODES := ["lod_near", "lod_medium", "lod_far"]
 

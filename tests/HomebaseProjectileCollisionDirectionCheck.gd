@@ -3,7 +3,7 @@ extends SceneTree
 const HOMEBASE_SCENE := preload("res://scenes/homebase/Homebase.tscn")
 const SOLARION_FACTION := preload("res://resources/factions/solarion_collective/solarion_collective.tres")
 const ENEMY_FACTION := preload("res://resources/factions/zarak/zarak_confedaracy.tres")
-const PROJECTILE_SCENE := preload("res://scenes/ship/accessories/Projectile.tscn")
+const PROJECTILE_SCENE := preload("res://scenes/common/weapons/Projectile.tscn")
 
 class DummyEnemySource:
 	extends Node2D

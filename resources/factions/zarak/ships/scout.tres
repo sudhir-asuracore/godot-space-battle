@@ -10,7 +10,9 @@
 
 [resource]
 script = ExtResource("3_script")
-faction = "Zarak Confedaracy"
+name = "Zarak Scout"
+description = "A nimble, expendable recon hull. Always free to deploy so you can never be grounded."
+faction = 0
 max_hull = 200.0
 shield_angle = 240.0
 max_speed = 250.0
@@ -24,3 +26,5 @@ ability_2 = ExtResource("4_ability")
 ability_3 = ExtResource("5_ability")
 ability_4 = ExtResource("6_ability")
 ability_5 = ExtResource("7_ability")
+purchase_cost = 0.0
+is_starter = true

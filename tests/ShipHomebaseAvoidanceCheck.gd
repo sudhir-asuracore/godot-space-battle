@@ -1,6 +1,6 @@
 extends SceneTree
 
-const SHIP_SCENE := preload("res://scenes/ship/solarion_collective/StrikerLance.tscn")
+const SHIP_SCENE := preload("res://scenes/factions/solarion/ships/StrikerLance.tscn")
 const HOMEBASE_SCENE := preload("res://scenes/homebase/Homebase.tscn")
 const SHIP_DATA := preload("res://resources/ships/base/t1_assault_ship.tres")
 const FACTION := preload("res://resources/factions/solarion_collective/solarion_collective.tres")

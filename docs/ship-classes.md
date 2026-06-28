@@ -252,14 +252,14 @@ For your game's scale (1–6 players per faction), this is probably the sweet sp
 -----
 
 
-Ship: I removed older scout and Striker Lance ships. A new ship is now available: res://scenes/ship/solarion_collective/Frigate.tscn
+Ship: I removed older scout and Striker Lance ships. A new ship is now available: res://scenes/factions/solarion/ships/Frigate.tscn
 
 Changes:
 Collision: The ship defines 4 collisionShape2D's. collision_front, collision_rear, collision_left, collision_right. Define different damage taken percentages by direction. eg: rear would be the highest. front will be the least.
 
 Engine: engine_0, engine_1.. will be available. Thruster trail needs to be rendered for each engine.
 
-Damage indicators: damage_0, damage_1.. are where res://scenes/ship/DamageMarkerEffect.tscn will be displayed. eg: if there are 3 markers, display each one after 1/3rd damage to hull has occured.
+Damage indicators: damage_0, damage_1.. are where res://scenes/common/effects/DamageMarkerEffect.tscn will be displayed. eg: if there are 3 markers, display each one after 1/3rd damage to hull has occured.
 
 Thrusters: thruster_rear_0,thruster_rear_1.. define thrusters on the rear.
 thruster_left_0, thruster_left_1.. and thruster_right_0, thruster_right_1 etc.. are side thrusters. These should be fired for side movement. Q and E keys will be used by user to  turn/point the ship to left and right.

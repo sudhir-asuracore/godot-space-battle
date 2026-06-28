@@ -1,6 +1,11 @@
 extends Area2D
 class_name DefenseHangar
 
+# How close (in world units) the player ship must be to the hangar for a click
+# to open the purchase/upgrade store. Clicks made from farther away fall through
+# to ship navigation instead of opening the store.
+@export var interaction_range: float = 800.0
+
 var faction_data: FactionData = null
 var homebase: Homebase = null
 var max_hull: float = 1.0
@@ -42,6 +47,13 @@ func _input_event(_viewport: Viewport, event: InputEvent, _shape_idx: int) -> vo
 	if player_faction and faction_data != player_faction:
 		return
 
+	# Only open the store when the player ship is parked near the hangar. A click
+	# from farther away is left unhandled so it still routes the ship there
+	# (Main._unhandled_input "navigate"), without popping up the store.
+	var player_ship := _get_player_ship()
+	if player_ship == null or player_ship.global_position.distance_to(global_position) > interaction_range:
+		return
+
 	var ships: Array = []
 	if faction_data:
 		ships = faction_data.hangar_ship_options.duplicate()
@@ -49,6 +61,17 @@ func _input_event(_viewport: Viewport, event: InputEvent, _shape_idx: int) -> vo
 	var event_bus := get_node_or_null(^"/root/EventBus")
 	if event_bus:
 		event_bus.call("emit_signal", &"hangar_shop_requested", faction_data, ships)
+	# Consume the click so the ship doesn't also navigate into the hangar.
+	_viewport.set_input_as_handled()
+
+# Returns the live player ship (from the shared "ships" group) or null when none
+# is alive, used to gate hangar interaction by distance.
+func _get_player_ship() -> Node2D:
+	for node in get_tree().get_nodes_in_group("ships"):
+		var ship := node as Ship
+		if ship and ship.is_player_ship and not ship.is_dead:
+			return ship
+	return null
 
 func take_damage(hull_dmg: float, _shield_dmg: float, _attacker: Node2D = null) -> void:
 	if hull_dmg <= 0.0:

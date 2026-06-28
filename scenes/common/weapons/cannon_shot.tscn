@@ -1,0 +1,35 @@
+[gd_scene format=3 uid="uid://bvh28e7s3nq5j"]
+
+[ext_resource type="Script" uid="uid://b1rlaun4qx15i" path="res://scenes/common/weapons/Projectile.gd" id="1_dy6h1"]
+[ext_resource type="Shader" uid="uid://b0t6p1fjgyeuo" path="res://shaders/basic_bullet.gdshader" id="2_koe7d"]
+
+[sub_resource type="CircleShape2D" id="3"]
+radius = 4.0
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_13obt"]
+shader = ExtResource("2_koe7d")
+shader_parameter/core_color = Color(1, 0.37254903, 0.08627451, 1)
+shader_parameter/glow_color = Color(0.85490197, 0.69803923, 0.06666667, 0.6745098)
+shader_parameter/core_width = 0.1290000061275
+shader_parameter/glow_width = 0.35600001691
+shader_parameter/laser_length = 0.26000001235
+shader_parameter/pulse_speed = 6.44400030609
+shader_parameter/pulse_intensity = 0.00800000038
+
+[node name="Projectile" type="Area2D" unique_id=1564926885]
+collision_layer = 16
+collision_mask = 79
+script = ExtResource("1_dy6h1")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=232432488]
+shape = SubResource("3")
+
+[node name="ColorRect" type="ColorRect" parent="." unique_id=91975747]
+material = SubResource("ShaderMaterial_13obt")
+offset_left = -3.0
+offset_top = -1.0
+offset_right = 4.0
+offset_bottom = 1.0
+pivot_offset = Vector2(0, 1)
+
+[connection signal="body_entered" from="." to="." method="_on_body_entered"]

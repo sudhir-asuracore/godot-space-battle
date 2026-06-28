@@ -1,8 +1,8 @@
 extends Sprite2D
 class_name DefenseTurret
 
-const PROJECTILE_SCENE := preload("res://scenes/ship/accessories/Projectile.tscn")
-const ENERGY_BEAM_SCENE := preload("res://scenes/ship/accessories/EnergyBeam.tscn")
+const PROJECTILE_SCENE := preload("res://scenes/common/weapons/Projectile.tscn")
+const ENERGY_BEAM_SCENE := preload("res://scenes/common/weapons/EnergyBeam.tscn")
 const WEAPON_COVERAGE_OVERLAY_SCRIPT := preload("res://scripts/WeaponCoverageOverlay.gd")
 const DEFENSE_HITBOX_RADIUS := 170.0
 
