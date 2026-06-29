@@ -4,7 +4,7 @@ extends SceneTree
 # faction enum registry) and that the resolved instance is the same engine-cached
 # object the match loads, so allegiance comparisons (==) stay correct.
 
-const ZARAK_FRIGATE_PATH := "res://resources/factions/zarak/ships/zarak_frigate.tres"
+const ZARAK_FRIGATE_PATH := "res://resources/factions/zarak/ships/gorehammer.tres"
 const ZARAK_SCOUT_PATH := "res://resources/factions/zarak/ships/scout.tres"
 const STRIKER_LANCE_PATH := "res://resources/factions/solarion_collective/ships/striker_lance.tres"
 const ZARAK_FACTION_PATH := "res://resources/factions/zarak/zarak_confedaracy.tres"

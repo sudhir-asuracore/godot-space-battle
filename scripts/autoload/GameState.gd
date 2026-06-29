@@ -11,6 +11,17 @@ const STARTING_TECH_POINTS: float = 0.0
 # Homebase shield interlock warning delay (PRD section 11.6: 10-20s)
 const SHIELD_WARNING_DELAY: float = 12.0
 
+# --- Fog of war / radar -------------------------------------------------------
+# Vision (radar) ranges in world units. Captured planets, the homebase and every
+# allied ship reveal a circular area; the union of those circles is what the
+# whole faction can see. Anything outside is fogged.
+const SHIP_VISION_RANGE: float = 2200.0
+const HOMEBASE_VISION_RANGE: float = 4200.0
+const DEFAULT_PLANET_VISION_RANGE: float = 2600.0
+# Seconds a faction ship must linger inside a planet's capture radius before the
+# planet is identified (its properties become readable) for that faction.
+const PLANET_IDENTIFY_TIME: float = 5.0
+
 var player_faction: FactionData = null
 
 var selected_faction_id: String = ""
@@ -28,6 +39,10 @@ var faction_tech_points: Dictionary = {}   # FactionData -> float
 var _owned_ships: Dictionary = {}
 # The ship each faction currently has selected for deployment. FactionData -> ShipData.
 var _current_ship: Dictionary = {}
+
+# Persistent fog-of-war identification: FactionData -> { Planet -> true }. Once a
+# faction identifies a planet it stays identified even if it later loses vision.
+var _identified_planets: Dictionary = {}
 
 var _homebase_factions: Array = []         # Factions that own a homebase
 var _shield_active: Dictionary = {}        # FactionData -> bool (current homebase shield state)
@@ -237,6 +252,70 @@ func _tick_income() -> void:
 		var owner: FactionData = planet_ownership[planet]
 		if owner and planet.planet_data:
 			add_prestige(owner, planet.planet_data.income_per_second)
+
+# --- Fog of war / radar ------------------------------------------------------
+
+# Returns the faction's live vision (radar) sources as an Array of dictionaries
+# { "position": Vector2, "range": float }. Sources are every captured planet
+# (using its PlanetData vision range), every owned homebase and every alive
+# faction ship. The union of these circles is the area the whole faction sees.
+func get_vision_sources(faction: FactionData) -> Array:
+	var sources: Array = []
+	if not faction:
+		return sources
+	var tree := get_tree()
+	if not tree:
+		return sources
+
+	for planet in planet_ownership:
+		if planet_ownership[planet] != faction or not is_instance_valid(planet):
+			continue
+		var p_range: float = DEFAULT_PLANET_VISION_RANGE
+		if planet.planet_data and planet.planet_data.has_method("get_vision_range"):
+			p_range = planet.planet_data.get_vision_range()
+		sources.append({"position": (planet as Node2D).global_position, "range": p_range})
+
+	for node in tree.get_nodes_in_group(&"homebases"):
+		if not is_instance_valid(node):
+			continue
+		if "faction_data" in node and node.faction_data == faction:
+			sources.append({"position": (node as Node2D).global_position, "range": HOMEBASE_VISION_RANGE})
+
+	for node in tree.get_nodes_in_group(&"ships"):
+		var ship := node as Node2D
+		if not is_instance_valid(ship):
+			continue
+		if "faction_data" in ship and ship.faction_data == faction and not ("is_dead" in ship and ship.is_dead):
+			sources.append({"position": ship.global_position, "range": SHIP_VISION_RANGE})
+
+	return sources
+
+# True when a world-space point falls inside any of the faction's vision circles.
+func is_position_visible(faction: FactionData, world_pos: Vector2) -> bool:
+	for source in get_vision_sources(faction):
+		if world_pos.distance_to(source["position"]) <= float(source["range"]):
+			return true
+	return false
+
+# --- Planet identification (fog-of-war discovery) ----------------------------
+
+func is_planet_identified(faction: FactionData, planet: Planet) -> bool:
+	if not faction or not planet:
+		return false
+	var owned: Dictionary = _identified_planets.get(faction, {})
+	return owned.has(planet)
+
+# Marks a planet as identified for a faction (idempotent). Emits
+# EventBus.planet_identified the first time so UI can reveal its properties.
+func mark_planet_identified(faction: FactionData, planet: Planet) -> void:
+	if not faction or not planet:
+		return
+	var owned: Dictionary = _identified_planets.get(faction, {})
+	if owned.has(planet):
+		return
+	owned[planet] = true
+	_identified_planets[faction] = owned
+	EventBus.planet_identified.emit(faction, planet)
 
 func clear_menu_selection() -> void:
 	selected_faction_id = ""

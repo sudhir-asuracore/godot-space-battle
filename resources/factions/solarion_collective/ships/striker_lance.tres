@@ -17,5 +17,6 @@ acceleration = 360.0
 strafe_speed = 90.0
 reverse_speed = 62.0
 basic_weapon = ExtResource("1_weapon")
+target_lock_range = 360.0
 trail_color = Color(0.25, 0.7, 1, 0.8)
 trail_brightness = 2.2

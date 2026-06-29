@@ -110,19 +110,21 @@ scale = Vector2(0.01, 0.1)
 position = Vector2(46, 26.000002)
 scale = Vector2(0.01, 0.1)
 
-[node name="log_near" type="Sprite2D" parent="." unique_id=1300606693]
+[node name="lod_near" type="Sprite2D" parent="." unique_id=1300606693]
+visible = false
 position = Vector2(8, -1)
 rotation = 1.5707964
 scale = Vector2(0.13, 0.13)
 texture = ExtResource("9_u0uvb")
 
-[node name="log_medium" type="Sprite2D" parent="." unique_id=2038884382]
+[node name="lod_medium" type="Sprite2D" parent="." unique_id=2038884382]
+visible = false
 position = Vector2(8.000001, -1)
 rotation = 1.5707964
 scale = Vector2(0.26, 0.26)
 texture = ExtResource("5_u0uvb")
 
-[node name="log_far" type="Sprite2D" parent="." unique_id=1509697203]
+[node name="lod_far" type="Sprite2D" parent="." unique_id=1509697203]
 position = Vector2(8, 0)
 rotation = 1.5707964
 scale = Vector2(0.53, 0.53)

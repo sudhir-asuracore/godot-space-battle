@@ -1,0 +1,116 @@
+[gd_scene format=3 uid="uid://drsfjmf0lgnmw"]
+
+[ext_resource type="Texture2D" uid="uid://cu02vqdslgy2x" path="res://assets/effects/muzzle/gun_flash.png" id="1_jo7sf"]
+[ext_resource type="AudioStream" uid="uid://caflh2ueak06l" path="res://assets/audio/explosion/medium.mp3" id="2_0l5oo"]
+
+[sub_resource type="CanvasItemMaterial" id="CanvasItemMaterial_5feh5"]
+blend_mode = 1
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_0l5oo"]
+atlas = ExtResource("1_jo7sf")
+region = Rect2(0, 42, 277, 225)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_1mwhf"]
+atlas = ExtResource("1_jo7sf")
+region = Rect2(277, 42, 277, 225)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_21e75"]
+atlas = ExtResource("1_jo7sf")
+region = Rect2(554, 42, 277, 225)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_mwnvo"]
+atlas = ExtResource("1_jo7sf")
+region = Rect2(831, 42, 277, 225)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_bkmpd"]
+atlas = ExtResource("1_jo7sf")
+region = Rect2(1108, 42, 277, 225)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_mrgwy"]
+atlas = ExtResource("1_jo7sf")
+region = Rect2(1385, 42, 277, 225)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_fxsxk"]
+atlas = ExtResource("1_jo7sf")
+region = Rect2(0, 492, 277, 225)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_clt0o"]
+atlas = ExtResource("1_jo7sf")
+region = Rect2(277, 492, 277, 225)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_c7hcp"]
+atlas = ExtResource("1_jo7sf")
+region = Rect2(554, 492, 277, 225)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_qngn4"]
+atlas = ExtResource("1_jo7sf")
+region = Rect2(831, 492, 277, 225)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_46wy5"]
+atlas = ExtResource("1_jo7sf")
+region = Rect2(1108, 492, 277, 225)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_4xr13"]
+atlas = ExtResource("1_jo7sf")
+region = Rect2(1385, 492, 277, 225)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_ghxl5"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_0l5oo")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_1mwhf")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_21e75")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_mwnvo")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_bkmpd")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_mrgwy")
+}],
+"loop": 1,
+"name": &"large",
+"speed": 20.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_fxsxk")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_clt0o")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_c7hcp")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_qngn4")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_46wy5")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_4xr13")
+}],
+"loop": 1,
+"name": &"medium",
+"speed": 10.0
+}]
+
+[node name="MuzzleFlashCannonLarge" type="Node2D" unique_id=2131745871]
+
+[node name="flash" type="AnimatedSprite2D" parent="." unique_id=598215755]
+visible = false
+material = SubResource("CanvasItemMaterial_5feh5")
+sprite_frames = SubResource("SpriteFrames_ghxl5")
+animation = &"large"
+offset = Vector2(115, -9)
+
+[node name="audio" type="AudioStreamPlayer2D" parent="." unique_id=2047867425]
+stream = ExtResource("2_0l5oo")

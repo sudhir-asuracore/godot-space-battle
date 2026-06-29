@@ -1,0 +1,143 @@
+[gd_scene format=3 uid="uid://mgfauo8dged3"]
+
+[ext_resource type="Script" uid="uid://dw622hw75aq0u" path="res://scenes/factions/zarak/ships/zarak_frigate.gd" id="1_xwupw"]
+[ext_resource type="Shader" uid="uid://ygy6nmx7ntkx" path="res://shaders/ship_shield.gdshader" id="2_yl0my"]
+[ext_resource type="PackedScene" uid="uid://dyap08d2dvuyw" path="res://scenes/factions/zarak/effects/Thruster_zarak.tscn" id="3_tjxpm"]
+[ext_resource type="Texture2D" uid="uid://wnln01dogj4y" path="res://assets/factions/zarak/ships/dreadnaught_01/lod_medium.png" id="5_sa0io"]
+[ext_resource type="Script" uid="uid://ce7dxwfhmrobl" path="res://scripts/WeaponController.gd" id="7_w0kfd"]
+[ext_resource type="Script" uid="uid://2uyc2o7ii6i8" path="res://scripts/AbilityController.gd" id="8_ocipq"]
+[ext_resource type="Script" uid="uid://csclx8xvdnu4u" path="res://scripts/TargetingController.gd" id="9_q3sdu"]
+[ext_resource type="Texture2D" uid="uid://bc2jjx8ondda5" path="res://assets/factions/zarak/ships/dreadnaught_01/lod_near.png" id="9_xwupw"]
+[ext_resource type="PackedScene" uid="uid://dnakjmnu8wtux" path="res://scenes/factions/zarak/weapons/ZarakWeapon_Cannon.tscn" id="10_nsdv1"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_ghxl5"]
+size = Vector2(37.5, 66.5)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_swkrw"]
+size = Vector2(13, 87)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_ass0e"]
+size = Vector2(85.5, 54)
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_striker_lance_shield"]
+shader = ExtResource("2_yl0my")
+shader_parameter/shield_fill_color = Color(0.35085803, 0.15938511, 0.16644055, 0.7176471)
+shader_parameter/shield_rim_color = Color(0.80290115, 0.1180375, 0, 1)
+shader_parameter/radius = 0.5
+shader_parameter/rim_thickness = 0.0090000004275
+shader_parameter/glow_intensity = 1.9970000473575
+shader_parameter/shield_angle = 270.000012825
+shader_parameter/edge_smoothness = 0.5
+shader_parameter/grow_from_right = true
+
+[node name="Ship" type="CharacterBody2D" unique_id=46216839]
+script = ExtResource("1_xwupw")
+
+[node name="collision_front" type="CollisionShape2D" parent="." unique_id=418808862]
+position = Vector2(66, 0)
+shape = SubResource("RectangleShape2D_ghxl5")
+
+[node name="collision_rear" type="CollisionShape2D" parent="." unique_id=44680908]
+position = Vector2(-49, 0)
+shape = SubResource("RectangleShape2D_swkrw")
+
+[node name="collision_left" type="CollisionShape2D" parent="." unique_id=2013418174]
+position = Vector2(1.25, -40)
+shape = SubResource("RectangleShape2D_ass0e")
+
+[node name="collision_right" type="CollisionShape2D" parent="." unique_id=1117143045]
+position = Vector2(3, 39)
+shape = SubResource("RectangleShape2D_ass0e")
+
+[node name="Shield" type="ColorRect" parent="." unique_id=236542781]
+material = SubResource("ShaderMaterial_striker_lance_shield")
+offset_left = -483.0
+offset_top = -401.0
+offset_right = 454.28625
+offset_bottom = 402.0
+pivot_offset = Vector2(482, 398)
+
+[node name="engine_0" type="Marker2D" parent="." unique_id=518682322]
+position = Vector2(-48, -29)
+
+[node name="engine_1" type="Marker2D" parent="." unique_id=181678505]
+position = Vector2(-48, 27)
+
+[node name="damage_0" type="Marker2D" parent="." unique_id=481845458]
+position = Vector2(-24.995, 0)
+
+[node name="damage_1" type="Marker2D" parent="." unique_id=90024912]
+position = Vector2(-12, -38)
+
+[node name="damage_2" type="Marker2D" parent="." unique_id=994458793]
+position = Vector2(-13.755, 38.945)
+
+[node name="thruster_rear_0" parent="." unique_id=2012412625 instance=ExtResource("3_tjxpm")]
+position = Vector2(-365, -125)
+rotation = 1.5707964
+scale = Vector2(0.15, 1)
+
+[node name="thruster_rear_1" parent="." unique_id=1620158978 instance=ExtResource("3_tjxpm")]
+position = Vector2(-330, 0)
+rotation = 1.5707964
+scale = Vector2(0.2, 1)
+
+[node name="thruster_rear_2" parent="." unique_id=1412388456 instance=ExtResource("3_tjxpm")]
+position = Vector2(-363, 125)
+rotation = 1.5707964
+scale = Vector2(0.15, 1)
+
+[node name="thruster_left_0" parent="." unique_id=1447448281 instance=ExtResource("3_tjxpm")]
+position = Vector2(45.000004, -28)
+rotation = 3.1415927
+scale = Vector2(0.01, 0.1)
+
+[node name="thruster_right_0" parent="." unique_id=1154762883 instance=ExtResource("3_tjxpm")]
+position = Vector2(46, 26.000002)
+scale = Vector2(0.01, 0.1)
+
+[node name="lod_medium" type="Sprite2D" parent="." unique_id=1374907003]
+visible = false
+position = Vector2(2, 2)
+rotation = 1.5707964
+scale = Vector2(1.6049366, 1.6049365)
+texture = ExtResource("5_sa0io")
+
+[node name="lod_far" type="Sprite2D" parent="." unique_id=913823596]
+visible = false
+position = Vector2(2, 2)
+rotation = 1.5707964
+scale = Vector2(1.6049366, 1.6049365)
+texture = ExtResource("5_sa0io")
+
+[node name="lod_near" type="Sprite2D" parent="." unique_id=94288899]
+rotation = 1.5707964
+scale = Vector2(0.8, 0.8)
+texture = ExtResource("9_xwupw")
+
+[node name="WeaponController" type="Node2D" parent="." unique_id=2107797252]
+script = ExtResource("7_w0kfd")
+
+[node name="AbilityController" type="Node2D" parent="." unique_id=179436908]
+script = ExtResource("8_ocipq")
+
+[node name="TargetingController" type="Node2D" parent="." unique_id=1295658060]
+script = ExtResource("9_q3sdu")
+
+[node name="StateMachine" type="Node" parent="." unique_id=800719105]
+
+[node name="weapon_cannonlarge_right_0" parent="." unique_id=1045058962 instance=ExtResource("10_nsdv1")]
+position = Vector2(308, 137)
+rotation = 1.5707964
+
+[node name="weapon_cannonlarge_right_1" parent="." unique_id=745892253 instance=ExtResource("10_nsdv1")]
+position = Vector2(232, 138)
+rotation = 1.5707964
+
+[node name="weapon_cannonlarge_left_0" parent="." unique_id=665260163 instance=ExtResource("10_nsdv1")]
+position = Vector2(310, -139)
+rotation = -1.5707964
+
+[node name="weapon_cannonlarge_left_1" parent="." unique_id=575456647 instance=ExtResource("10_nsdv1")]
+position = Vector2(228, -139)
+rotation = -1.5707964

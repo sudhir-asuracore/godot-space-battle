@@ -1,0 +1,21 @@
+[gd_resource type="Resource" script_class="WeaponData" format=3]
+
+[ext_resource type="Script" uid="uid://cegt3oesh5v7k" path="res://scripts/resources/WeaponData.gd" id="1_script"]
+
+[resource]
+script = ExtResource("1_script")
+name = "Large Cannon"
+weapon_range = 900.0
+attack_cone_degrees = 10.0
+max_turret_angle = 180.0
+show_coverage_grid = true
+fire_rate = 0.5
+ammo = 0
+cooldown = 0.0
+shield_damage = 18.0
+hull_damage = 45.0
+projectile_speed = 1100.0
+spread_degrees = 1.0
+fire_audio_once_per_ammo = 1
+is_beam = false
+auto_fire = true

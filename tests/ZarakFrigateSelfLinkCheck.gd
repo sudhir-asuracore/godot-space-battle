@@ -4,7 +4,7 @@ extends SceneTree
 # it picks up its own ship_data (safety net) and resolves the zarak faction,
 # producing non-default stats without any external spawner wiring.
 
-const ZARAK_FRIGATE_SCENE := "res://scenes/factions/zarak/ships/ZarakFrigate.tscn"
+const ZARAK_FRIGATE_SCENE := "res://scenes/factions/zarak/ships/ZarakGorehammer.tscn"
 const ZARAK_FACTION_PATH := "res://resources/factions/zarak/zarak_confedaracy.tres"
 
 func _init() -> void:
@@ -20,7 +20,7 @@ func _run() -> void:
 
 	if ship.ship_data == null:
 		failures.append("ship_data was not auto-assigned")
-	elif ship.ship_data.name != "Zarak Frigate":
+	elif ship.ship_data.name != "Zarak Gorehammer":
 		failures.append("ship_data is not the zarak frigate: %s" % ship.ship_data.name)
 
 	var zarak_faction := load(ZARAK_FACTION_PATH) as FactionData

@@ -1,10 +1,10 @@
 extends Ship
 
-const SHIP_NAME := "Zarak Frigate"
+const SHIP_NAME := "Zarak Gorehammer"
 # Resource this ship represents. Used as a safety net so the scene stays linked
 # to its own ship/faction data even when instantiated directly (e.g. tests or
 # standalone scenes) without a spawner assigning ship_data.
-const DEFAULT_SHIP_DATA_PATH := "res://resources/factions/zarak/ships/zarak_frigate.tres"
+const DEFAULT_SHIP_DATA_PATH := "res://resources/factions/zarak/ships/gorehammer.tres"
 
 func _before_ship_ready() -> void:
 	if ship_data == null:

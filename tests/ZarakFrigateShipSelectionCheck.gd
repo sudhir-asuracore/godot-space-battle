@@ -10,9 +10,10 @@ extends SceneTree
 # through the `/root/EventBus` autoload node.
 
 const ZARAK_FACTION_PATH := "res://resources/factions/zarak/zarak_confedaracy.tres"
-const ZARAK_FRIGATE_PATH := "res://resources/factions/zarak/ships/zarak_frigate.tres"
-const ZARAK_FRIGATE_SCENE := "res://scenes/factions/zarak/ships/ZarakFrigate.tscn"
+const ZARAK_FRIGATE_PATH := "res://resources/factions/zarak/ships/gorehammer.tres"
+const ZARAK_FRIGATE_SCENE := "res://scenes/factions/zarak/ships/ZarakGorehammer.tscn"
 const PLAYER_HUD_SCRIPT := "res://scripts/ui/PlayerHUD.gd"
+const HANGAR_STORE_SCRIPT := "res://scripts/ui/HangarStore.gd"
 const MAIN_SCRIPT := "res://scenes/Main.gd"
 
 var _selected_ship_data: ShipData = null
@@ -26,21 +27,21 @@ func _run() -> void:
 	# 1. Frigate ship resource exists, is named, and points at its scene.
 	var frigate := load(ZARAK_FRIGATE_PATH) as ShipData
 	if not frigate:
-		failures.append("Failed to load zarak_frigate.tres as ShipData")
+		failures.append("Failed to load gorehammer.tres as ShipData")
 	else:
-		if frigate.name != "Zarak Frigate":
-			failures.append("Frigate name should be 'Zarak Frigate', got '%s'" % frigate.name)
+		if frigate.name != "Zarak Gorehammer":
+			failures.append("Frigate name should be 'Zarak Gorehammer', got '%s'" % frigate.name)
 		if frigate.ship_scene == null:
 			failures.append("Frigate ship_scene is not set")
 
 	# 2. ZarakFrigate scene instantiates as a Ship.
 	var frigate_scene := load(ZARAK_FRIGATE_SCENE) as PackedScene
 	if not frigate_scene:
-		failures.append("Failed to load ZarakFrigate.tscn")
+		failures.append("Failed to load ZarakGorehammer.tscn")
 	else:
 		var ship := frigate_scene.instantiate()
 		if not (ship is Ship):
-			failures.append("ZarakFrigate.tscn root is not a Ship")
+			failures.append("ZarakGorehammer.tscn root is not a Ship")
 		if ship:
 			ship.free()
 
@@ -53,7 +54,7 @@ func _run() -> void:
 			var found_frigate := false
 			for entry in faction.hangar_ship_options:
 				var sd := entry as ShipData
-				if sd and sd.name == "Zarak Frigate":
+				if sd and sd.name == "Zarak Gorehammer":
 					found_frigate = true
 			if not found_frigate:
 				failures.append("Zarak faction hangar_ship_options is missing the frigate")
@@ -72,11 +73,14 @@ func _run() -> void:
 			failures.append("player_ship_selected did not deliver the chosen ship data")
 		event_bus.disconnect("player_ship_selected", _on_player_ship_selected)
 
-	# 5. HUD exposes the clickable selection API and emits the selection signal.
+	# 5. HUD exposes the clickable selection API; the Hangar Store scene builds
+	# the ship list and emits the selection signal.
 	_check_source(PLAYER_HUD_SCRIPT, [
 		"func show_ship_selection",
 		"func hide_ship_selection",
 		"func is_ship_selection_visible",
+	], failures)
+	_check_source(HANGAR_STORE_SCRIPT, [
 		"func _make_ship_button",
 		"EventBus.player_ship_selected.emit",
 	], failures)

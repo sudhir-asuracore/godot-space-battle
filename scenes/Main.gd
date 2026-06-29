@@ -11,6 +11,7 @@ var _ship: Ship = null
 @onready var _solar_system: SolarSystem = $SolarSystem as SolarSystem
 
 const AI_SHIP_CONTROLLER_SCRIPT = preload("res://scripts/AIShipController.gd")
+const FOG_OF_WAR_SCRIPT = preload("res://scripts/FogOfWar.gd")
 const HOMEBASE_SCENE = preload("res://scenes/homebase/Homebase.tscn")
 const DEFAULT_PLAYER_SHIP_DATA_PATH := "res://resources/factions/zarak/ships/scout.tres"
 const DEFAULT_PLAYER_FACTION_PATH := "res://resources/factions/zarak/zarak_confedaracy.tres"
@@ -60,6 +61,8 @@ func _ready() -> void:
 	_register_key_action(&"turn_left", KEY_Q)
 	_register_key_action(&"turn_right", KEY_E)
 	_register_key_action(&"reverse_thrust", KEY_R)
+	# M toggles the System Map overlay.
+	_register_key_action(&"toggle_map", KEY_M)
 	
 	_resolve_match_setup()
 	_resolve_solar_system_layout()
@@ -72,7 +75,9 @@ func _ready() -> void:
 	GameState.player_faction = _player_faction
 
 	EventBus.player_ship_selected.connect(_on_player_ship_selected)
+	EventBus.map_deploy_requested.connect(_on_map_deploy_requested)
 
+	_spawn_fog_of_war()
 	_spawn_homebases()
 	_spawn_enemy()
 
@@ -106,6 +111,19 @@ func _on_player_ship_selected(ship_data: ShipData) -> void:
 		_ship = null
 	_spawn_player_ship_from_data(ship_data, spawn_pos)
 
+# Map-driven deployment: the player picked a hangar-capable location on the
+# System Map. Only honoured while there is no living player ship (matching the
+# map's deploy gating); spawns the chosen ship at the selected world position.
+func _on_map_deploy_requested(ship_data: ShipData, world_position: Vector2) -> void:
+	if _match_over or not ship_data:
+		return
+	if _ship and is_instance_valid(_ship) and not _ship.is_dead:
+		return
+	if _ship and is_instance_valid(_ship):
+		_ship.queue_free()
+		_ship = null
+	_spawn_player_ship_from_data(ship_data, world_position)
+
 func _setup_camera_and_path() -> void:
 	# Camera follows the player ship automatically on launch.
 	if _camera and _ship:
@@ -123,6 +141,14 @@ func _setup_camera_and_path() -> void:
 		_path_line.default_color = path_color # Glowing semi-transparent cyan
 		_path_line.clear_points()
 		_path_line.visible = false
+
+# Adds the shared faction fog of war overlay (captured planets, homebase and
+# allied ships reveal a radar area; everything else is darkened).
+func _spawn_fog_of_war() -> void:
+	var fog := FOG_OF_WAR_SCRIPT.new()
+	fog.name = &"FogOfWar"
+	add_child(fog)
+	fog.setup(_player_faction)
 
 func _spawn_homebases() -> void:
 	var player_hb: Homebase = HOMEBASE_SCENE.instantiate() as Homebase
@@ -248,6 +274,10 @@ func _on_ship_destroyed(ship: Ship, _killer: Node2D) -> void:
 func _respawn_player() -> void:
 	if not _ship or _match_over:
 		return
+	# Skip the auto-respawn if the player already redeployed via the map in the
+	# meantime (the live ship would otherwise be yanked back to the homebase).
+	if not _ship.is_dead:
+		return
 	# Free T1 fallback so the player can never softlock (PRD section 10.4).
 	_ship.respawn(_player_homebase_pos)
 	if _targeting:
@@ -281,8 +311,7 @@ func _process(delta: float) -> void:
 			
 	# 2. Update the dynamic zoom level display.
 	if _zoom_label and _camera and not _match_over:
-		var percentage: int = roundi(_camera.zoom.x * 100.0)
-		_zoom_label.text = "Zoom: %d%%" % percentage
+		_zoom_label.text = "Zoom: %dx" % _camera.get_zoom_level()
 	
 	# 3. Keep the target reticle bound to the current locked target.
 	if _reticle and _targeting:
@@ -307,6 +336,12 @@ func _process(delta: float) -> void:
 				_spawn_enemy()
 
 func _unhandled_input(event: InputEvent) -> void:
+	# The System Map can be toggled even after the match ends so the result can
+	# still be reviewed; route it before the match-over early-out.
+	if event.is_action_pressed(&"toggle_map"):
+		EventBus.map_screen_toggle_requested.emit()
+		get_viewport().set_input_as_handled()
+		return
 	if _match_over:
 		return
 	# Set destination target on Left Click using the "navigate" action.

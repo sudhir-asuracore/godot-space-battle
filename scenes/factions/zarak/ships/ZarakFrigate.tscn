@@ -1,4 +1,4 @@
-[gd_scene format=3 uid="uid://bgr6ppt5qkjyf"]
+[gd_scene format=3 uid="uid://cgbh5d77pj52i"]
 
 [ext_resource type="Script" uid="uid://dw622hw75aq0u" path="res://scenes/factions/zarak/ships/zarak_frigate.gd" id="1_7p0gr"]
 [ext_resource type="Shader" uid="uid://ygy6nmx7ntkx" path="res://shaders/ship_shield.gdshader" id="2_gcel2"]

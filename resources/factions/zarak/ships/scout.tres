@@ -20,6 +20,7 @@ acceleration = 350.0
 strafe_speed = 80.0
 reverse_speed = 55.0
 basic_weapon = ExtResource("1_weapon")
+target_lock_range = 460.0
 trail_length = 70
 ability_1 = ExtResource("2_ability")
 ability_2 = ExtResource("4_ability")

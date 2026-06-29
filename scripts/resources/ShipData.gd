@@ -75,6 +75,14 @@ func resolve_faction_data() -> FactionData:
 # Any type not listed here falls back to basic_weapon.
 @export var muzzle_weapons: Dictionary = {}
 
+# Maps a self-contained weapon node's key to the WeaponData resource it fires.
+# The key matches the weapon node's prefix in the ship scene, i.e. the
+# "weapon_<key>" portion of a node named weapon_<key>_<side>_<index>
+# (e.g. node "weapon_cannonlarge_right_0" -> key "weapon_cannonlarge"). This
+# lets a ship declare which weapon .tres each of its weapon slots uses, so the
+# weapon (its projectile, muzzle flash, audio) stays fully self-contained.
+@export var weapons: Dictionary = {}
+
 # Returns the weapon resource configured for a given muzzle type, or null when
 # no specific mapping exists (callers fall back to basic_weapon).
 func get_muzzle_weapon(muzzle_type: StringName) -> WeaponData:
@@ -84,6 +92,18 @@ func get_muzzle_weapon(muzzle_type: StringName) -> WeaponData:
 	if mapped == null:
 		# Allow string keys too for convenience when authored in the inspector.
 		mapped = muzzle_weapons.get(String(muzzle_type))
+	return mapped as WeaponData
+
+# Returns the WeaponData a self-contained weapon node should fire, resolved from
+# the node's "weapon_<key>" prefix (e.g. "weapon_cannonlarge"). Returns null
+# when the ship declares no weapon for that key.
+func get_ship_weapon(weapon_key: StringName) -> WeaponData:
+	if weapon_key == &"":
+		return null
+	var mapped: Variant = weapons.get(weapon_key)
+	if mapped == null:
+		# Allow string keys too for convenience when authored in the inspector.
+		mapped = weapons.get(String(weapon_key))
 	return mapped as WeaponData
 
 @export_category("Visuals")

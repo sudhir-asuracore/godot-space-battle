@@ -64,7 +64,11 @@ func _ready() -> void:
 		planet_textures.append("res://assets/kenney_planets/Planets/planet0%d.png" % i)
 	planet_textures.shuffle()
 	
-	var default_planet_data: PlanetData = load("res://resources/planets/default_planet.tres") as PlanetData
+	# Per-planet properties are generated from the PRD planet-type table (11.5)
+	# via PlanetData.generate. A dedicated RNG keeps planet generation isolated
+	# from the orbit randf() sequence so existing layout tests stay stable.
+	var planet_rng := RandomNumberGenerator.new()
+	planet_rng.randomize()
 
 	var current_radius: float = FIRST_PLANET_ORBIT_RADIUS
 	for i in range(num_planets):
@@ -73,10 +77,17 @@ func _ready() -> void:
 		
 		var texture_path: String = planet_textures[i % planet_textures.size()]
 		
+		var is_homebase_end: bool = i == inner_end_index or i == outer_end_index
+		
 		# Instantiate Planet
 		var planet_instance: Planet = PLANET_SCENE.instantiate() as Planet
 		planet_instance.name = "Planet_%d" % (i + 1)
-		planet_instance.planet_data = default_planet_data
+		# Homebase-end worlds always host a hangar (the fleet must be able to
+		# (re)deploy from home); every other world gets a random PRD type.
+		if is_homebase_end:
+			planet_instance.planet_data = PlanetData.build_type(PlanetData.PlanetType.SHIPYARD, planet_rng)
+		else:
+			planet_instance.planet_data = PlanetData.generate(planet_rng)
 		add_child(planet_instance)
 		
 		var sprite: Sprite2D = planet_instance.get_node("Sprite2D")
@@ -86,8 +97,6 @@ func _ready() -> void:
 		var base_scale: float = randf_range(0.2, 0.5)
 		sprite.scale = Vector2(base_scale, base_scale)
 		planet_instance.get_node("CollisionShape2D").shape.radius = 250.0 * base_scale
-		
-		var is_homebase_end: bool = i == inner_end_index or i == outer_end_index
 		
 		# Orbital stats
 		var orbit_data: OrbitData = OrbitData.new()

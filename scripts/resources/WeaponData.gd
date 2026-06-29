@@ -4,6 +4,11 @@ class_name WeaponData
 @export var name: String = "Autocannon"
 @export var weapon_range: float = 500.0
 @export_range(0.0, 360.0, 0.5) var attack_cone_degrees: float = 360.0
+# Maximum arc the turret can swing through, centred on its mounted/home
+# direction. 360 (default) means it can rotate freely; e.g. 180 lets the
+# weapon swing -90..+90 from its home position, so a side-mounted gun cannot
+# fire on enemies behind the opposite flank. WeaponModule enforces this.
+@export_range(0.0, 360.0, 1.0) var max_turret_angle: float = 360.0
 @export var show_coverage_grid: bool = true
 @export var fire_rate: float = 4.0
 @export var ammo: int = 0

@@ -8,11 +8,31 @@ const WEAPON_COVERAGE_OVERLAY_SCRIPT := preload("res://scripts/WeaponCoverageOve
 
 const MUZZLE_NODE_PREFIX := "muzzle_"
 
+# Prefix identifying a self-contained weapon node instanced on the ship
+# (e.g. weapon_left_0, weapon_right_1). Each such node is a full weapon scene
+# bundling its sprite, muzzle marker, muzzle flash + audio and the projectile
+# it fires. This is the new self-reliant weapon model that coexists with the
+# legacy muzzle_<type>_<side>_<index> marker pattern below.
+const WEAPON_NODE_PREFIX := "weapon_"
+
 # Every muzzle marker on the ship, parsed from nodes named
 # muzzle_<weapon_type>_<side>_<index>. A legacy single "Muzzle" node is also
 # supported. The primary muzzle is used as the representative point for audio.
 var _muzzles: Array[Dictionary] = []
 var _primary_muzzle: Marker2D = null
+
+# Self-contained weapon modules discovered on the ship. Each entry is a
+# WeaponModule node that fully manages its own range, aiming, coverage grid,
+# fire cadence, projectile, muzzle flash and audio. The controller only acts as
+# a coordinator that forwards the locked target to them. See
+# _resolve_weapon_modules().
+var _weapon_modules: Array[Node] = []
+
+# True once each discovered module has been handed its WeaponData. The ship's
+# `ship_data` may not be assigned yet when this node enters the tree (e.g. the
+# spawner calls add_child() before setting ship_data), so configuration is
+# deferred until ship_data is available rather than done eagerly in _ready().
+var _modules_configured: bool = false
 
 var _shot_timer: float = 0.0
 var _reload_timer: float = 0.0
@@ -26,6 +46,7 @@ const PROJECTILE_SCENE = preload("res://scenes/common/weapons/Projectile.tscn")
 
 func _ready() -> void:
 	_resolve_muzzles()
+	_resolve_weapon_modules()
 	_ensure_coverage_overlay()
 
 func _resolve_muzzles() -> void:
@@ -65,6 +86,74 @@ func _resolve_muzzles() -> void:
 
 	if not _muzzles.is_empty():
 		_primary_muzzle = _muzzles[0].get("node") as Marker2D
+
+func _resolve_weapon_modules() -> void:
+	# Discover self-contained WeaponModule nodes (weapon_<key>_<side>_<index>)
+	# instanced on the ship. Each module owns everything about itself, so the
+	# controller only has to tell it which WeaponData it fires and then forward
+	# the locked target every frame.
+	#
+	# Only the nodes are collected here; resolving each module's WeaponData and
+	# calling configure() is deferred to _ensure_modules_configured() because
+	# the ship's `ship_data` is often assigned after this node enters the tree.
+	_weapon_modules.clear()
+	_modules_configured = false
+
+	var parent := get_parent()
+	if not parent:
+		return
+
+	for child in parent.get_children():
+		# A self-contained weapon is any weapon_* node running the WeaponModule
+		# script (detected via its configure()/tick() API so this works even
+		# before the editor has registered the class_name).
+		if not str(child.name).begins_with(WEAPON_NODE_PREFIX):
+			continue
+		if not (child.has_method("configure") and child.has_method("tick")):
+			continue
+		_weapon_modules.append(child)
+
+	_weapon_modules.sort_custom(func(a: Node, b: Node) -> bool:
+		return str(a.name if a else "") < str(b.name if b else "")
+	)
+
+func _ensure_modules_configured() -> void:
+	# Configure each discovered module with the WeaponData declared by the ship.
+	# Runs once ship_data is available; until then modules stay inert (their
+	# tick() is a no-op without a weapon), which avoids configuring them with a
+	# null weapon when the spawner sets ship_data after add_child().
+	if _modules_configured or _weapon_modules.is_empty():
+		return
+	if not _ship or not _ship.ship_data:
+		return
+
+	for module in _weapon_modules:
+		var weapon_key := _parse_weapon_node_key(module.name)
+		var weapon: WeaponData = _ship.ship_data.get_ship_weapon(weapon_key)
+		module.configure(weapon, _ship)
+
+	_modules_configured = true
+
+func _parse_weapon_node_key(node_name: StringName) -> StringName:
+	# Self-contained weapon nodes are named weapon_<key>_<side>_<index>
+	# (e.g. weapon_cannonlarge_right_0). The ship declares which WeaponData a
+	# slot fires under the "weapon_<key>" key, so we strip the trailing
+	# <side>_<index> and return the leading "weapon_<key>" portion.
+	var raw_name: String = str(node_name)
+	if not raw_name.begins_with(WEAPON_NODE_PREFIX):
+		return &""
+
+	var parts: PackedStringArray = raw_name.split("_")
+	# Need at least weapon, key, side, index.
+	if parts.size() < 4:
+		return &""
+
+	# Drop the last two segments (side, index); the rest (minus the leading
+	# "weapon") is the weapon key, rejoined to support multi-word keys.
+	var key_segments: PackedStringArray = parts.slice(1, parts.size() - 2)
+	if key_segments.is_empty():
+		return &""
+	return StringName(WEAPON_NODE_PREFIX + "_".join(key_segments))
 
 func _parse_muzzle_node_name(node_name: StringName) -> Dictionary:
 	# Expected pattern: muzzle_<weapon_type>_<side>_<index>
@@ -107,10 +196,17 @@ func _get_weapon_for_muzzle(muzzle_entry: Dictionary, fallback_weapon: WeaponDat
 	return fallback_weapon
 
 func _process(delta: float) -> void:
-	if not _can_process_weapon_logic():
+	var active := _can_process_weapon_logic()
+
+	# Self-contained weapon modules manage their own range, aiming, coverage
+	# grid and firing; the controller only forwards the locked target to them.
+	_tick_weapon_modules(delta, active)
+
+	if not active:
 		_set_coverage_overlay_visible(false)
 		return
 
+	# Legacy / basic_weapon path for ships not yet migrated to weapon modules.
 	var weapon: WeaponData = _get_active_weapon_data()
 	if not weapon:
 		_set_coverage_overlay_visible(false)
@@ -125,12 +221,22 @@ func _process(delta: float) -> void:
 	if _should_auto_fire(weapon):
 		_attempt_fire(weapon)
 
+func _tick_weapon_modules(delta: float, active: bool) -> void:
+	if _weapon_modules.is_empty():
+		return
+	_ensure_modules_configured()
+	var target: Node2D = _get_locked_target() if active else null
+	for module in _weapon_modules:
+		module.tick(delta, target, active)
+
 func _can_process_weapon_logic() -> bool:
 	return _ship != null and not _ship.is_dead
 
 func _get_active_weapon_data() -> WeaponData:
 	if not _ship or not _ship.ship_data:
 		return null
+	# Weapon modules drive themselves, so the controller-level weapon is only
+	# the legacy basic_weapon (used for muzzle markers and the ship-level grid).
 	return _ship.ship_data.basic_weapon
 
 func _after_weapon_tick(_delta: float, _weapon: WeaponData) -> void:
@@ -253,11 +359,16 @@ func _on_reload_finished(_weapon: WeaponData) -> void:
 	pass
 
 func _fire(target: Node2D, weapon: WeaponData) -> bool:
+	# Self-contained weapon modules fire themselves (see WeaponModule); this
+	# path only covers the legacy muzzle markers used by ships that still rely
+	# on the ship-level basic_weapon.
+	if _muzzles.is_empty():
+		return false
+	return _fire_legacy_muzzles(target, weapon)
+
+func _fire_legacy_muzzles(target: Node2D, weapon: WeaponData) -> bool:
 	if not PROJECTILE_SCENE:
 		print("Error: Projectile scene not preloaded!")
-		return false
-
-	if _muzzles.is_empty():
 		return false
 
 	_play_fire_audio(weapon)
@@ -290,7 +401,7 @@ func _fire(target: Node2D, weapon: WeaponData) -> bool:
 func _create_projectile() -> Projectile:
 	return PROJECTILE_SCENE.instantiate() as Projectile
 
-func _configure_projectile(projectile: Projectile, muzzle: Marker2D, target: Node2D, weapon: WeaponData) -> void:
+func _configure_projectile(projectile: Projectile, muzzle: Node2D, target: Node2D, weapon: WeaponData) -> void:
 	projectile.global_position = muzzle.global_position
 	projectile.direction = (muzzle.global_position.direction_to(target.global_position)).normalized()
 	projectile.speed = weapon.projectile_speed

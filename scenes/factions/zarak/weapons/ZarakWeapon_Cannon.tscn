@@ -1,0 +1,20 @@
+[gd_scene format=3 uid="uid://dnakjmnu8wtux"]
+
+[ext_resource type="Texture2D" uid="uid://d1wbonxcevdp0" path="res://assets/factions/zarak/weapons/cannon_single_barrel.png" id="1_sosya"]
+[ext_resource type="PackedScene" uid="uid://drsfjmf0lgnmw" path="res://scenes/common/effects/MuzzleFlash_CannonLarge.tscn" id="2_5feh5"]
+[ext_resource type="PackedScene" uid="uid://bvh28e7s3nq5j" path="res://scenes/common/weapons/cannon_shot.tscn" id="3_mcof2"]
+[ext_resource type="Script" uid="uid://bk4ok82tspa66" path="res://scripts/WeaponModule.gd" id="4_module"]
+
+[node name="ZarakCannon" type="Node2D" unique_id=1045058962]
+script = ExtResource("4_module")
+
+[node name="CannonSingleBarrel" type="Sprite2D" parent="." unique_id=1793170671]
+texture = ExtResource("1_sosya")
+
+[node name="muzzle_zarak_cannon_0" type="Marker2D" parent="." unique_id=1786368547]
+position = Vector2(42, 0)
+
+[node name="flash" parent="." unique_id=2131745871 instance=ExtResource("2_5feh5")]
+position = Vector2(43, -1)
+
+[node name="projectile" parent="." unique_id=1564926885 instance=ExtResource("3_mcof2")]

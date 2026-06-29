@@ -1,20 +1,20 @@
 # Faction Ship Names
 
 A pool of flavour names per faction. Each name is paired with a **class** — the
-class defines what the ship actually *is* (Scout, Striker, Dreadnaught, Carrier),
-while the name is what players see. For example, a Striker named *Lance* is still
-mechanically a Striker; "Lance" is just its hull name.
+class defines what the ship actually *is* (Scout, Frigate, Dreadnaught, Carrier),
+while the name is what players see. For example, a Frigate named *Lance* is still
+mechanically a Frigate; "Lance" is just its hull name.
 
 Classes (see `ship-classes.md`):
 
 | Class       | Role                                |
 | ----------- | ----------------------------------- |
 | Scout       | Fast reconnaissance and skirmishing |
-| Striker     | General-purpose combat ship         |
+| Frigate     | General-purpose combat ship         |
 | Dreadnaught | Heavy frontline warship             |
 | Carrier     | Fleet support and drone deployment  |
 
-> Naming convention for resources stays `class_name` (e.g. `striker_lance`,
+> Naming convention for resources stays `class_name` (e.g. `Frigate_lance`,
 > `carrier_dominator`); the table below is the source of truth for the human
 > name and the class it maps to.
 
@@ -30,13 +30,13 @@ guttural, industrial names.
 | 1  | Cinder      | Scout       |
 | 2  | Razorfang   | Scout       |
 | 3  | Emberjack   | Scout       |
-| 4  | Slagrunner  | Scout       |
-| 5  | Bruteforce  | Striker     |
-| 6  | Ironmaw     | Striker     |
-| 7  | Gorehammer  | Striker     |
-| 8  | Cleaver     | Striker     |
-| 9  | Skullcrack  | Striker     |
-| 10 | Rustbringer | Striker     |
+| 4  | Slagrunner  | Scout       |        
+| 5  | Bruteforce  | Frigate     |
+| 6  | Ironmaw     | Frigate     |
+| 7  | Gorehammer  | Frigate     |
+| 8  | Cleaver     | Frigate     |
+| 9  | Skullcrack  | Frigate     |
+| 10 | Rustbringer | Frigate     |
 | 11 | Warbeast    | Dreadnaught |
 | 12 | Vanguard    | Dreadnaught |
 | 13 | Doomforge   | Dreadnaught |
@@ -61,12 +61,12 @@ and luminous names.
 | 2  | Glimmer     | Scout       |
 | 3  | Sunspear    | Scout       |
 | 4  | Halcyon     | Scout       |
-| 5  | Raptor      | Striker     |
-| 6  | Auralight   | Striker     |
-| 7  | Solflare    | Striker     |
-| 8  | Radiant     | Striker     |
-| 9  | Goldwing    | Striker     |
-| 10 | Lumen       | Striker     |
+| 5  | Raptor      | Frigate     |
+| 6  | Auralight   | Frigate     |
+| 7  | Solflare    | Frigate     |
+| 8  | Radiant     | Frigate     |
+| 9  | Goldwing    | Frigate     |
+| 10 | Lumen       | Frigate     |
 | 11 | Daybreak    | Dreadnaught |
 | 12 | Aureate     | Dreadnaught |
 | 13 | Helios      | Dreadnaught |
@@ -91,12 +91,12 @@ fortress-like names.
 | 2  | Picket      | Scout       |
 | 3  | Watchman    | Scout       |
 | 4  | Outrider    | Scout       |
-| 5  | Bulwark     | Striker     |
-| 6  | Warden      | Striker     |
-| 7  | Phalanx     | Striker     |
-| 8  | Guardian    | Striker     |
-| 9  | Bastion     | Striker     |
-| 10 | Paladin     | Striker     |
+| 5  | Bulwark     | Frigate     |
+| 6  | Warden      | Frigate     |
+| 7  | Phalanx     | Frigate     |
+| 8  | Guardian    | Frigate     |
+| 9  | Bastion     | Frigate     |
+| 10 | Paladin     | Frigate     |
 | 11 | Aegisborn   | Dreadnaught |
 | 12 | Rampart     | Dreadnaught |
 | 13 | Citadel     | Dreadnaught |

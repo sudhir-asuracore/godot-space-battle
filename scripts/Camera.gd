@@ -3,17 +3,24 @@ class_name GameCamera
 
 @export var min_zoom: float = 0.3
 @export var max_zoom: float = 4.0
-@export var zoom_speed: float = 0.15
+# Fixed amount each zoom in/out moves the camera by (one discrete step).
+@export var zoom_step: float = 0.2
+# How quickly the current zoom eases toward the target zoom (higher = snappier).
+@export var zoom_smoothing: float = 10.0
 @export var move_speed: float = 1800.0 # Keyboard movement speed
 
 var target_node: Node2D = null
 var follow_target: bool = true
+
+# Zoom level the camera is easing toward; the actual zoom lerps to this each frame.
+var _target_zoom: float = 1.0
 
 var _drag_start: Vector2 = Vector2.ZERO
 var _dragging: bool = false
 
 func _ready() -> void:
 	# Start at default 100% zoom
+	_target_zoom = 1.0
 	zoom = Vector2(1.0, 1.0)
 
 func _physics_process(delta: float) -> void:
@@ -38,6 +45,14 @@ func _process(delta: float) -> void:
 		follow_target = false
 		position += move_dir.normalized() * (move_speed / zoom.x) * delta
 
+	# Smoothly ease the actual zoom toward the stepped target zoom.
+	if not is_equal_approx(zoom.x, _target_zoom):
+		var t: float = clamp(zoom_smoothing * delta, 0.0, 1.0)
+		var smoothed: float = lerp(zoom.x, _target_zoom, t)
+		if is_equal_approx(smoothed, _target_zoom):
+			smoothed = _target_zoom
+		zoom = Vector2(smoothed, smoothed)
+
 func _unhandled_input(event: InputEvent) -> void:
 	# Relock camera on Spacebar
 	if event is InputEventKey and event.pressed and event.keycode == KEY_SPACE:
@@ -54,9 +69,9 @@ func _unhandled_input(event: InputEvent) -> void:
 				
 		# Zoom using Input Map actions (e.g. Wheel Up / Wheel Down)
 		elif event.is_action_pressed("zoom_in"):
-			adjust_zoom(1.15)
+			step_zoom(1)
 		elif event.is_action_pressed("zoom_out"):
-			adjust_zoom(1.0 / 1.15)
+			step_zoom(-1)
 			
 	elif event is InputEventMouseMotion and _dragging:
 		# Decouple camera follow if user manual drags
@@ -66,7 +81,13 @@ func _unhandled_input(event: InputEvent) -> void:
 		position -= delta_pos / zoom.x
 		_drag_start = current_pos
 
-func adjust_zoom(factor: float) -> void:
-	var new_zoom: float = zoom.x * factor
-	new_zoom = clamp(new_zoom, min_zoom, max_zoom)
-	zoom = Vector2(new_zoom, new_zoom)
+# Move the target zoom by a number of discrete steps (positive = zoom in,
+# negative = zoom out). The actual zoom then eases toward this target in _process.
+func step_zoom(steps: int) -> void:
+	_target_zoom = clamp(_target_zoom + zoom_step * float(steps), min_zoom, max_zoom)
+
+# Current zoom expressed as a discrete step level (1 = most zoomed out), used
+# for the HUD readout instead of a percentage. Anchored to min_zoom so the
+# value increases by one for every zoom step.
+func get_zoom_level() -> int:
+	return roundi((_target_zoom - min_zoom) / zoom_step) + 1

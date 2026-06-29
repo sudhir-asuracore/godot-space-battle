@@ -17,5 +17,6 @@ max_shield = 50.0
 max_hull = 200
 shield_angle = 240.0
 basic_weapon = ExtResource("1_weapon")
+target_lock_range = 320.0
 trail_length = 70
 ability_1 = ExtResource("2_ability")

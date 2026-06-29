@@ -1,0 +1,34 @@
+[gd_resource type="Resource" script_class="ShipData" format=3]
+
+[ext_resource type="Resource" path="res://resources/factions/zarak/weapons/zarak_weapon_cannonlarge.tres" id="1_weapon_cannonlarge"]
+[ext_resource type="Script" uid="uid://deo8044sl5k4r" path="res://scripts/resources/ShipData.gd" id="2_script"]
+[ext_resource type="PackedScene" uid="uid://mgfauo8dged3" path="res://scenes/factions/zarak/ships/ZarakWarbeast.tscn" id="3_scene"]
+[ext_resource type="Resource" path="res://resources/abilities/overcharge.tres" id="4_ability"]
+[ext_resource type="Resource" path="res://resources/abilities/supershield.tres" id="5_ability"]
+
+[resource]
+script = ExtResource("2_script")
+name = "Zarak Warbeast"
+description = "A brutalist capital-grade dreadnaught. Slow and ponderous, but soaks immense punishment and overwhelms anything that stands in front of its guns."
+tier = 3
+ship_class = 2
+faction = 0
+ship_size = 3
+ship_scene = ExtResource("3_scene")
+max_hull = 900.0
+max_shield = 220.0
+shield_angle = 270.0
+max_speed = 130.0
+acceleration = 150.0
+strafe_speed = 35.0
+reverse_speed = 28.0
+weapons = {
+"weapon_cannonlarge": ExtResource("1_weapon_cannonlarge")
+}
+target_lock_range = 560.0
+trail_length = 90
+ability_1 = ExtResource("4_ability")
+ability_2 = ExtResource("5_ability")
+purchase_cost = 650.0
+kill_bounty = 120.0
+death_penalty = 60.0

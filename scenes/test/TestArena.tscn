@@ -1,0 +1,83 @@
+[gd_scene format=3 uid="uid://cdotskymuwsqv"]
+
+[ext_resource type="Script" uid="uid://dhvorrniapn1j" path="res://scripts/test/TestArena.gd" id="1_arena"]
+[ext_resource type="Script" uid="uid://cewp3weqgu8el" path="res://scripts/Camera.gd" id="2_camera"]
+
+[node name="TestArena" type="Node2D" unique_id=1257729362]
+script = ExtResource("1_arena")
+
+[node name="Background" type="CanvasLayer" parent="." unique_id=1254613010]
+layer = -100
+
+[node name="ColorRect" type="ColorRect" parent="Background" unique_id=417000870]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(0.0235294, 0.027451, 0.0509804, 1)
+
+[node name="World" type="Node2D" parent="." unique_id=1480514640]
+
+[node name="Camera2D" type="Camera2D" parent="." unique_id=1109077910]
+script = ExtResource("2_camera")
+
+[node name="UI" type="CanvasLayer" parent="." unique_id=1086460953]
+
+[node name="Panel" type="PanelContainer" parent="UI" unique_id=1432735911]
+offset_left = 15.0
+offset_top = 15.0
+offset_right = 330.0
+offset_bottom = 230.0
+
+[node name="VBox" type="VBoxContainer" parent="UI/Panel" unique_id=2130959501]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="Title" type="Label" parent="UI/Panel/VBox" unique_id=828414238]
+layout_mode = 2
+text = "Ship Test Arena"
+
+[node name="FactionLabel" type="Label" parent="UI/Panel/VBox" unique_id=298317558]
+layout_mode = 2
+text = "Faction"
+
+[node name="FactionPicker" type="OptionButton" parent="UI/Panel/VBox" unique_id=732851192]
+layout_mode = 2
+
+[node name="ShipLabel" type="Label" parent="UI/Panel/VBox" unique_id=950596867]
+layout_mode = 2
+text = "Ship"
+
+[node name="ShipPicker" type="OptionButton" parent="UI/Panel/VBox" unique_id=59674070]
+layout_mode = 2
+
+[node name="SpawnButton" type="Button" parent="UI/Panel/VBox" unique_id=1835360045]
+layout_mode = 2
+text = "Spawn Ship"
+
+[node name="Controls" type="Label" parent="UI" unique_id=1234806485]
+offset_left = 15.0
+offset_top = 245.0
+offset_right = 360.0
+offset_bottom = 400.0
+text = "Controls
+• Left Click: steer / navigate
+• Right Click enemy: lock target (auto-fire)
+• Q / E: turn left / right
+• R: reverse thrust
+• 1: ability 1
+• Space: re-lock camera • Wheel: zoom
+• WASD / Arrows: pan camera"
+
+[node name="StatusLabel" type="Label" parent="UI" unique_id=1241125898]
+anchors_preset = 2
+anchor_top = 1.0
+anchor_bottom = 1.0
+offset_left = 15.0
+offset_top = -80.0
+offset_right = 400.0
+offset_bottom = -15.0
+grow_vertical = 0
+text = "Pick a faction and a ship, then press Spawn Ship."

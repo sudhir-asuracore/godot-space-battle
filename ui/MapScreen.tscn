@@ -1,0 +1,12 @@
+[gd_scene format=3 uid="uid://c2tpecxl81aku"]
+
+[ext_resource type="Script" path="res://scripts/ui/MapScreen.gd" id="1_map_screen"]
+
+[node name="MapScreen" type="Panel"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 0
+script = ExtResource("1_map_screen")

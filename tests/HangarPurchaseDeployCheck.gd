@@ -13,8 +13,9 @@ extends SceneTree
 
 const ZARAK_FACTION_PATH := "res://resources/factions/zarak/zarak_confedaracy.tres"
 const ZARAK_SCOUT_PATH := "res://resources/factions/zarak/ships/scout.tres"
-const ZARAK_FRIGATE_PATH := "res://resources/factions/zarak/ships/zarak_frigate.tres"
+const ZARAK_FRIGATE_PATH := "res://resources/factions/zarak/ships/gorehammer.tres"
 const PLAYER_HUD_SCRIPT := "res://scripts/ui/PlayerHUD.gd"
+const HANGAR_STORE_SCRIPT := "res://scripts/ui/HangarStore.gd"
 
 func _init() -> void:
 	call_deferred("_run")
@@ -111,15 +112,21 @@ func _run() -> void:
 		if gs.selected_ship_data_path != ZARAK_FRIGATE_PATH:
 			failures.append("Deploy should persist selected_ship_data_path, got '%s'" % gs.selected_ship_data_path)
 
-	# 5. The hangar HUD wires the new flow (source inspection).
+	# 5. The HUD still exposes the public selection API (delegating wrappers).
 	_check_source(PLAYER_HUD_SCRIPT, [
-		"func _build_hangar",
+		"func show_ship_selection",
+		"func hide_ship_selection",
+		"func is_ship_selection_visible",
+	], failures)
+
+	# The Hangar Store scene now owns the purchase/deploy flow (source inspection).
+	_check_source(HANGAR_STORE_SCRIPT, [
 		"func show_ship_selection",
 		"func hide_ship_selection",
 		"func is_ship_selection_visible",
 		"func _make_ship_button",
-		"func _on_hangar_purchase_pressed",
-		"func _on_hangar_deploy_pressed",
+		"func _on_purchase_pressed",
+		"func _on_deploy_pressed",
 		"get_hangar_portrait",
 		"GameState.purchase_ship",
 		"GameState.set_current_ship",

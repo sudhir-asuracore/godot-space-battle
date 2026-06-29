@@ -2,26 +2,27 @@
 
 [ext_resource type="Resource" uid="uid://bib8dja4sl371" path="res://resources/weapons/gattling.tres" id="1_weapon"]
 [ext_resource type="Script" uid="uid://deo8044sl5k4r" path="res://scripts/resources/ShipData.gd" id="2_script"]
-[ext_resource type="PackedScene" path="res://scenes/factions/zarak/ships/ZarakFrigate.tscn" id="3_scene"]
+[ext_resource type="PackedScene" uid="uid://cpf2tvyub4dne" path="res://scenes/factions/zarak/ships/ZarakIronmaw.tscn" id="3_scene"]
 [ext_resource type="Resource" path="res://resources/abilities/afterburner.tres" id="4_ability"]
 
 [resource]
 script = ExtResource("2_script")
-name = "Zarak Frigate"
-description = "A sturdy line warship with heavy guns. A clear step up from the scout once prestige allows."
+name = "Zarak Ironmaw"
+description = "A reinforced second-line frigate. Trades a touch of speed for thicker plating and a wider shield arc, making it the dependable workhorse of a Zarak push."
 tier = 2
 ship_class = 1
 faction = 0
 ship_size = 2
 ship_scene = ExtResource("3_scene")
-max_hull = 320.0
-max_shield = 90.0
+max_hull = 380.0
+max_shield = 110.0
 shield_angle = 270.0
-max_speed = 200.0
-acceleration = 280.0
-strafe_speed = 60.0
-reverse_speed = 45.0
+max_speed = 190.0
+acceleration = 260.0
+strafe_speed = 55.0
+reverse_speed = 42.0
 basic_weapon = ExtResource("1_weapon")
+target_lock_range = 380.0
 trail_length = 70
 ability_1 = ExtResource("4_ability")
-purchase_cost = 250.0
+purchase_cost = 320.0
