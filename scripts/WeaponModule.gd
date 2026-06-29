@@ -106,13 +106,15 @@ func tick(delta: float, target: Node2D, active: bool) -> void:
 	var in_arc := in_range and _is_within_arc(target.global_position)
 
 	if in_range:
-		_aim_at(target.global_position)
+		_aim_at(target.global_position, delta)
 	else:
-		_return_to_rest()
+		_return_to_rest(delta)
 
 	_update_overlay(active)
 
-	if in_range and in_arc and _can_fire():
+	# A heavy turret may still be swinging onto the target; only fire once the
+	# barrel has actually lined up (within the homing tolerance).
+	if in_range and in_arc and _is_aimed_at(target.global_position) and _can_fire():
 		_fire(target)
 
 # --- Range & aiming -------------------------------------------------------
@@ -123,12 +125,40 @@ func _weapon_origin() -> Vector2:
 func _is_in_range(target: Node2D) -> bool:
 	return _weapon_origin().distance_to(target.global_position) <= _weapon.weapon_range
 
-func _aim_at(target_pos: Vector2) -> void:
+func _aim_at(target_pos: Vector2, delta: float) -> void:
 	# Point the centre->muzzle vector at the target, clamped to the turret arc
-	# so the barrel never swings past its allowed range.
+	# so the barrel never swings past its allowed range. The barrel eases toward
+	# that heading at turret_homing_speed so heavy turrets track slowly.
 	var aim_angle := (target_pos - global_position).angle()
 	var clamped := _clamp_to_arc(aim_angle)
-	global_rotation = clamped - _muzzle_local_angle
+	_rotate_toward_global(clamped - _muzzle_local_angle, delta)
+
+# Eases the turret's global rotation toward a desired heading, capped at the
+# weapon's turret_homing_speed (degrees/second). A non-positive homing speed
+# snaps instantly (original behaviour).
+func _rotate_toward_global(desired_global: float, delta: float) -> void:
+	var rate := _homing_rate_rad()
+	if rate <= 0.0:
+		global_rotation = desired_global
+	else:
+		global_rotation = rotate_toward(global_rotation, desired_global, rate * delta)
+
+# The turret's tracking speed in radians/second (0 or less = instant tracking).
+func _homing_rate_rad() -> float:
+	if _weapon and _weapon.turret_homing_speed > 0.0:
+		return deg_to_rad(_weapon.turret_homing_speed)
+	return 0.0
+
+# True when the barrel's current forward direction is lined up with the target
+# closely enough to fire. Instantly-tracking turrets are always considered
+# aimed; homing turrets must first swing within half their attack cone.
+func _is_aimed_at(target_pos: Vector2) -> bool:
+	if _homing_rate_rad() <= 0.0:
+		return true
+	var aim_angle := (target_pos - global_position).angle()
+	var current_forward := global_rotation + _muzzle_local_angle
+	var tolerance := deg_to_rad(maxf(_weapon.attack_cone_degrees, 1.0)) * 0.5
+	return absf(angle_difference(current_forward, aim_angle)) <= tolerance
 
 func _is_within_arc(target_pos: Vector2) -> bool:
 	# True when the target lies within the turret's swing arc, centred on the
@@ -151,11 +181,15 @@ func _clamp_to_arc(desired_forward: float) -> float:
 	var delta := clampf(wrapf(desired_forward - rest_forward, -PI, PI), -half, half)
 	return rest_forward + delta
 
-func _return_to_rest() -> void:
+func _return_to_rest(delta: float) -> void:
 	if _ship and is_instance_valid(_ship):
-		global_rotation = _ship.global_rotation + _rest_local_rotation
+		_rotate_toward_global(_ship.global_rotation + _rest_local_rotation, delta)
 	else:
-		rotation = _rest_local_rotation
+		var rate := _homing_rate_rad()
+		if rate <= 0.0:
+			rotation = _rest_local_rotation
+		else:
+			rotation = rotate_toward(rotation, _rest_local_rotation, rate * delta)
 
 func _mount_forward_global() -> float:
 	# The direction the barrel points at rest, in global space.
@@ -188,13 +222,13 @@ func _update_overlay(active: bool) -> void:
 	# weapon's mount-forward direction, so coverage reads from the weapon.
 	_coverage_overlay.global_position = global_position
 	_coverage_overlay.global_rotation = _mount_forward_global()
-	# When the turret is restricted, draw the grid across its swing arc so the
-	# coverage reads as the area the weapon can actually engage; otherwise fall
-	# back to the weapon's configured attack cone.
-	var coverage_cone := _weapon.attack_cone_degrees
+	# Draw the attack cone as a grid (the area shots actually cover) and, when the
+	# turret is restricted, draw its swing arc as a plain outline so the two read
+	# as distinct: the grid shows coverage, the outline shows the swing limit.
+	var outline_cone := 0.0
 	if _weapon.max_turret_angle < 360.0:
-		coverage_cone = _weapon.max_turret_angle
-	_coverage_overlay.set_coverage(_weapon.weapon_range, 0.0, coverage_cone)
+		outline_cone = _weapon.max_turret_angle
+	_coverage_overlay.set_coverage(_weapon.weapon_range, 0.0, _weapon.attack_cone_degrees, outline_cone)
 
 # --- Fire timing ----------------------------------------------------------
 

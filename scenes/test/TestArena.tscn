@@ -64,12 +64,12 @@ offset_right = 360.0
 offset_bottom = 400.0
 text = "Controls
 • Left Click: steer / navigate
+• WASD: fly ship (W thrust, S reverse, A/D turn)
 • Right Click enemy: lock target (auto-fire)
-• Q / E: turn left / right
-• R: reverse thrust
+• Q / E / R: turn left / right / reverse (alt)
 • 1: ability 1
 • Space: re-lock camera • Wheel: zoom
-• WASD / Arrows: pan camera"
+• Arrows / Mouse to screen edge: pan camera"
 
 [node name="StatusLabel" type="Label" parent="UI" unique_id=1241125898]
 anchors_preset = 2
@@ -81,3 +81,15 @@ offset_right = 400.0
 offset_bottom = -15.0
 grow_vertical = 0
 text = "Pick a faction and a ship, then press Spawn Ship."
+
+[node name="HealthLabel" type="Label" parent="UI" unique_id=1241125899]
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -340.0
+offset_top = 15.0
+offset_right = -15.0
+offset_bottom = 110.0
+grow_horizontal = 0
+horizontal_alignment = 2
+text = "No ships spawned."

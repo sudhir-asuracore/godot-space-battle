@@ -9,6 +9,11 @@ class_name WeaponData
 # weapon swing -90..+90 from its home position, so a side-mounted gun cannot
 # fire on enemies behind the opposite flank. WeaponModule enforces this.
 @export_range(0.0, 360.0, 1.0) var max_turret_angle: float = 360.0
+# How fast the turret can swing its barrel toward (or back from) a target,
+# in degrees per second. Lower values make the turret feel heavy: it lags
+# behind a moving target and takes time to line up before it can fire.
+# Set <= 0 to track instantly (no weight, original snapping behaviour).
+@export var turret_homing_speed: float = 0.0
 @export var show_coverage_grid: bool = true
 @export var fire_rate: float = 4.0
 @export var ammo: int = 0

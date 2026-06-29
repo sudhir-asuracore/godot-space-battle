@@ -68,10 +68,11 @@ offset_right = 410.0
 offset_bottom = 100.0
 text = "Nebula Conquest — Controls
 • Left Click: steer / navigate ship
+• WASD: fly ship (W thrust, S reverse, A/D turn)
 • Right Click enemy or homebase: lock target (auto-fire)
 • 1: Afterburner
 • Spacebar: lock camera onto ship
-• WASD / Arrows / Right-Click Drag: pan • Wheel: zoom"
+• Arrows / Mouse to screen edge / Right-Click Drag: pan • Wheel: zoom"
 
 [node name="ZoomPanel" type="Panel" parent="HUD/Control" unique_id=442362801]
 layout_mode = 1

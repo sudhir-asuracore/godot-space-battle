@@ -4,6 +4,10 @@ class_name Ship
 @export var ship_data: ShipData
 @export var faction_data: FactionData
 @export_range(5.0, 100.0, 5) var damage_flame_scale_factor: float = 50.0
+# Multiplies the rear-thruster plume length so larger hulls can show longer
+# flames. The base intensity-to-scale mapping is tuned for the smallest ships;
+# bigger ships scale it up here. Defaults to 1.0 so existing ships are unchanged.
+@export_range(0.5, 20.0, 0.5) var thruster_flame_scale_factor: float = 1.0
 
 # Current state
 var target_position: Vector2 = Vector2.ZERO
@@ -70,11 +74,17 @@ var max_capacitor: float
 var _max_speed: float
 var _acceleration: float
 var _turn_speed: float
+var _turn_acceleration: float
 var _strafe_speed: float
 var _reverse_speed: float
 var _forward_damping: float
 var _lateral_damping: float
 var _braking_strength: float
+
+# Current angular velocity (radians/second). Turning ramps this toward the
+# desired rate rather than rotating the ship directly, giving rotational
+# inertia so the hull feels heavy (eases in and coasts out of turns).
+var _angular_velocity: float = 0.0
 
 var _thrust_intensity: float = 0.0
 var _visual_thrust: float = 0.0
@@ -85,6 +95,11 @@ var _visual_side_thrust: Dictionary = {&"left": 0.0, &"right": 0.0}
 var _shield_regen_delay_timer: float = 0.0
 var _last_attacker: Node2D = null
 var _shield_active: bool = true
+# Tracks the ship_data the current vitals (hull/shield/capacitor) were
+# initialized from. When a spawner assigns ship_data after the scene's _ready
+# ran (so update_stats first executed against a fallback resource), the vitals
+# must be re-initialized against the real resource instead of being preserved.
+var _vitals_initialized_for: ShipData = null
 # Cached AudioManager autoload reference (resolved once; the singleton lives for
 # the whole game so the per-frame node-path lookup is avoidable).
 var _audio_manager: Node = null
@@ -452,6 +467,7 @@ func update_stats() -> void:
 	_max_speed = ship_data.max_speed * speed_mult
 	_acceleration = ship_data.acceleration * accel_mult
 	_turn_speed = ship_data.turn_speed * turn_mult
+	_turn_acceleration = ship_data.turn_acceleration * turn_mult
 	_strafe_speed = ship_data.strafe_speed
 	_reverse_speed = ship_data.reverse_speed
 	_forward_damping = ship_data.forward_damping
@@ -466,10 +482,22 @@ func update_stats() -> void:
 	if faction_data and has_node(^"Sprite2D"):
 		$Sprite2D.modulate = faction_data.primary_color
 	
-	if current_hull <= 0: # Only init if not already set (or if we want to reset)
+	# Initialize vitals when they have never been set, or when the ship_data has
+	# changed since the last initialization (e.g. a spawner assigned the real
+	# resource after _ready already ran update_stats against a fallback). Without
+	# the data-changed check, current_hull would stay pinned to the fallback's
+	# smaller max_hull and the ship would spawn looking damaged.
+	if current_hull <= 0 or _vitals_initialized_for != ship_data:
 		current_hull = max_hull
 		current_shield = max_shield
 		current_capacitor = max_capacitor
+		_vitals_initialized_for = ship_data
+
+		# Rebuild the engine trail against the (possibly newly assigned) ship_data
+		# so trail styling (thickness/length/color) follows the real resource
+		# instead of a fallback that was active when _ready first ran.
+		if is_inside_tree():
+			_setup_trail()
 		
 		# Initialize shield visual state
 		_shield_active = current_shield > 0
@@ -510,8 +538,8 @@ func _physics_process(delta: float) -> void:
 	move_and_slide()
 
 func _process_manual_movement_input(delta: float) -> bool:
-	# Q/E manually turn (point) the ship. Negative = turn left (counter-clockwise),
-	# positive = turn right (clockwise).
+	# A/D (or Q/E) manually turn (point) the ship. Negative = turn left
+	# (counter-clockwise), positive = turn right (clockwise).
 	var turn_input: float = 0.0
 	if InputMap.has_action("turn_left") and Input.is_action_pressed("turn_left"):
 		turn_input -= 1.0
@@ -525,12 +553,23 @@ func _process_manual_movement_input(delta: float) -> bool:
 	_side_thrust_intensity[&"left"] = 1.0 if turn_input > 0.0 else 0.0
 
 	if not is_zero_approx(turn_input):
-		global_rotation += turn_input * _turn_speed * delta
 		# Manual steering takes over from any click-to-move heading.
 		is_moving = false
+		_apply_turn_toward_rate(turn_input * _turn_speed, delta)
+	elif not is_moving:
+		# No steering input and not navigating: let the spin bleed off through
+		# its inertia so the ship coasts to a stop instead of halting instantly.
+		_apply_turn_toward_rate(0.0, delta)
 
+	# W drives the ship forward, S brakes / reverses it.
+	var forward_input: bool = InputMap.has_action("thrust_forward") and Input.is_action_pressed("thrust_forward")
 	var reverse_input: bool = InputMap.has_action("reverse_thrust") and Input.is_action_pressed("reverse_thrust")
-	if is_zero_approx(turn_input) and not reverse_input:
+
+	# Manual thrust also overrides any click-to-move heading.
+	if forward_input or reverse_input:
+		is_moving = false
+
+	if is_zero_approx(turn_input) and not forward_input and not reverse_input:
 		return false
 
 	var forward_dir: Vector2 = Vector2.from_angle(global_rotation)
@@ -538,12 +577,29 @@ func _process_manual_movement_input(delta: float) -> bool:
 	var forward_vel: float = velocity.dot(forward_dir)
 	var lateral_vel: float = velocity.dot(lateral_dir)
 
-	if reverse_input:
+	# Forward thrust wins over reverse when both are held.
+	if forward_input:
+		forward_vel = move_toward(forward_vel, _max_speed, _acceleration * delta)
+		_thrust_intensity = max(_thrust_intensity, 1.0)
+	elif reverse_input:
 		forward_vel = move_toward(forward_vel, -_reverse_speed, _acceleration * delta)
 		_thrust_intensity = max(_thrust_intensity, 0.25)
 
 	velocity = forward_dir * forward_vel + lateral_dir * lateral_vel
 	return true
+
+# Eases the ship's angular velocity toward a requested turn rate (radians/sec)
+# instead of rotating instantly, then integrates it into the heading. The
+# turn_acceleration stat caps how fast that rate can change, giving the hull
+# rotational inertia so it feels heavy. A non-positive turn_acceleration falls
+# back to instant turning (no inertia).
+func _apply_turn_toward_rate(desired_rate: float, delta: float) -> void:
+	if _turn_acceleration > 0.0:
+		_angular_velocity = move_toward(_angular_velocity, desired_rate, _turn_acceleration * delta)
+	else:
+		_angular_velocity = desired_rate
+	if not is_zero_approx(_angular_velocity):
+		global_rotation += _angular_velocity * delta
 
 func apply_acceleration(accel: Vector2) -> void:
 	velocity += accel * get_physics_process_delta_time()
@@ -579,7 +635,7 @@ func _update_thruster_vfx(delta: float) -> void:
 
 func _apply_thruster_intensity(thruster_entry: Dictionary, intensity: float) -> void:
 	var clamped_intensity: float = clampf(intensity, 0.0, 1.0)
-	var thrust_scale: float = lerp(0.008, 0.05, clamped_intensity)
+	var thrust_scale: float = lerp(0.008, 0.05, clamped_intensity) * thruster_flame_scale_factor
 
 	var thruster_node := thruster_entry.get("node") as Node2D
 	if thruster_node:
@@ -644,9 +700,13 @@ func _process_movement(delta: float) -> void:
 	if distance < 1.0:
 		return
 	
-	# 1. Rotation
+	# 1. Rotation. Steer toward the target through the ship's angular inertia
+	# (heavy feel) rather than snapping the heading. The desired turn rate is
+	# whatever closes the remaining angle this frame, capped at _turn_speed.
 	var target_angle: float = to_target.angle()
-	global_rotation = rotate_toward(global_rotation, target_angle, _turn_speed * delta)
+	var angle_error: float = angle_difference(global_rotation, target_angle)
+	var desired_rate: float = clampf(angle_error / delta, -_turn_speed, _turn_speed)
+	_apply_turn_toward_rate(desired_rate, delta)
 	
 	# 2. Acceleration
 	var forward_dir: Vector2 = Vector2.from_angle(global_rotation)

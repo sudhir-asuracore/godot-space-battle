@@ -32,6 +32,7 @@ shader_parameter/grow_from_right = true
 
 [node name="Ship" type="CharacterBody2D" unique_id=46216839]
 script = ExtResource("1_xwupw")
+thruster_flame_scale_factor = 5.0
 
 [node name="collision_front" type="CollisionShape2D" parent="." unique_id=418808862]
 position = Vector2(66, 0)
@@ -58,10 +59,10 @@ offset_bottom = 402.0
 pivot_offset = Vector2(482, 398)
 
 [node name="engine_0" type="Marker2D" parent="." unique_id=518682322]
-position = Vector2(-48, -29)
+position = Vector2(-353, -119)
 
 [node name="engine_1" type="Marker2D" parent="." unique_id=181678505]
-position = Vector2(-48, 27)
+position = Vector2(-355, 126)
 
 [node name="damage_0" type="Marker2D" parent="." unique_id=481845458]
 position = Vector2(-24.995, 0)
@@ -96,19 +97,18 @@ scale = Vector2(0.01, 0.1)
 position = Vector2(46, 26.000002)
 scale = Vector2(0.01, 0.1)
 
-[node name="lod_medium" type="Sprite2D" parent="." unique_id=1374907003]
+[node name="lod_far" type="Sprite2D" parent="." unique_id=1374907003]
 visible = false
 position = Vector2(2, 2)
 rotation = 1.5707964
 scale = Vector2(1.6049366, 1.6049365)
 texture = ExtResource("5_sa0io")
 
-[node name="lod_far" type="Sprite2D" parent="." unique_id=913823596]
+[node name="lod_medium" type="Sprite2D" parent="." unique_id=2085800670]
 visible = false
-position = Vector2(2, 2)
 rotation = 1.5707964
-scale = Vector2(1.6049366, 1.6049365)
-texture = ExtResource("5_sa0io")
+scale = Vector2(0.8, 0.8)
+texture = ExtResource("9_xwupw")
 
 [node name="lod_near" type="Sprite2D" parent="." unique_id=94288899]
 rotation = 1.5707964

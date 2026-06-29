@@ -16,6 +16,13 @@ class_name WeaponCoverageOverlay
 		cone_degrees = clampf(value, 0.0, 360.0)
 		queue_redraw()
 
+# The turret's full swing arc. When greater than zero it is rendered as a plain
+# outline (no internal grid) so it reads as a boundary rather than coverage.
+@export_range(0.0, 360.0, 0.5) var outline_cone_degrees: float = 0.0:
+	set(value):
+		outline_cone_degrees = clampf(value, 0.0, 360.0)
+		queue_redraw()
+
 @export var radial_step: float = 120.0:
 	set(value):
 		radial_step = maxf(20.0, value)
@@ -42,7 +49,10 @@ var _overlay_visible: bool = true
 func _ready() -> void:
 	top_level = true
 	z_as_relative = false
-	z_index = 200
+	# Draw beneath the ship sprites so the coverage grid reads as a background
+	# layer rather than overlapping the hull. The world background sits lower
+	# still (see Main.tscn at z_index -50), so the grid stays above it.
+	z_index = -10
 	set_process(true)
 
 func _process(_delta: float) -> void:
@@ -57,10 +67,11 @@ func follow(anchor: Node2D) -> void:
 		global_position = _anchor.global_position
 		global_rotation = _anchor.global_rotation
 
-func set_coverage(max_range: float, min_range: float = 0.0, cone: float = 360.0) -> void:
+func set_coverage(max_range: float, min_range: float = 0.0, cone: float = 360.0, outline_cone: float = 0.0) -> void:
 	outer_range = maxf(0.0, max_range)
 	inner_range = clampf(min_range, 0.0, outer_range)
 	cone_degrees = clampf(cone, 0.0, 360.0)
+	outline_cone_degrees = clampf(outline_cone, 0.0, 360.0)
 	queue_redraw()
 
 func set_overlay_visible(visible_now: bool) -> void:
@@ -81,17 +92,35 @@ func _draw() -> void:
 		return
 
 	var min_range := clampf(inner_range, 0.0, max_range)
-	var cone := clampf(cone_degrees, 0.0, 360.0)
-	if cone <= 0.0:
-		return
+	var arc_points := maxi(24, int(ceil(max_range / 16.0)))
 
+	# Draw the attack cone as a full grid (range rings + radial lines).
+	var cone := clampf(cone_degrees, 0.0, 360.0)
+	if cone > 0.0:
+		var full_circle := cone >= 359.95
+		var start_angle := -PI if full_circle else -deg_to_rad(cone) * 0.5
+		var end_angle := PI if full_circle else deg_to_rad(cone) * 0.5
+		_draw_range_rings(min_range, max_range, start_angle, end_angle, arc_points)
+		_draw_angle_grid(min_range, max_range, start_angle, end_angle, full_circle)
+
+	# Draw the turret swing arc as a plain outline, without any internal grid.
+	var outline_cone := clampf(outline_cone_degrees, 0.0, 360.0)
+	if outline_cone > 0.0:
+		_draw_cone_outline(min_range, max_range, outline_cone, arc_points)
+
+func _draw_cone_outline(min_range: float, max_range: float, cone: float, arc_points: int) -> void:
+	var outline_color := _alpha_scaled(line_color, 1.0)
 	var full_circle := cone >= 359.95
 	var start_angle := -PI if full_circle else -deg_to_rad(cone) * 0.5
 	var end_angle := PI if full_circle else deg_to_rad(cone) * 0.5
-	var arc_points := maxi(24, int(ceil(max_range / 16.0)))
 
-	_draw_range_rings(min_range, max_range, start_angle, end_angle, arc_points)
-	_draw_angle_grid(min_range, max_range, start_angle, end_angle, full_circle)
+	draw_arc(Vector2.ZERO, max_range, start_angle, end_angle, arc_points, outline_color, line_width, true)
+	if min_range > 0.0:
+		draw_arc(Vector2.ZERO, min_range, start_angle, end_angle, arc_points, outline_color, line_width, true)
+
+	if not full_circle:
+		_draw_radial_line(start_angle, min_range, max_range, outline_color)
+		_draw_radial_line(end_angle, min_range, max_range, outline_color)
 
 func _draw_range_rings(min_range: float, max_range: float, start_angle: float, end_angle: float, arc_points: int) -> void:
 	var major_color := _alpha_scaled(line_color, 1.0)

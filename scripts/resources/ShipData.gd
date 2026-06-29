@@ -55,7 +55,13 @@ func resolve_faction_data() -> FactionData:
 @export_category("Movement")
 @export var max_speed: float = 35.0
 @export var acceleration: float = 45.0
+# Peak turn rate (radians/second) the ship can rotate at.
 @export var turn_speed: float = 4.0
+# How quickly the ship can build up to / bleed off its turn rate
+# (radians/second^2). Lower values give the ship more rotational inertia so it
+# feels heavy: it eases into a turn and keeps drifting briefly after the input
+# stops instead of snapping. Set <= 0 to turn instantly (no inertia).
+@export var turn_acceleration: float = 8.0
 @export var strafe_speed: float = 12.0
 @export var reverse_speed: float = 8.0
 @export var forward_damping: float = 0.08

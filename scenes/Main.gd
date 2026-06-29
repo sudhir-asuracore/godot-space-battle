@@ -57,10 +57,15 @@ func _ready() -> void:
 	_register_input_action(&"zoom_in", MOUSE_BUTTON_WHEEL_UP)
 	_register_input_action(&"zoom_out", MOUSE_BUTTON_WHEEL_DOWN)
 	_register_key_action(&"ability_1", KEY_1)
-	# Q/E point (turn) the ship left/right.
+	# WASD manually fly the ship: W thrusts forward, S reverses/brakes,
+	# A/D steer. Q/E/R remain as alternative bindings for the same actions.
 	_register_key_action(&"turn_left", KEY_Q)
 	_register_key_action(&"turn_right", KEY_E)
 	_register_key_action(&"reverse_thrust", KEY_R)
+	_register_key_action(&"thrust_forward", KEY_W)
+	_add_key_event(&"turn_left", KEY_A)
+	_add_key_event(&"turn_right", KEY_D)
+	_add_key_event(&"reverse_thrust", KEY_S)
 	# M toggles the System Map overlay.
 	_register_key_action(&"toggle_map", KEY_M)
 	
@@ -369,4 +374,15 @@ func _register_key_action(action_name: StringName, key_index: Key) -> void:
 		InputMap.add_action(action_name)
 		var ev: InputEventKey = InputEventKey.new()
 		ev.keycode = key_index
+		InputMap.action_add_event(action_name, ev)
+
+# Adds an extra key binding to an existing (or new) action without clobbering
+# the bindings already registered, and without duplicating an identical event
+# if _ready runs again against the global InputMap (e.g. a scene reload).
+func _add_key_event(action_name: StringName, key_index: Key) -> void:
+	if not InputMap.has_action(action_name):
+		InputMap.add_action(action_name)
+	var ev: InputEventKey = InputEventKey.new()
+	ev.keycode = key_index
+	if not InputMap.action_has_event(action_name, ev):
 		InputMap.action_add_event(action_name, ev)

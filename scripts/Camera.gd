@@ -7,7 +7,11 @@ class_name GameCamera
 @export var zoom_step: float = 0.2
 # How quickly the current zoom eases toward the target zoom (higher = snappier).
 @export var zoom_smoothing: float = 10.0
-@export var move_speed: float = 1800.0 # Keyboard movement speed
+@export var move_speed: float = 1800.0 # Keyboard / edge-scroll movement speed
+# How close (in pixels) the mouse must get to a viewport border before the
+# map starts panning toward that edge. Set <= 0 to disable edge scrolling.
+@export var edge_scroll_margin: float = 24.0
+@export var edge_scroll_enabled: bool = true
 
 var target_node: Node2D = null
 var follow_target: bool = true
@@ -29,17 +33,20 @@ func _physics_process(delta: float) -> void:
 		global_position = global_position.lerp(target_node.global_position, 6.0 * delta)
 
 func _process(delta: float) -> void:
-	# Keyboard movement (WASD or Arrow keys)
+	# Map panning with the Arrow keys (WASD is reserved for flying the ship).
 	var move_dir: Vector2 = Vector2.ZERO
-	if Input.is_key_pressed(KEY_W) or Input.is_key_pressed(KEY_UP):
+	if Input.is_key_pressed(KEY_UP):
 		move_dir.y -= 1
-	if Input.is_key_pressed(KEY_S) or Input.is_key_pressed(KEY_DOWN):
+	if Input.is_key_pressed(KEY_DOWN):
 		move_dir.y += 1
-	if Input.is_key_pressed(KEY_A) or Input.is_key_pressed(KEY_LEFT):
+	if Input.is_key_pressed(KEY_LEFT):
 		move_dir.x -= 1
-	if Input.is_key_pressed(KEY_D) or Input.is_key_pressed(KEY_RIGHT):
+	if Input.is_key_pressed(KEY_RIGHT):
 		move_dir.x += 1
-		
+
+	# Pushing the mouse against a screen border pans the map that way too.
+	move_dir += _edge_scroll_direction()
+
 	if move_dir != Vector2.ZERO:
 		# Decouple camera follow if user manual controls movement
 		follow_target = false
@@ -80,6 +87,32 @@ func _unhandled_input(event: InputEvent) -> void:
 		var delta_pos: Vector2 = current_pos - _drag_start
 		position -= delta_pos / zoom.x
 		_drag_start = current_pos
+
+# Returns a unit-ish direction (per axis) the map should pan when the mouse
+# sits within edge_scroll_margin of a viewport border. Returns Vector2.ZERO
+# when edge scrolling is disabled or the cursor is away from the borders /
+# outside the window entirely.
+func _edge_scroll_direction() -> Vector2:
+	if not edge_scroll_enabled or edge_scroll_margin <= 0.0:
+		return Vector2.ZERO
+	var viewport: Viewport = get_viewport()
+	if not viewport:
+		return Vector2.ZERO
+	var mouse_pos: Vector2 = viewport.get_mouse_position()
+	var view_size: Vector2 = viewport.get_visible_rect().size
+	# Ignore the cursor when it is outside the visible window.
+	if mouse_pos.x < 0.0 or mouse_pos.y < 0.0 or mouse_pos.x > view_size.x or mouse_pos.y > view_size.y:
+		return Vector2.ZERO
+	var dir: Vector2 = Vector2.ZERO
+	if mouse_pos.x <= edge_scroll_margin:
+		dir.x -= 1
+	elif mouse_pos.x >= view_size.x - edge_scroll_margin:
+		dir.x += 1
+	if mouse_pos.y <= edge_scroll_margin:
+		dir.y -= 1
+	elif mouse_pos.y >= view_size.y - edge_scroll_margin:
+		dir.y += 1
+	return dir
 
 # Move the target zoom by a number of discrete steps (positive = zoom in,
 # negative = zoom out). The actual zoom then eases toward this target in _process.

@@ -48,6 +48,7 @@ const PLANET_SPRITE_SCALE: float = 2.5
 @onready var _ship_picker: OptionButton = $UI/Panel/VBox/ShipPicker as OptionButton
 @onready var _spawn_button: Button = $UI/Panel/VBox/SpawnButton as Button
 @onready var _status_label: Label = $UI/StatusLabel as Label
+@onready var _health_label: Label = $UI/HealthLabel as Label
 
 # FactionData resources loaded from FACTION_RESOURCE_PATHS, in picker order.
 var _factions: Array[FactionData] = []
@@ -72,6 +73,10 @@ func _ready() -> void:
 		_faction_picker.select(0)
 		_populate_ship_picker(_factions[0])
 	_update_status()
+	_update_health_readout()
+
+func _process(_delta: float) -> void:
+	_update_health_readout()
 
 # --- Setup helpers -----------------------------------------------------------
 
@@ -279,6 +284,24 @@ func _set_status(text: String) -> void:
 	if _status_label:
 		_status_label.text = text
 
+# Continuously mirrors the hull and shield of both the player (ally) and enemy
+# ships so their health is readable while flying and testing weapons.
+func _update_health_readout() -> void:
+	if not _health_label:
+		return
+	var lines: Array[String] = []
+	lines.append(_format_ship_health("Ally", _player_ship))
+	lines.append(_format_ship_health("Enemy", _enemy_ship))
+	_health_label.text = "\n".join(lines)
+
+func _format_ship_health(role: String, ship: Ship) -> String:
+	if not is_instance_valid(ship):
+		return "%s: —" % role
+	var ship_name := ship.ship_data.name if ship.ship_data else role
+	var hull := "Hull %d / %d" % [int(ceil(ship.current_hull)), int(ceil(ship.max_hull))]
+	var shield := "Shield %d / %d" % [int(ceil(ship.current_shield)), int(ceil(ship.max_shield))]
+	return "%s — %s\n  %s\n  %s" % [role, ship_name, hull, shield]
+
 # --- Input -------------------------------------------------------------------
 
 func _unhandled_input(event: InputEvent) -> void:
@@ -301,9 +324,15 @@ func _register_inputs() -> void:
 	_register_mouse_action(&"zoom_in", MOUSE_BUTTON_WHEEL_UP)
 	_register_mouse_action(&"zoom_out", MOUSE_BUTTON_WHEEL_DOWN)
 	_register_key_action(&"ability_1", KEY_1)
+	# WASD manually fly the ship (W forward, S reverse, A/D steer); Q/E/R remain
+	# as alternative bindings for the same actions.
 	_register_key_action(&"turn_left", KEY_Q)
 	_register_key_action(&"turn_right", KEY_E)
 	_register_key_action(&"reverse_thrust", KEY_R)
+	_register_key_action(&"thrust_forward", KEY_W)
+	_add_key_event(&"turn_left", KEY_A)
+	_add_key_event(&"turn_right", KEY_D)
+	_add_key_event(&"reverse_thrust", KEY_S)
 
 func _register_mouse_action(action_name: StringName, button_index: MouseButton) -> void:
 	if InputMap.has_action(action_name):
@@ -320,3 +349,13 @@ func _register_key_action(action_name: StringName, key_index: Key) -> void:
 	var ev := InputEventKey.new()
 	ev.keycode = key_index
 	InputMap.action_add_event(action_name, ev)
+
+# Adds an extra key binding to an existing (or new) action without dropping the
+# bindings already registered or duplicating an identical event.
+func _add_key_event(action_name: StringName, key_index: Key) -> void:
+	if not InputMap.has_action(action_name):
+		InputMap.add_action(action_name)
+	var ev := InputEventKey.new()
+	ev.keycode = key_index
+	if not InputMap.action_has_event(action_name, ev):
+		InputMap.action_add_event(action_name, ev)
