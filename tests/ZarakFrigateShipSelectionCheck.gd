@@ -11,7 +11,7 @@ extends SceneTree
 
 const ZARAK_FACTION_PATH := "res://resources/factions/zarak/zarak_confedaracy.tres"
 const ZARAK_FRIGATE_PATH := "res://resources/factions/zarak/ships/gorehammer.tres"
-const ZARAK_FRIGATE_SCENE := "res://scenes/factions/zarak/ships/ZarakGorehammer.tscn"
+const ZARAK_FRIGATE_SCENE := "res://scenes/factions/zarak/ships/Zarak_Ship_Frigate_Gorehammer.tscn"
 const PLAYER_HUD_SCRIPT := "res://scripts/ui/PlayerHUD.gd"
 const HANGAR_STORE_SCRIPT := "res://scripts/ui/HangarStore.gd"
 const MAIN_SCRIPT := "res://scenes/Main.gd"
@@ -37,11 +37,11 @@ func _run() -> void:
 	# 2. ZarakFrigate scene instantiates as a Ship.
 	var frigate_scene := load(ZARAK_FRIGATE_SCENE) as PackedScene
 	if not frigate_scene:
-		failures.append("Failed to load ZarakGorehammer.tscn")
+		failures.append("Failed to load Zarak_Ship_Frigate_Gorehammer.tscn")
 	else:
 		var ship := frigate_scene.instantiate()
 		if not (ship is Ship):
-			failures.append("ZarakGorehammer.tscn root is not a Ship")
+			failures.append("Zarak_Ship_Frigate_Gorehammer.tscn root is not a Ship")
 		if ship:
 			ship.free()
 

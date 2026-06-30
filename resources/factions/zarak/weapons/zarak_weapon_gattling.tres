@@ -1,0 +1,20 @@
+[gd_resource type="Resource" script_class="WeaponData" format=3 uid="uid://t57aufugqesc"]
+
+[ext_resource type="Script" uid="uid://cegt3oesh5v7k" path="res://scripts/resources/WeaponData.gd" id="1_script"]
+
+[resource]
+script = ExtResource("1_script")
+name = "Gattling"
+weapon_range = 600.0
+attack_cone_degrees = 25.0
+max_turret_angle = 270.0
+turret_homing_speed = 140.0
+show_coverage_grid = true
+fire_rate = 64
+ammo = 64
+cooldown = 2
+shield_damage = 0.8
+hull_damage = 3.0
+projectile_speed = 1800.0
+spread_degrees = 6.0
+fire_audio_once_per_ammo = 64

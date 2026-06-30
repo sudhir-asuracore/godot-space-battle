@@ -3,12 +3,15 @@
 [ext_resource type="Script" uid="uid://dw622hw75aq0u" path="res://scenes/factions/zarak/ships/zarak_frigate.gd" id="1_7p0gr"]
 [ext_resource type="Shader" uid="uid://ygy6nmx7ntkx" path="res://shaders/ship_shield.gdshader" id="2_gcel2"]
 [ext_resource type="PackedScene" uid="uid://dyap08d2dvuyw" path="res://scenes/factions/zarak/effects/Thruster_zarak.tscn" id="3_x00n0"]
+[ext_resource type="PackedScene" uid="uid://bh6x4fsgcw5hp" path="res://scenes/common/weapons/Weapon_Gattling.tscn" id="4_cbu4o"]
 [ext_resource type="Texture2D" uid="uid://brxr77j6n2dx6" path="res://assets/factions/zarak/ships/frigate/lod_near.png" id="4_fvhqd"]
 [ext_resource type="Texture2D" uid="uid://c475glc7ljivl" path="res://assets/factions/zarak/ships/frigate/lod_medium.png" id="5_adi60"]
 [ext_resource type="Script" uid="uid://ce7dxwfhmrobl" path="res://scripts/WeaponController.gd" id="6_30682"]
 [ext_resource type="Texture2D" uid="uid://dyrurf8gwi6md" path="res://assets/factions/zarak/ships/frigate/lod_far.png" id="6_yawy2"]
 [ext_resource type="Script" uid="uid://2uyc2o7ii6i8" path="res://scripts/AbilityController.gd" id="7_j52oc"]
 [ext_resource type="Script" uid="uid://csclx8xvdnu4u" path="res://scripts/TargetingController.gd" id="8_tlqrg"]
+[ext_resource type="PackedScene" uid="uid://dnakjmnu8wtux" path="res://scenes/factions/zarak/weapons/ZarakWeapon_Cannon.tscn" id="10_32gtq"]
+[ext_resource type="PackedScene" uid="uid://cxge7q8wedvyv" path="res://scenes/common/effects/Death_Explosion_Large.tscn" id="12_5u0dh"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_ghxl5"]
 size = Vector2(37.5, 66.5)
@@ -56,12 +59,6 @@ offset_top = -75.0
 offset_right = 93.89
 offset_bottom = 75.69
 
-[node name="muzzle_cannon_left_0" type="Marker2D" parent="." unique_id=1342596275]
-position = Vector2(10, -37)
-
-[node name="muzzle_cannon_right_0" type="Marker2D" parent="." unique_id=1127078243]
-position = Vector2(10, 37)
-
 [node name="muzzle_gattling_front_0" type="Marker2D" parent="." unique_id=981469173]
 position = Vector2(68, -3)
 
@@ -107,8 +104,11 @@ scale = Vector2(0.01, 0.1)
 position = Vector2(46, 16)
 scale = Vector2(0.01, 0.1)
 
+[node name="weapon_gattling_front_0" parent="." unique_id=1203745432 instance=ExtResource("4_cbu4o")]
+position = Vector2(61.999992, -2.3841858e-07)
+scale = Vector2(0.1, 0.1)
+
 [node name="lod_near" type="Sprite2D" parent="." unique_id=218621345]
-visible = false
 texture_filter = 4
 position = Vector2(8, -1.4210855e-14)
 rotation = 1.5707964
@@ -124,6 +124,7 @@ scale = Vector2(0.26, 0.26)
 texture = ExtResource("5_adi60")
 
 [node name="lod_far" type="Sprite2D" parent="." unique_id=1332859762]
+visible = false
 texture_filter = 4
 position = Vector2(8.000001, 3.9079864e-14)
 rotation = 1.5707964
@@ -140,3 +141,16 @@ script = ExtResource("7_j52oc")
 script = ExtResource("8_tlqrg")
 
 [node name="StateMachine" type="Node" parent="." unique_id=800719105]
+
+[node name="weapon_cannon_left_0" parent="." unique_id=1045058962 instance=ExtResource("10_32gtq")]
+position = Vector2(4, -39)
+scale = Vector2(0.15, 0.15)
+
+[node name="weapon_cannon_right_0" parent="." unique_id=1487613876 instance=ExtResource("10_32gtq")]
+position = Vector2(4, 39)
+scale = Vector2(0.15, 0.15)
+
+[node name="death_explosion" parent="." unique_id=1259741854 instance=ExtResource("12_5u0dh")]
+position = Vector2(-5, 2)
+scale = Vector2(0.22, 0.22)
+volume = 0.4

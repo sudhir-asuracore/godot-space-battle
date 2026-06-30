@@ -2,7 +2,8 @@
 
 [ext_resource type="Resource" uid="uid://dydrs1nlkjweb" path="res://resources/factions/zarak/weapons/zarak_weapon_cannonlarge.tres" id="1_weapon_cannonlarge"]
 [ext_resource type="Script" uid="uid://deo8044sl5k4r" path="res://scripts/resources/ShipData.gd" id="2_script"]
-[ext_resource type="PackedScene" uid="uid://mgfauo8dged3" path="res://scenes/factions/zarak/ships/ZarakWarbeast.tscn" id="3_scene"]
+[ext_resource type="Resource" uid="uid://04bnwnap86mx" path="res://resources/factions/zarak/weapons/zarak_weapon_gattlingheavy.tres" id="2_weapon_gattlingheavy"]
+[ext_resource type="PackedScene" uid="uid://mgfauo8dged3" path="res://scenes/factions/zarak/ships/Zarak_Ship_Dread_Warbeast.tscn" id="3_scene"]
 [ext_resource type="Resource" path="res://resources/abilities/overcharge.tres" id="4_ability"]
 [ext_resource type="Resource" path="res://resources/abilities/supershield.tres" id="5_ability"]
 
@@ -14,7 +15,7 @@ ship_class = 2
 ship_size = 3
 description = "A brutalist capital-grade dreadnaught. Slow and ponderous, but soaks immense punishment and overwhelms anything that stands in front of its guns."
 ship_scene = ExtResource("3_scene")
-max_hull = 900.0
+max_hull = 1100.0
 max_shield = 220.0
 shield_angle = 270.0
 max_speed = 130.0
@@ -25,12 +26,13 @@ strafe_speed = 15.0
 reverse_speed = 28.0
 target_lock_range = 1000.0
 weapons = {
-"weapon_cannonlarge": ExtResource("1_weapon_cannonlarge")
+"weapon_cannonlarge": ExtResource("1_weapon_cannonlarge"),
+"weapon_gattling": ExtResource("2_weapon_gattlingheavy")
 }
 trail_thickness = 40.0
 trail_length = 90
 ability_1 = ExtResource("4_ability")
 ability_2 = ExtResource("5_ability")
-purchase_cost = 650.0
+purchase_cost = 150.0
 kill_bounty = 120.0
 death_penalty = 60.0

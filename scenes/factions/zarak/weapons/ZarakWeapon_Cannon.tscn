@@ -8,6 +8,8 @@
 [node name="ZarakCannon" type="Node2D" unique_id=1045058962]
 script = ExtResource("4_module")
 
+[node name="projectile" parent="." unique_id=1564926885 instance=ExtResource("3_mcof2")]
+
 [node name="CannonSingleBarrel" type="Sprite2D" parent="." unique_id=1793170671]
 texture = ExtResource("1_sosya")
 
@@ -16,5 +18,3 @@ position = Vector2(42, 0)
 
 [node name="flash" parent="." unique_id=2131745871 instance=ExtResource("2_5feh5")]
 position = Vector2(43, -1)
-
-[node name="projectile" parent="." unique_id=1564926885 instance=ExtResource("3_mcof2")]

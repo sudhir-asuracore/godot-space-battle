@@ -1,0 +1,20 @@
+[gd_resource type="Resource" script_class="WeaponData" format=3 uid="uid://04bnwnap86mx"]
+
+[ext_resource type="Script" uid="uid://cegt3oesh5v7k" path="res://scripts/resources/WeaponData.gd" id="1_script"]
+
+[resource]
+script = ExtResource("1_script")
+name = "Gattling Heavy"
+weapon_range = 1000.0
+attack_cone_degrees = 15.0
+max_turret_angle = 270.0
+turret_homing_speed = 50.0
+show_coverage_grid = true
+fire_rate = 64
+ammo = 64
+cooldown = 3
+shield_damage = 0.8
+hull_damage = 5.0
+projectile_speed = 1800.0
+spread_degrees = 6.0
+fire_audio_once_per_ammo = 64

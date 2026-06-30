@@ -1,14 +1,14 @@
-[gd_scene format=3 uid="uid://cgbh5d77pj52i"]
+[gd_scene format=3 uid="uid://cpf2tvyub4dne"]
 
-[ext_resource type="Script" uid="uid://dw622hw75aq0u" path="res://scenes/factions/zarak/ships/zarak_frigate.gd" id="1_7p0gr"]
-[ext_resource type="Shader" uid="uid://ygy6nmx7ntkx" path="res://shaders/ship_shield.gdshader" id="2_gcel2"]
-[ext_resource type="PackedScene" uid="uid://dyap08d2dvuyw" path="res://scenes/factions/zarak/effects/Thruster_zarak.tscn" id="3_x00n0"]
-[ext_resource type="Texture2D" uid="uid://brxr77j6n2dx6" path="res://assets/factions/zarak/ships/frigate/lod_near.png" id="4_fvhqd"]
-[ext_resource type="Texture2D" uid="uid://c475glc7ljivl" path="res://assets/factions/zarak/ships/frigate/lod_medium.png" id="5_adi60"]
-[ext_resource type="Script" uid="uid://ce7dxwfhmrobl" path="res://scripts/WeaponController.gd" id="6_30682"]
-[ext_resource type="Texture2D" uid="uid://dyrurf8gwi6md" path="res://assets/factions/zarak/ships/frigate/lod_far.png" id="6_yawy2"]
-[ext_resource type="Script" uid="uid://2uyc2o7ii6i8" path="res://scripts/AbilityController.gd" id="7_j52oc"]
-[ext_resource type="Script" uid="uid://csclx8xvdnu4u" path="res://scripts/TargetingController.gd" id="8_tlqrg"]
+[ext_resource type="Script" uid="uid://dw622hw75aq0u" path="res://scenes/factions/zarak/ships/zarak_frigate.gd" id="1_u0uvb"]
+[ext_resource type="Shader" uid="uid://ygy6nmx7ntkx" path="res://shaders/ship_shield.gdshader" id="2_x4ruo"]
+[ext_resource type="PackedScene" uid="uid://dyap08d2dvuyw" path="res://scenes/factions/zarak/effects/Thruster_zarak.tscn" id="3_lwtdo"]
+[ext_resource type="Texture2D" uid="uid://n8iepftve00o" path="res://assets/factions/zarak/ships/frigate_02/log_medium.png" id="5_u0uvb"]
+[ext_resource type="Texture2D" uid="uid://3iu0fil3k6i4" path="res://assets/factions/zarak/ships/frigate_02/log_far.png" id="6_x4ruo"]
+[ext_resource type="Script" uid="uid://ce7dxwfhmrobl" path="res://scripts/WeaponController.gd" id="7_h11da"]
+[ext_resource type="Script" uid="uid://2uyc2o7ii6i8" path="res://scripts/AbilityController.gd" id="8_tn1bv"]
+[ext_resource type="Script" uid="uid://csclx8xvdnu4u" path="res://scripts/TargetingController.gd" id="9_a4j1s"]
+[ext_resource type="Texture2D" uid="uid://btr55qnqmpxd5" path="res://assets/factions/zarak/ships/frigate_02/log_close.png" id="9_u0uvb"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_ghxl5"]
 size = Vector2(37.5, 66.5)
@@ -20,7 +20,7 @@ size = Vector2(13, 87)
 size = Vector2(85.5, 54)
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_striker_lance_shield"]
-shader = ExtResource("2_gcel2")
+shader = ExtResource("2_x4ruo")
 shader_parameter/shield_fill_color = Color(0.35085803, 0.15938511, 0.16644055, 0.7176471)
 shader_parameter/shield_rim_color = Color(0.80290115, 0.1180375, 0, 1)
 shader_parameter/radius = 0.5
@@ -31,7 +31,7 @@ shader_parameter/edge_smoothness = 0.5
 shader_parameter/grow_from_right = true
 
 [node name="Ship" type="CharacterBody2D" unique_id=46216839]
-script = ExtResource("1_7p0gr")
+script = ExtResource("1_u0uvb")
 
 [node name="collision_front" type="CollisionShape2D" parent="." unique_id=418808862]
 position = Vector2(66, 0)
@@ -57,22 +57,25 @@ offset_right = 93.89
 offset_bottom = 75.69
 
 [node name="muzzle_cannon_left_0" type="Marker2D" parent="." unique_id=1342596275]
-position = Vector2(10, -37)
+position = Vector2(21, -42)
 
 [node name="muzzle_cannon_right_0" type="Marker2D" parent="." unique_id=1127078243]
-position = Vector2(10, 37)
+position = Vector2(21, 40)
 
-[node name="muzzle_gattling_front_0" type="Marker2D" parent="." unique_id=981469173]
-position = Vector2(68, -3)
+[node name="muzzle_gattling_left_0" type="Marker2D" parent="." unique_id=981469173]
+position = Vector2(52, -29)
+
+[node name="muzzle_gattling_right_0" type="Marker2D" parent="." unique_id=1392721921]
+position = Vector2(52, 26)
 
 [node name="muzzle_laser_front_0" type="Marker2D" parent="." unique_id=938890835]
-position = Vector2(68, 3)
+position = Vector2(68, 0)
 
 [node name="engine_0" type="Marker2D" parent="." unique_id=518682322]
-position = Vector2(-48, -31)
+position = Vector2(-48, -29)
 
 [node name="engine_1" type="Marker2D" parent="." unique_id=181678505]
-position = Vector2(-48, 32)
+position = Vector2(-48, 27)
 
 [node name="damage_0" type="Marker2D" parent="." unique_id=481845458]
 position = Vector2(-24.995, 0)
@@ -83,60 +86,57 @@ position = Vector2(-12, -38)
 [node name="damage_2" type="Marker2D" parent="." unique_id=994458793]
 position = Vector2(-13.755, 38.945)
 
-[node name="thruster_rear_0" parent="." unique_id=2012412625 instance=ExtResource("3_x00n0")]
-position = Vector2(-48, -31)
+[node name="thruster_rear_0" parent="." unique_id=2012412625 instance=ExtResource("3_lwtdo")]
+position = Vector2(-48, -28)
 rotation = 1.5707964
 scale = Vector2(0.018, 1)
 
-[node name="thruster_rear_1" parent="." unique_id=1620158978 instance=ExtResource("3_x00n0")]
-position = Vector2(-45, 0)
+[node name="thruster_rear_1" parent="." unique_id=1620158978 instance=ExtResource("3_lwtdo")]
+position = Vector2(-44, -2)
 rotation = 1.5707964
 scale = Vector2(0.045, 1)
 
-[node name="thruster_rear_2" parent="." unique_id=1412388456 instance=ExtResource("3_x00n0")]
-position = Vector2(-45, 32)
+[node name="thruster_rear_2" parent="." unique_id=1412388456 instance=ExtResource("3_lwtdo")]
+position = Vector2(-44, 26)
 rotation = 1.5707964
 scale = Vector2(0.018, 1)
 
-[node name="thruster_left_0" parent="." unique_id=1447448281 instance=ExtResource("3_x00n0")]
-position = Vector2(45, -16.000002)
+[node name="thruster_left_0" parent="." unique_id=1447448281 instance=ExtResource("3_lwtdo")]
+position = Vector2(45.000004, -28)
 rotation = 3.1415927
 scale = Vector2(0.01, 0.1)
 
-[node name="thruster_right_0" parent="." unique_id=1154762883 instance=ExtResource("3_x00n0")]
-position = Vector2(46, 16)
+[node name="thruster_right_0" parent="." unique_id=1154762883 instance=ExtResource("3_lwtdo")]
+position = Vector2(46, 26.000002)
 scale = Vector2(0.01, 0.1)
 
-[node name="lod_near" type="Sprite2D" parent="." unique_id=218621345]
-visible = false
-texture_filter = 4
-position = Vector2(8, -1.4210855e-14)
+[node name="lod_near" type="Sprite2D" parent="." unique_id=1300606693]
+position = Vector2(8, -1)
 rotation = 1.5707964
 scale = Vector2(0.13, 0.13)
-texture = ExtResource("4_fvhqd")
+texture = ExtResource("9_u0uvb")
 
-[node name="lod_medium" type="Sprite2D" parent="." unique_id=682870500]
+[node name="lod_medium" type="Sprite2D" parent="." unique_id=2038884382]
 visible = false
-texture_filter = 4
-position = Vector2(8, 2.842171e-14)
+position = Vector2(8.000001, -1)
 rotation = 1.5707964
 scale = Vector2(0.26, 0.26)
-texture = ExtResource("5_adi60")
+texture = ExtResource("5_u0uvb")
 
-[node name="lod_far" type="Sprite2D" parent="." unique_id=1332859762]
-texture_filter = 4
-position = Vector2(8.000001, 3.9079864e-14)
+[node name="lod_far" type="Sprite2D" parent="." unique_id=1509697203]
+visible = false
+position = Vector2(8, 0)
 rotation = 1.5707964
-scale = Vector2(0.515, 0.515)
-texture = ExtResource("6_yawy2")
+scale = Vector2(0.53, 0.53)
+texture = ExtResource("6_x4ruo")
 
 [node name="WeaponController" type="Node2D" parent="." unique_id=2107797252]
-script = ExtResource("6_30682")
+script = ExtResource("7_h11da")
 
 [node name="AbilityController" type="Node2D" parent="." unique_id=179436908]
-script = ExtResource("7_j52oc")
+script = ExtResource("8_tn1bv")
 
 [node name="TargetingController" type="Node2D" parent="." unique_id=1295658060]
-script = ExtResource("8_tlqrg")
+script = ExtResource("9_a4j1s")
 
 [node name="StateMachine" type="Node" parent="." unique_id=800719105]

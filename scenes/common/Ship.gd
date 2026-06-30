@@ -27,6 +27,7 @@ var infinite_hull: bool = false
 const RIBBON_TRAIL_SCENE = preload("res://scenes/common/effects/RibbonTrail.tscn")
 const DAMAGE_MARKER_EFFECT_SCENE = preload("res://scenes/common/effects/DamageMarkerEffect.tscn")
 const SHIP_EXPLOSION_SCENE = preload("res://scenes/common/effects/ExplosionSprite.tscn")
+const DEATH_EXPLOSION_NODE_NAME := &"death_explosion"
 const DAMAGE_MARKER_PREFIX := "damage_"
 const THRUSTER_NODE_PREFIX := "thruster_"
 const ENGINE_NODE_PREFIX := "engine_"
@@ -705,7 +706,39 @@ func _process_movement(delta: float) -> void:
 	# whatever closes the remaining angle this frame, capped at _turn_speed.
 	var target_angle: float = to_target.angle()
 	var angle_error: float = angle_difference(global_rotation, target_angle)
-	var desired_rate: float = clampf(angle_error / delta, -_turn_speed, _turn_speed)
+
+	# Cap the requested turn rate so the ship can still decelerate to a stop
+	# before the heading reaches the target (otherwise it keeps spinning at top
+	# speed, overshoots, and wobbles left/right because the angular inertia can't
+	# brake in time). This is the rotational analogue of braking distance: given
+	# the available turn acceleration, we limit the turn rate to the fastest one
+	# that can still bleed off over the remaining angle. Capping at this value
+	# makes _apply_turn_toward_rate ease the angular velocity down (reverse turn
+	# thrust) as the ship approaches alignment.
+	#
+	# We use the discrete-time braking limit rather than the idealised
+	# sqrt(2 * accel * angle): integrating at a fixed timestep travels a little
+	# further per step than the continuous formula predicts, so the naive cap
+	# still overshoots by one frame. Solving v^2 + (accel*dt)*v - 2*accel*angle
+	# <= 0 for v gives the rate that stops exactly on target without overshoot.
+	var max_rate: float = _turn_speed
+	if _turn_acceleration > 0.0:
+		var a_dt: float = _turn_acceleration * delta
+		var brake_rate: float = (-a_dt + sqrt(a_dt * a_dt + 8.0 * _turn_acceleration * abs(angle_error))) / 2.0
+		max_rate = min(_turn_speed, brake_rate)
+	var desired_rate: float = clampf(angle_error / delta, -max_rate, max_rate)
+
+	# Drive the side-thruster VFX from the turn the auto-nav is actually
+	# commanding, just like manual steering does. We key off the change the
+	# turn requires (desired_rate vs the current spin) rather than the heading
+	# error so the correct thruster also fires while braking the turn: easing a
+	# leftward spin back down fires the opposite (reverse) thruster. Firing the
+	# right-hand thrusters rotates the bow left (negative rate) and the left-hand
+	# thrusters rotate it right (positive rate), matching the manual convention.
+	var turn_thrust: float = desired_rate - _angular_velocity
+	_side_thrust_intensity[&"right"] = 1.0 if turn_thrust < 0.0 else 0.0
+	_side_thrust_intensity[&"left"] = 1.0 if turn_thrust > 0.0 else 0.0
+
 	_apply_turn_toward_rate(desired_rate, delta)
 	
 	# 2. Acceleration
@@ -837,8 +870,12 @@ func _die() -> void:
 		var audio_manager := _get_audio_manager()
 		if audio_manager:
 			audio_manager.call("set_player_thruster_intensity", 0.0)
-	# Spawn the destruction explosion (scaled to the ship size) then hide the hull.
-	_spawn_destruction_explosion()
+	# Trigger the ship's embedded death-explosion node (if it provides one) so its
+	# bespoke explosion animation/audio plays as the hull disappears. If the ship
+	# supplies its own death explosion, skip the generic destruction explosion.
+	if not _trigger_death_explosion():
+		# Spawn the destruction explosion (scaled to the ship size) then hide the hull.
+		_spawn_destruction_explosion()
 	visible = false
 	_clear_trails()
 
@@ -852,6 +889,24 @@ func _die() -> void:
 
 func _on_ship_destroyed(_killer: Node2D) -> void:
 	pass
+
+## Plays the ship's embedded "death_explosion" node, if present. The node is
+## hidden during normal play; on death it is reparented to the ship's parent so
+## it stays visible (the hull itself is hidden right after) and survives the
+## ship being freed, then it plays and self-frees once finished.
+## Returns true if an embedded death-explosion node was found and triggered.
+func _trigger_death_explosion() -> bool:
+	var death_explosion := get_node_or_null(NodePath(DEATH_EXPLOSION_NODE_NAME)) as Node2D
+	if death_explosion == null:
+		return false
+	var spawn_parent: Node = get_parent()
+	if spawn_parent:
+		# reparent keeps the global transform, so the explosion stays put.
+		death_explosion.reparent(spawn_parent)
+	death_explosion.visible = true
+	if death_explosion.has_method("play"):
+		death_explosion.call("play")
+	return true
 
 func _spawn_destruction_explosion() -> void:
 	var spawn_parent: Node = get_parent()

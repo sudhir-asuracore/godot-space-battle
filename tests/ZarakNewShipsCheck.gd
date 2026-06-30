@@ -3,8 +3,8 @@ extends SceneTree
 const FACTION_PATH := "res://resources/factions/zarak/zarak_confedaracy.tres"
 const IRONMAW_PATH := "res://resources/factions/zarak/ships/ironmaw.tres"
 const WARBEAST_PATH := "res://resources/factions/zarak/ships/warbeast.tres"
-const FRIGATE_02_SCENE := "res://scenes/factions/zarak/ships/ZarakIronmaw.tscn"
-const DREAD_01_SCENE := "res://scenes/factions/zarak/ships/ZarakWarbeast.tscn"
+const FRIGATE_02_SCENE := "res://scenes/factions/zarak/ships/Zarak_Ship_Frigate_Ironmaw.tscn"
+const DREAD_01_SCENE := "res://scenes/factions/zarak/ships/Zarak_Ship_Dread_Warbeast.tscn"
 
 func _init() -> void:
 	call_deferred("_run")

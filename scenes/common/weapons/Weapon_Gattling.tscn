@@ -1,0 +1,24 @@
+[gd_scene format=3 uid="uid://bh6x4fsgcw5hp"]
+
+[ext_resource type="Texture2D" uid="uid://co1y8bhr80l6x" path="res://assets/common/weapons/gattling.png" id="1_ayrd7"]
+[ext_resource type="Script" uid="uid://bk4ok82tspa66" path="res://scripts/WeaponModule.gd" id="1_nqoqn"]
+[ext_resource type="PackedScene" uid="uid://cxt5gla5r5l8x" path="res://scenes/common/effects/MuzzleFlash_GunPowder.tscn" id="2_jlgm1"]
+[ext_resource type="PackedScene" uid="uid://clj6i0q5n3k4u" path="res://scenes/common/weapons/Projectile.tscn" id="3_b4nf0"]
+
+[node name="WeaponGattling" type="Node2D" unique_id=1203745432]
+script = ExtResource("1_nqoqn")
+
+[node name="projectile" parent="." unique_id=1564926885 instance=ExtResource("3_b4nf0")]
+position = Vector2(0, 1)
+
+[node name="Gattling" type="Sprite2D" parent="." unique_id=1375918008]
+texture = ExtResource("1_ayrd7")
+offset = Vector2(88, 1)
+
+[node name="muzzle_gattling_0" type="Marker2D" parent="." unique_id=1416310190]
+position = Vector2(174, 1)
+
+[node name="flash" parent="." unique_id=541273447 instance=ExtResource("2_jlgm1")]
+position = Vector2(152, -1)
+scale = Vector2(0.5, 0.5)
+script = null

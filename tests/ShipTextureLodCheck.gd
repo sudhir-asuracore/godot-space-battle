@@ -9,7 +9,7 @@ extends SceneTree
 # The render logic is exercised live by instantiating the frigate next to a
 # Camera2D and driving the zoom across the near / medium / far bands.
 
-const ZARAK_FRIGATE_SCENE := "res://scenes/factions/zarak/ships/ZarakGorehammer.tscn"
+const ZARAK_FRIGATE_SCENE := "res://scenes/factions/zarak/ships/Zarak_Ship_Frigate_Gorehammer.tscn"
 
 const EXPECTED_LOD_NODES := ["lod_near", "lod_medium", "lod_far"]
 
@@ -21,13 +21,13 @@ func _run() -> void:
 
 	var packed := load(ZARAK_FRIGATE_SCENE) as PackedScene
 	if not packed:
-		_fail(["Failed to load ZarakGorehammer.tscn"])
+		_fail(["Failed to load Zarak_Ship_Frigate_Gorehammer.tscn"])
 		return
 
 	var ship := packed.instantiate()
 	if not (ship is Ship):
 		ship.free()
-		_fail(["ZarakGorehammer.tscn root is not a Ship"])
+		_fail(["Zarak_Ship_Frigate_Gorehammer.tscn root is not a Ship"])
 		return
 
 	# 1. The three LOD sprites exist with the expected names.

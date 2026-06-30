@@ -14,7 +14,7 @@ class_name WeaponData
 # behind a moving target and takes time to line up before it can fire.
 # Set <= 0 to track instantly (no weight, original snapping behaviour).
 @export var turret_homing_speed: float = 0.0
-@export var show_coverage_grid: bool = true
+@export var show_coverage_grid: bool = false
 @export var fire_rate: float = 4.0
 @export var ammo: int = 0
 @export var cooldown: float = 0.25

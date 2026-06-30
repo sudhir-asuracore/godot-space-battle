@@ -2,6 +2,11 @@
 
 [ext_resource type="Texture2D" uid="uid://2kjseu0mrwip" path="res://assets/sprites/jettelly_muzzle_flash_4x4x_01.png" id="1_1bosb"]
 [ext_resource type="Script" uid="uid://cfpik5dsw4rt3" path="res://shaders/muzzle_flash_gun_powder.gd" id="1_qnf5b"]
+[ext_resource type="Texture2D" uid="uid://cu02vqdslgy2x" path="res://assets/effects/muzzle/gun_flash.png" id="3_vg1xs"]
+[ext_resource type="AudioStream" uid="uid://dklu8vqpbjq0f" path="res://assets/audio/weapons/a10_brrt.mp3" id="4_lkwyi"]
+
+[sub_resource type="CanvasItemMaterial" id="CanvasItemMaterial_ghxl5"]
+blend_mode = 1
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_1bosb"]
 atlas = ExtResource("1_1bosb")
@@ -67,6 +72,30 @@ region = Rect2(1024, 1536, 512, 512)
 atlas = ExtResource("1_1bosb")
 region = Rect2(1536, 1536, 512, 512)
 
+[sub_resource type="AtlasTexture" id="AtlasTexture_yxdyh"]
+atlas = ExtResource("3_vg1xs")
+region = Rect2(0, 708, 277, 236)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_tm46h"]
+atlas = ExtResource("3_vg1xs")
+region = Rect2(277, 708, 277, 236)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_2500i"]
+atlas = ExtResource("3_vg1xs")
+region = Rect2(554, 708, 277, 236)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_r35xe"]
+atlas = ExtResource("3_vg1xs")
+region = Rect2(831, 708, 277, 236)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_t21bl"]
+atlas = ExtResource("3_vg1xs")
+region = Rect2(1108, 708, 277, 236)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_p5ahs"]
+atlas = ExtResource("3_vg1xs")
+region = Rect2(1385, 708, 277, 236)
+
 [sub_resource type="SpriteFrames" id="SpriteFrames_ghxl5"]
 animations = [{
 "frames": [{
@@ -121,14 +150,41 @@ animations = [{
 "loop": 1,
 "name": &"flash",
 "speed": 30.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_yxdyh")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_tm46h")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_2500i")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_r35xe")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_t21bl")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_p5ahs")
+}],
+"loop": 1,
+"name": &"gattler",
+"speed": 60.0
 }]
 
 [node name="MuzzleFlash" type="Node2D" unique_id=541273447]
 script = ExtResource("1_qnf5b")
 
 [node name="flash" type="AnimatedSprite2D" parent="." unique_id=66102585]
+visible = false
+material = SubResource("CanvasItemMaterial_ghxl5")
 sprite_frames = SubResource("SpriteFrames_ghxl5")
-animation = &"flash"
-frame = 4
-frame_progress = 0.3160866
-offset = Vector2(261, -2)
+animation = &"gattler"
+frame_progress = 0.40952957
+offset = Vector2(77, 29)
+
+[node name="audio" type="AudioStreamPlayer2D" parent="." unique_id=809443968]
+stream = ExtResource("4_lkwyi")

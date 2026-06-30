@@ -1,28 +1,32 @@
-[gd_resource type="Resource" script_class="ShipData" format=3]
+[gd_resource type="Resource" script_class="ShipData" format=3 uid="uid://cm85hte1id61s"]
 
-[ext_resource type="Resource" uid="uid://bib8dja4sl371" path="res://resources/weapons/gattling.tres" id="1_weapon"]
+[ext_resource type="Resource" uid="uid://34n8po6nb7r4" path="res://resources/factions/zarak/weapons/zarak_weapon_cannon.tres" id="1_weapon_cannon"]
 [ext_resource type="Script" uid="uid://deo8044sl5k4r" path="res://scripts/resources/ShipData.gd" id="2_script"]
-[ext_resource type="PackedScene" path="res://scenes/factions/zarak/ships/ZarakGorehammer.tscn" id="3_scene"]
+[ext_resource type="Resource" uid="uid://t57aufugqesc" path="res://resources/factions/zarak/weapons/zarak_weapon_gattling.tres" id="2_weapon_gattling"]
+[ext_resource type="PackedScene" uid="uid://bgr6ppt5qkjyf" path="res://scenes/factions/zarak/ships/Zarak_Ship_Frigate_Gorehammer.tscn" id="3_scene"]
 [ext_resource type="Resource" path="res://resources/abilities/afterburner.tres" id="4_ability"]
 
 [resource]
 script = ExtResource("2_script")
 name = "Zarak Gorehammer"
-description = "A sturdy line warship with heavy guns. A clear step up from the scout once prestige allows."
 tier = 2
 ship_class = 1
-faction = 0
 ship_size = 2
+description = "A sturdy line warship with heavy guns. A clear step up from the scout once prestige allows."
 ship_scene = ExtResource("3_scene")
 max_hull = 320.0
 max_shield = 90.0
 shield_angle = 270.0
 max_speed = 200.0
 acceleration = 280.0
+turn_speed = 3.0
+turn_acceleration = 3.0
 strafe_speed = 60.0
 reverse_speed = 45.0
-basic_weapon = ExtResource("1_weapon")
-target_lock_range = 380.0
+target_lock_range = 700.0
+weapons = {
+"weapon_cannon": ExtResource("1_weapon_cannon"),
+"weapon_gattling": ExtResource("2_weapon_gattling")
+}
 trail_length = 70
 ability_1 = ExtResource("4_ability")
-purchase_cost = 250.0

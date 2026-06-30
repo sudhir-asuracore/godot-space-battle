@@ -1,18 +1,18 @@
-[gd_resource type="Resource" script_class="WeaponData" format=3 uid="uid://dydrs1nlkjweb"]
+[gd_resource type="Resource" script_class="WeaponData" format=3 uid="uid://34n8po6nb7r4"]
 
 [ext_resource type="Script" uid="uid://cegt3oesh5v7k" path="res://scripts/resources/WeaponData.gd" id="1_script"]
 
 [resource]
 script = ExtResource("1_script")
-name = "Large Cannon"
-weapon_range = 700.0
+name = "Cannon"
+weapon_range = 500.0
 attack_cone_degrees = 10.0
 max_turret_angle = 180.0
-turret_homing_speed = 35.0
+turret_homing_speed = 65.0
 show_coverage_grid = true
-fire_rate = 0.5
+fire_rate = 1
 cooldown = 0.0
-shield_damage = 18.0
-hull_damage = 45.0
+shield_damage = 5.0
+hull_damage = 10.0
 projectile_speed = 1800.0
-spread_degrees = 1.0
+spread_degrees = 20.0

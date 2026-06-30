@@ -38,6 +38,10 @@ var _coverage_overlay = null
 var _shot_timer: float = 0.0
 var _reload_timer: float = 0.0
 var _ammo_in_mag: int = -1
+# Countdown that keeps the muzzle flash visible. Each shot re-arms it, so during
+# sustained fire the flash never gets hidden between shots and only switches off
+# once firing stops for a full flash lifetime.
+var _flash_timer: float = 0.0
 
 func _ready() -> void:
 	# The owning WeaponController drives this weapon via tick(), so it does not
@@ -218,17 +222,24 @@ func _update_overlay(active: bool) -> void:
 	if not should_show:
 		return
 
-	# Anchor the grid to the weapon's own centre and orient its cone along the
-	# weapon's mount-forward direction, so coverage reads from the weapon.
+	# Anchor the grid to the weapon's own centre and orient the overlay along the
+	# weapon's mount-forward direction, so the swing-arc outline reads from the
+	# weapon's home heading regardless of where the barrel is currently pointing.
+	var mount_forward := _mount_forward_global()
 	_coverage_overlay.global_position = global_position
-	_coverage_overlay.global_rotation = _mount_forward_global()
+	_coverage_overlay.global_rotation = mount_forward
 	# Draw the attack cone as a grid (the area shots actually cover) and, when the
 	# turret is restricted, draw its swing arc as a plain outline so the two read
 	# as distinct: the grid shows coverage, the outline shows the swing limit.
 	var outline_cone := 0.0
 	if _weapon.max_turret_angle < 360.0:
 		outline_cone = _weapon.max_turret_angle
-	_coverage_overlay.set_coverage(_weapon.weapon_range, 0.0, _weapon.attack_cone_degrees, outline_cone)
+	# The grid follows the barrel's current heading (target/homing direction),
+	# offset from the mount-forward the overlay is anchored to, so coverage tracks
+	# where the turret is actually aiming.
+	var aim_forward := global_rotation + _muzzle_local_angle
+	var facing_offset := rad_to_deg(angle_difference(mount_forward, aim_forward))
+	_coverage_overlay.set_coverage(_weapon.weapon_range, 0.0, _weapon.attack_cone_degrees, outline_cone, facing_offset)
 
 # --- Fire timing ----------------------------------------------------------
 
@@ -241,6 +252,11 @@ func _uses_ammo() -> bool:
 func _tick_timers(delta: float) -> void:
 	if _shot_timer > 0.0:
 		_shot_timer = maxf(0.0, _shot_timer - delta)
+
+	if _flash_timer > 0.0:
+		_flash_timer = maxf(0.0, _flash_timer - delta)
+		if _flash_timer <= 0.0:
+			_hide_flash()
 
 	if _reload_timer <= 0.0:
 		return
@@ -309,35 +325,45 @@ func _configure_projectile(projectile: Projectile, target: Node2D) -> void:
 
 func _trigger_muzzle_flash() -> void:
 	# The weapon owns a `muzzle_flash` node bundling its flash animation
-	# (`flash`) and firing sound (`audio`). Firing enables the flash sprite,
-	# plays the animation and the audio, then hides the flash again.
+	# (`flash`) and firing sound (`audio`). Firing enables the flash sprite and
+	# plays the animation; the flash is hidden by a re-armed countdown in
+	# _tick_timers rather than a per-shot timer, so rapid fire keeps it lit
+	# instead of stale timers hiding freshly triggered flashes.
 	if not _muzzle_flash or not is_instance_valid(_muzzle_flash):
 		return
 
 	var flash := _get_child_case_insensitive(_muzzle_flash, "flash") as AnimatedSprite2D
 	var flash_lifetime := 0.1
 	if flash:
-		flash.visible = true
 		if flash.sprite_frames:
-			flash.frame = 0
-			flash.play()
+			# Restart the animation only when it is not already running so a
+			# sustained burst plays smoothly instead of snapping back to frame 0
+			# every shot.
+			if not flash.visible or not flash.is_playing():
+				flash.frame = 0
+				flash.play()
 			var animation_name: StringName = flash.animation
 			var frame_count := flash.sprite_frames.get_frame_count(animation_name)
 			var animation_speed := maxf(0.01, flash.sprite_frames.get_animation_speed(animation_name))
 			var computed_lifetime := frame_count / animation_speed
 			flash_lifetime = computed_lifetime if computed_lifetime > 0.05 else 0.05
-		_schedule_flash_hide(flash, flash_lifetime)
+		flash.visible = true
+		# Re-arm (never shorten) the visibility countdown so the flash stays lit
+		# through the whole burst and only hides a flash lifetime after the last
+		# shot.
+		_flash_timer = maxf(_flash_timer, flash_lifetime)
 
 	var audio := _get_child_case_insensitive(_muzzle_flash, "audio") as AudioStreamPlayer2D
 	if audio:
 		audio.play()
 
-func _schedule_flash_hide(flash: AnimatedSprite2D, lifetime: float) -> void:
-	get_tree().create_timer(lifetime).timeout.connect(func() -> void:
-		if is_instance_valid(flash):
-			flash.stop()
-			flash.visible = false
-	)
+func _hide_flash() -> void:
+	if not _muzzle_flash or not is_instance_valid(_muzzle_flash):
+		return
+	var flash := _get_child_case_insensitive(_muzzle_flash, "flash") as AnimatedSprite2D
+	if flash:
+		flash.stop()
+		flash.visible = false
 
 func _get_child_case_insensitive(parent: Node, child_name: String) -> Node:
 	var lowered := child_name.to_lower()

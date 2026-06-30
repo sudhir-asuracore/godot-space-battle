@@ -4,7 +4,7 @@ extends SceneTree
 # it picks up its own ship_data (safety net) and resolves the zarak faction,
 # producing non-default stats without any external spawner wiring.
 
-const ZARAK_FRIGATE_SCENE := "res://scenes/factions/zarak/ships/ZarakGorehammer.tscn"
+const ZARAK_FRIGATE_SCENE := "res://scenes/factions/zarak/ships/Zarak_Ship_Frigate_Gorehammer.tscn"
 const ZARAK_FACTION_PATH := "res://resources/factions/zarak/zarak_confedaracy.tres"
 
 func _init() -> void:
